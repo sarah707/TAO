@@ -4,7 +4,7 @@
 
 ## 玩家下载
 
-下载根目录中的 [`贵族学校的特招生.json`](./贵族学校的特招生.json) 并导入酒馆。需要安装并启用酒馆助手。
+从 [v1.0.0 Release](https://github.com/sarah707/TAO/releases/tag/v1.0.0) 下载 `Noble-School-Special-Student-v1.0.0.json` 并导入酒馆。仓库根目录也保留了中文文件名的正式角色卡。需要安装并启用酒馆助手。
 
 角色卡固定引用下面的 CDN 启动器：
 
