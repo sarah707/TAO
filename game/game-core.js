@@ -125,6 +125,50 @@
     return null;
   }
 
+  function selectRandomAPlusCourseId(courses = {}, courseIds = [], random = Math.random) {
+    const eligibleCourseIds = courseIds.filter((courseId) => courses[courseId]?.finalGrade === 'A+');
+    if (!eligibleCourseIds.length) {
+      return null;
+    }
+    const roll = Math.max(0, Math.min(0.999999999999, Number(random()) || 0));
+    return eligibleCourseIds[Math.floor(roll * eligibleCourseIds.length)];
+  }
+
+  function canReceiveGraduationInternshipOffer({ termId } = {}) {
+    return termId === CAMPAIGN_CONFIG.upperTermId;
+  }
+
+  function findCharactersForCourse(characters = [], courseName, identityText) {
+    const normalizedCourseName = String(courseName || '').trim();
+    const normalizedIdentity = String(identityText || '').trim();
+    if (!normalizedCourseName || !normalizedIdentity) {
+      return [];
+    }
+    return characters.filter((character) => (
+      String(character?.identity || '').includes(normalizedIdentity)
+      && String(character?.identity || '').includes(normalizedCourseName)
+    ));
+  }
+
+  function resolveInternshipSelection(offers = [], selectionId, schoolLocation = '兰斯特皇家学院合作实习基地') {
+    if (selectionId === 'school') {
+      return {
+        offerId: 'school',
+        locationText: schoolLocation,
+        inviterCharacterId: ''
+      };
+    }
+    const offer = offers.find((item) => item?.id === selectionId);
+    if (!offer) {
+      return null;
+    }
+    return {
+      offerId: offer.id,
+      locationText: String(offer.locationText || '实习单位'),
+      inviterCharacterId: String(offer.inviterCharacterId || '')
+    };
+  }
+
   function makeImageScopePrefix(scope, username = 'guest') {
     return `${IMAGE_KEY_VERSION}|${encodeURIComponent(username)}|${scope}|`;
   }
@@ -209,6 +253,10 @@
     evaluateTermStanding,
     evaluateGraduation,
     selectFirstClassIntroduction,
+    selectRandomAPlusCourseId,
+    canReceiveGraduationInternshipOffer,
+    findCharactersForCourse,
+    resolveInternshipSelection,
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,

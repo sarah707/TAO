@@ -13,6 +13,10 @@
     evaluateTermStanding,
     evaluateGraduation,
     selectFirstClassIntroduction,
+    selectRandomAPlusCourseId,
+    canReceiveGraduationInternshipOffer,
+    findCharactersForCourse,
+    resolveInternshipSelection,
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
@@ -22,14 +26,14 @@
   if (typeof requestJson !== 'function' || typeof postJson !== 'function' || typeof escapeHtml !== 'function' || typeof parseDurationMs !== 'function') {
     throw new Error('公共客户端工具加载失败。');
   }
-  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof selectFirstClassIntroduction !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function') {
+  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof findCharactersForCourse !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function') {
     throw new Error('游戏核心规则加载失败。');
   }
   if (!GAME_PROMPTS?.eventSpecs || typeof GAME_PROMPTS.buildPromptModules !== 'function' || typeof GAME_PROMPTS.buildEventPromptTexts !== 'function') {
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260916201558';
   const DAILY_COST = 25;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -39,8 +43,6 @@
   const GRADUATION_ACTION_PROGRESS = CAMPAIGN_CONFIG.graduationActionProgress;
   const RELATIONSHIP_THRESHOLDS = CAMPAIGN_CONFIG.relationshipThresholds;
   const ASSISTANT_COURSE = CAMPAIGN_CONFIG.assistantCourse;
-  const WINTER_HOLIDAY_INTERNSHIP_START = '02-01';
-  const WINTER_HOLIDAY_INTERNSHIP_END = '02-28';
   const WINTER_BREAK_START = '02-01';
   const WINTER_BREAK_END = '02-28';
   const SUMMER_BREAK_MONTH_DAY_START = '07-06';
@@ -104,7 +106,6 @@
     '春游野餐会',
     '校园音乐节',
     '仲夏夜假面舞会',
-    '参观毕业典礼',
     '企业宣讲会',
     '上某门课',
     '班级度假',
@@ -113,7 +114,7 @@
     '复习某门课',
     '做助教',
     '发传单',
-    '假期实习',
+    '新年礼宾临时工',
     '毕业实习',
     '写毕业论文',
     '准备校际辩论会',
@@ -132,7 +133,6 @@
     ['春游野餐会', '春游野餐会'],
     ['校园音乐节', '校园音乐节'],
     ['仲夏夜假面舞会', '仲夏夜假面舞会'],
-    ['参观毕业典礼', '参观毕业典礼'],
     ['企业宣讲会', '企业宣讲会'],
     ['班级度假', '班级度假']
   ]);
@@ -166,51 +166,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260916201558', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg', name: '零散想法' },
-        { level: 3, svg: '1-3.svg', name: '初步构思' },
-        { level: 4, svg: '1-4.svg', name: '核心论点' },
-        { level: 5, svg: '1-5.svg', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260916201558', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260916201558', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260916201558', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260916201558', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260916201558', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260916201558', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260916201558', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260916201558', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg', name: '综述片段' },
-        { level: 4, svg: '2-4.svg', name: '文献综述' },
-        { level: 5, svg: '2-5.svg', name: '理论框架' },
-        { level: 6, svg: '2-6.svg', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260916201558', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260916201558', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260916201558', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260916201558', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260916201558', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260916201558', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260916201558', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260916201558', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg', name: '实验记录' },
-        { level: 3, svg: '3-3.svg', name: '分析图表' },
-        { level: 4, svg: '3-4.svg', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg', name: '结果解读' },
-        { level: 6, svg: '3-6.svg', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260916201558', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260916201558', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260916201558', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260916201558', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260916201558', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260916201558', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260916201558', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260916201558', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260916201558', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260916201558', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260916201558', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260916201558', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260916201558', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260916201558', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260916201558', name: '讨论定稿' }
       ]
     }
   ];
@@ -219,51 +219,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260916201558', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260916201558', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260916201558', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260916201558', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260916201558', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260916201558', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260916201558', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260916201558', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260916201558', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260916201558', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260916201558', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260916201558', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260916201558', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260916201558', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260916201558', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260916201558', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260916201558', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260916201558', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260916201558', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260916201558', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260916201558', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260916201558', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260916201558', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260916201558', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260916201558', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260916201558', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260916201558', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260916201558', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260916201558', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260916201558', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260916201558', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260916201558', name: '落地路线图' }
       ]
     }
   ];
@@ -560,16 +560,6 @@
       return '毕业学年暑假';
     }
     return null;
-  }
-
-  function isHolidayInternshipDateAvailable(runtime, dateText) {
-    if (isWeekend(dateText)) {
-      return false;
-    }
-    if (isDateInWinterBreak(dateText) || isDateInSummerBreak(dateText)) {
-      return true;
-    }
-    return false;
   }
 
   function formatHistoryDatePrefix(dateText) {
@@ -1192,10 +1182,9 @@
     runtime.player.assistantRole = runtime.player.assistantRole && typeof runtime.player.assistantRole === 'object'
       ? runtime.player.assistantRole
       : null;
-    runtime.player.holidayInternship = runtime.player.holidayInternship || null;
     runtime.player.graduationInternship = runtime.player.graduationInternship || null;
-    runtime.player.holidayInternshipReferrer = runtime.player.holidayInternshipReferrer || '';
-    runtime.player.graduationInternshipReferrer = runtime.player.graduationInternshipReferrer || '';
+    runtime.player.graduationInternshipBossId = runtime.player.graduationInternshipBossId || '';
+    runtime.player.graduationInternshipOfferId = runtime.player.graduationInternshipOfferId || '';
     runtime.player.graduationThesisProgress = Number(runtime.player.graduationThesisProgress || runtime.courses?.['graduation-thesis']?.studyProgress || 0);
     runtime.player.age = Number(runtime.player.age) || CAMPAIGN_CONFIG.playerStartingAge;
     runtime.player.inspiration = Math.max(0, Math.min(MERGE_INSPIRATION_MAX, Number(runtime.player.inspiration ?? MERGE_INSPIRATION_INITIAL)));
@@ -1268,6 +1257,10 @@
     runtime.flags.internships.offers = runtime.flags.internships.offers && typeof runtime.flags.internships.offers === 'object'
       ? runtime.flags.internships.offers
       : {};
+    runtime.flags.internships.acceptedOffers = Array.isArray(runtime.flags.internships.acceptedOffers)
+      ? runtime.flags.internships.acceptedOffers.filter((offer) => offer && typeof offer === 'object' && offer.id)
+      : [];
+    runtime.flags.internships.selectionResolved = Boolean(runtime.flags.internships.selectionResolved);
     runtime.flags.weeklyMergePromptShown = typeof runtime.flags.weeklyMergePromptShown === 'boolean' ? runtime.flags.weeklyMergePromptShown : false;
     runtime.mergeGame = runtime.mergeGame && typeof runtime.mergeGame === 'object' ? runtime.mergeGame : null;
     runtime.bizMergeGame = runtime.bizMergeGame && typeof runtime.bizMergeGame === 'object' ? runtime.bizMergeGame : null;
@@ -1710,7 +1703,6 @@
         error: '没有找到酒馆世界书桥接接口。请确认酒馆助手和本卡脚本已经启用。',
         updatedAt: nowIso()
       };
-      if (result.sync) runtime.meta.worldbookSync = result.sync;
       return runtime.meta.worldbookExport;
     }
     runtime.meta.worldbookExport = { status: 'pending', updatedAt: nowIso() };
@@ -1723,6 +1715,7 @@
         existingChatWorldbook: result.existingChatWorldbook || null,
         updatedAt: nowIso()
       };
+      if (result.sync) runtime.meta.worldbookSync = result.sync;
     } catch (error) {
       runtime.meta.worldbookExport = {
         status: 'failed',
@@ -2345,10 +2338,9 @@
         dailyCost: DAILY_COST,
         currentDate: START_DATE,
         assistantRole: null,
-        holidayInternship: null,
         graduationInternship: null,
-        holidayInternshipReferrer: '',
-        graduationInternshipReferrer: '',
+        graduationInternshipBossId: '',
+        graduationInternshipOfferId: '',
         graduationThesisProgress: 0,
         inspiration: 100,
         bizProgress: 0
@@ -2396,7 +2388,9 @@
         debate: {},
         internships: {
           firstSeenLocations: {},
-          offers: {}
+          offers: {},
+          acceptedOffers: [],
+          selectionResolved: false
         }
       },
       meta: {
@@ -2786,8 +2780,8 @@
     if (token === 'class-trip') {
       return makeAction('activity', '班级度假', { activity: '班级度假', fixed: false, specKey: '班级度假' });
     }
-    if (token === 'holiday-internship') {
-      return makeAction('holiday-internship', '假期实习');
+    if (token === 'winter-job') {
+      return makeAction('winter-job', '新年礼宾临时工');
     }
     if (token === 'graduation-internship') {
       return makeAction('graduation-internship', '毕业实习');
@@ -2865,13 +2859,11 @@
     if (runtime.player.assistantRole?.termId === currentTerm?.id && currentTerm && !currentTerm.isBreak && !isWeekend(dateText) && hasAssistantAvailableThisWeek(runtime, dateText) && hasAnyHomeworkInTerm(runtime, currentTerm.id)) {
       actions.push(makeAction('assistant', '做助教'));
     }
-    if (runtime.player.holidayInternship && isHolidayInternshipDateAvailable(runtime, dateText)) {
-      actions.push(makeAction('holiday-internship', '假期实习'));
+    if (isDateInWinterBreak(dateText)) {
+      actions.push(makeAction('winter-job', '新年礼宾临时工'));
     }
     if (currentTerm?.id === GRADUATION_TERM_ID && !isWeekend(dateText)) {
-      if (runtime.player.graduationInternship) {
-        actions.push(makeAction('graduation-internship', '毕业实习'));
-      }
+      actions.push(makeAction('graduation-internship', '毕业实习'));
       actions.push(makeAction('graduation-thesis', '写毕业论文'));
     }
     actions.push(makeAction('sleep', '睡觉'));
@@ -2917,7 +2909,7 @@
     if (action.kind === 'tutor') return '做家教';
     if (action.kind === 'student-secretary') return '做学生会秘书';
     if (action.kind === 'assistant') return '做助教';
-    if (action.kind === 'holiday-internship') return '假期实习';
+    if (action.kind === 'winter-job') return '新年礼宾临时工';
     if (action.kind === 'graduation-internship') return '毕业实习';
     if (action.kind === 'graduation-thesis') return '写毕业论文';
     if (action.kind === 'debate-prep') return '准备校际辩论会';
@@ -3808,7 +3800,8 @@
     }
     if (rule.includes('本门课教授')) {
       const courseId = options.courseId || options.assistantCourseId || runtime.player.assistantRole?.courseId;
-      const candidate = pickRandom(courseId ? getCharactersForCourse(runtime, courseId, '教授') : []);
+      const courseName = options.courseName || runtime.player.assistantRole?.courseName || '';
+      const candidate = pickRandom(courseId ? getCharactersForCourse(runtime, courseId, '教授', courseName) : []);
       return uniqueCharacterIds([candidate?.id]);
     }
     if (rule.includes('角色列表里任意一个低<user>一届的本校学生')) {
@@ -3828,9 +3821,6 @@
     }
     if (rule.includes('这些角色里有这次的舞伴')) {
       return uniqueCharacterIds(candidates.map((character) => character.id));
-    }
-    if (rule.includes('所有本学校今天毕业的学生')) {
-      return explicitIds;
     }
     if (rule.includes('辩论队4个人每个年级出一个人')) {
       return resolveDebateTeammateIds(runtime, dateText);
@@ -4065,12 +4055,6 @@
       eventConfig.userPrompt = eventConfig.userPrompt.replaceAll(search, value);
     }
     eventConfig.userPrompt = applyEventPromptDirectives(runtime, eventConfig.userPrompt, context, options);
-    if (eventName === '第一天实习事件' && options.referrerName) {
-      eventConfig.userPrompt = eventConfig.userPrompt.replace(
-        '认识自己的上司的剧情',
-        '认识自己的上司的剧情。请判断实习介绍人' + options.referrerName + '的身份是否合适做<user>的上司，如果合适的话直接由实习介绍人做<user>的上司。注意学生或教授是不能做<user>的上司的。如果介绍人不合适做<user>的上司，则新创建一个角色做<user>的上司。该角色必须和介绍人有亲戚关系'
-      );
-    }
     const cloth = resolvePromptClothText(runtime, eventSpec);
     const time = getPromptTimeText(dateText);
     eventConfig.userPrompt = eventConfig.userPrompt
@@ -4126,6 +4110,8 @@ ${promptContextLines.join('\n')}`;
       systemInstruction: joinSystemInstructionParts(promptTexts.systemInstructionParts),
       systemInstructionParts: promptTexts.systemInstructionParts,
       builtInStyleInstruction: promptTexts.builtInStyleInstruction,
+      scriptSettingsInstruction: promptTexts.scriptSettingsInstruction,
+      outputFormatInstruction: promptTexts.outputFormatInstruction,
       gameSystemInstruction: promptTexts.gameSystemInstruction,
       historySystemInstruction: promptTexts.historySystemInstruction,
       writingPointsInstruction: promptTexts.writingPointsInstruction,
@@ -4558,6 +4544,8 @@ ${promptContextLines.join('\n')}`;
             systemInstruction: eventPrompt.systemInstruction,
             systemInstructionParts: eventPrompt.systemInstructionParts,
             builtInStyleInstruction: eventPrompt.builtInStyleInstruction,
+            scriptSettingsInstruction: eventPrompt.scriptSettingsInstruction,
+            outputFormatInstruction: eventPrompt.outputFormatInstruction,
             gameSystemInstruction: eventPrompt.gameSystemInstruction,
             historySystemInstruction: eventPrompt.historySystemInstruction,
             writingPointsInstruction: eventPrompt.writingPointsInstruction,
@@ -4692,6 +4680,14 @@ ${promptContextLines.join('\n')}`;
     openModal({
       type: 'outfits',
       title: '礼服'
+    });
+  }
+
+  function openInternshipOffersModal() {
+    openModal({
+      type: 'internship-offers',
+      title: '实习机会',
+      offers: state.runtime?.flags?.internships?.acceptedOffers?.slice() || []
     });
   }
 
@@ -4866,8 +4862,9 @@ ${promptContextLines.join('\n')}`;
     return runtime.characters.filter(predicate);
   }
 
-  function getCharactersForCourse(runtime, courseId, identityText) {
-    return runtime.characters.filter((item) => item.identity.includes(identityText) && item.identity.includes(runtime.courses[courseId]?.courseName || ''));
+  function getCharactersForCourse(runtime, courseId, identityText, courseNameOverride = '') {
+    const courseName = String(courseNameOverride || runtime.courses[courseId]?.courseName || '').trim();
+    return findCharactersForCourse(runtime.characters, courseName, identityText);
   }
 
   function ensureCharacterEventFlags(character) {
@@ -4949,75 +4946,95 @@ ${promptContextLines.join('\n')}`;
     runtime.flags.internships.offers[getInternshipOfferKey(type, termId, sourceKey)] = value;
   }
 
-  async function maybeAskInternshipOffer(runtime, dateText, config) {
+  function addAcceptedInternshipOffer(runtime, dateText, config) {
+    const sourceKey = String(config.sourceKey || 'unknown');
+    const inviterCharacterId = String(config.inviterCharacterId || '');
+    const existing = runtime.flags.internships.acceptedOffers.find((offer) => (
+      offer.sourceKey === sourceKey
+      || (inviterCharacterId && offer.inviterCharacterId === inviterCharacterId)
+    ));
+    if (existing) {
+      return existing;
+    }
+    const inviter = inviterCharacterId ? getCharacterById(runtime, inviterCharacterId) : null;
+    const locationText = String(config.locationText || '').trim() || '实习单位';
+    const inviterLabel = String(config.inviterLabel || inviter?.name || locationText).trim() || '实习单位';
+    const offer = {
+      id: getInternshipOfferKey('graduation', UPPER_TERM_ID, sourceKey),
+      sourceKey,
+      label: String(config.label || `${inviterLabel}发出的实习邀请`),
+      locationText,
+      inviterCharacterId,
+      professorCourseId: String(config.professorCourseId || ''),
+      professorCourseName: String(config.professorCourseName || ''),
+      acceptedAt: dateText
+    };
+    runtime.flags.internships.acceptedOffers.push(offer);
+    return offer;
+  }
+
+  async function maybeAddInternshipOffer(runtime, dateText, config) {
     const term = getTermMeta(dateText);
     if (!term) {
       return false;
     }
-    const internshipType = config.type;
+    const internshipType = 'graduation';
     const sourceKey = config.sourceKey || internshipType;
-    if (getInternshipOfferState(runtime, internshipType, term.id, sourceKey) === 'declined') {
+    if (getInternshipOfferState(runtime, internshipType, term.id, sourceKey)) {
       return false;
     }
-    if (internshipType === 'graduation') {
-      if ((config.allowWhen ? !config.allowWhen(term) : term.id !== 'y4-upper') || runtime.player.graduationInternship) {
-        return false;
-      }
-    } else {
-      if (term.isBreak || term.id === GRADUATION_TERM_ID || runtime.player.holidayInternship) {
-        return false;
-      }
+    if (!canReceiveGraduationInternshipOffer({ termId: term.id })) {
+      return false;
+    }
+    if (config.referrerCharacterId && runtime.flags.internships.acceptedOffers.some((offer) => offer.inviterCharacterId === config.referrerCharacterId)) {
+      return false;
     }
     if (config.probability !== undefined && !chance(config.probability)) {
       return false;
     }
 
-    const accepted = await waitForBooleanChoice(config.title, config.message, '接受', '拒绝');
-    if (accepted) {
-      const locationText = String(config.locationText || '').trim() || '实习单位';
-      const referrerId = String(config.referrerCharacterId || '').trim();
-      if (internshipType === 'graduation') {
-        runtime.player.graduationInternship = locationText;
-        runtime.player.graduationInternshipReferrer = referrerId;
-        addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}答应前往${locationText}进行毕业实习。`);
-      } else {
-        runtime.player.holidayInternship = locationText;
-        runtime.player.holidayInternshipReferrer = referrerId;
-        addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}答应前往${locationText}参加假期实习。`);
-      }
-      setInternshipOfferState(runtime, internshipType, term.id, sourceKey, 'accepted');
-      return true;
+    const locationText = String(config.locationText || '').trim() || '实习单位';
+    const referrerId = String(config.referrerCharacterId || '').trim();
+    addAcceptedInternshipOffer(runtime, dateText, {
+      sourceKey,
+      locationText,
+      inviterCharacterId: referrerId,
+      inviterLabel: config.inviterLabel,
+      label: config.offerLabel
+    });
+    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}获得了前往${locationText}毕业实习的邀请，将在下学期开学时决定最终去向。`);
+    setInternshipOfferState(runtime, internshipType, term.id, sourceKey, 'accepted');
+    if (config.message) {
+      await waitForTextModal(config.title || '实习邀请', config.message);
     }
-
-    setInternshipOfferState(runtime, internshipType, term.id, sourceKey, 'declined');
-    const declineLocationText = String(config.locationText || '').trim() || '实习单位';
-    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}拒绝了前往${declineLocationText}${internshipType === 'graduation' ? '毕业实习' : '假期实习'}的邀请。`);
-    return false;
+    return true;
   }
 
   async function maybePromptSeminarInternships(runtime, dateText) {
     const term = getTermMeta(dateText);
-    if (!term) {
+    const sourceKey = 'company-briefing-graduation';
+    if (!term
+      || !canReceiveGraduationInternshipOffer({ termId: term.id })
+      || getInternshipOfferState(runtime, 'graduation', term.id, sourceKey)) {
       return;
     }
-    const acceptedGraduation = await maybeAskInternshipOffer(runtime, dateText, {
-      type: 'graduation',
-      sourceKey: 'company-briefing-graduation',
-      title: '企业宣讲会邀约',
-      message: '今日的宣讲会上你的问题引起了公司高层的关注，对方向你发来了实习的邀请，要接受吗？',
-      locationText: '企业宣讲会合作企业'
+    const knownCharacterIds = new Set(runtime.characters.map((character) => character.id));
+    await executeStoryEvent('企业宣讲会实习邀请事件', dateText, {
+      characterIds: runtime.characters.map((character) => character.id)
     });
-    if (acceptedGraduation) {
+    const inviter = runtime.characters.find((character) => !knownCharacterIds.has(character.id));
+    if (!inviter) {
       return;
     }
-    await maybeAskInternshipOffer(runtime, dateText, {
-      type: 'holiday',
-      sourceKey: 'company-briefing-holiday',
-      title: '企业宣讲会邀约',
-      message: '今日的宣讲会上你的问题引起了公司高层的关注，对方向你发来了假期实习的邀请，要接受吗？',
-      locationText: '企业宣讲会合作企业',
-      probability: 0.25
+    const locationText = getCharacterBusinessLocation(inviter, `${inviter.name}家的企业`);
+    addAcceptedInternshipOffer(runtime, dateText, {
+      sourceKey,
+      locationText,
+      inviterCharacterId: inviter.id,
+      inviterLabel: inviter.name
     });
+    setInternshipOfferState(runtime, 'graduation', term.id, sourceKey, 'accepted');
+    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${inviter.name}向${runtime.player.name}提出毕业实习可以去他家的企业进行实习。`);
   }
 
   function rewardTutorStudentFavorability(runtime) {
@@ -5034,43 +5051,13 @@ ${promptContextLines.join('\n')}`;
       return;
     }
     const businessLocation = getCharacterBusinessLocation(character, options.fallbackLocation);
-    const acceptedGraduation = await maybeAskInternshipOffer(runtime, dateText, {
-      type: 'graduation',
+    await maybeAddInternshipOffer(runtime, dateText, {
       sourceKey: `${options.sourcePrefix || 'character'}:${character.id}:graduation`,
       title: '实习邀约',
-      message: `${character.name}询问你下学期要不要去他家的企业实习。`,
+      message: `${character.name}向你提出你的毕业实习可以去他家的企业进行实习。`,
       locationText: businessLocation,
       referrerCharacterId: character.id,
       probability: options.graduationProbability
-    });
-    if (acceptedGraduation) {
-      return;
-    }
-    await maybeAskInternshipOffer(runtime, dateText, {
-      type: 'holiday',
-      sourceKey: `${options.sourcePrefix || 'character'}:${character.id}:holiday`,
-      title: '实习邀约',
-      message: `${character.name}询问你假期要不要去他家的企业实习。`,
-      locationText: businessLocation,
-      referrerCharacterId: character.id,
-      probability: options.holidayProbability
-    });
-  }
-
-  async function maybePromptInternshipUpgrade(runtime, dateText, locationText) {
-    const contact = getHighestFavorabilityCharacter(runtime.characters.filter((item) => item.favorability >= RELATIONSHIP_THRESHOLDS.admirer));
-    if (!contact) {
-      return;
-    }
-    await maybeAskInternshipOffer(runtime, dateText, {
-      type: 'graduation',
-      sourceKey: `internship-upgrade:${contact.id}:${locationText || '实习单位'}`,
-      title: '毕业实习邀约',
-      message: `${contact.name}问你是否愿意在这里进行毕业实习？`,
-      locationText: locationText || getCharacterBusinessLocation(contact, '实习单位'),
-      referrerCharacterId: contact.id,
-      probability: 0.3,
-      allowWhen: (term) => term.id === UPPER_TERM_ID
     });
   }
 
@@ -5107,13 +5094,74 @@ ${promptContextLines.join('\n')}`;
     });
   }
 
-  function ensureGraduationInternshipPlacement(runtime, dateText) {
-    if (runtime.player.graduationInternship) {
+  async function maybeAddProfessorInternshipOffer(runtime, dateText) {
+    const upperTermCourseIds = getTermCourseIds(UPPER_TERM_ID);
+    const aPlusCourseId = selectRandomAPlusCourseId(runtime.courses, upperTermCourseIds);
+    if (!aPlusCourseId) {
       return false;
     }
-    runtime.player.graduationInternship = '兰斯特皇家学院合作实习基地';
-    runtime.player.graduationInternshipReferrer = '';
-    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，学院为尚未确定去向的${runtime.player.name}安排了毕业实习岗位。`);
+
+    const sourceKey = `a-plus-professor:${aPlusCourseId}`;
+    if (runtime.flags.internships.acceptedOffers.some((offer) => offer.sourceKey === sourceKey)) {
+      return false;
+    }
+    const course = runtime.courses[aPlusCourseId];
+    const professor = pickRandom(getCharactersForCourse(runtime, aPlusCourseId, '教授'));
+    const professorLabel = professor?.name
+      ? `${course.courseName}课教授${professor.name}`
+      : `${course.courseName}课教授`;
+    addAcceptedInternshipOffer(runtime, dateText, {
+      sourceKey,
+      locationText: professor ? getCharacterBusinessLocation(professor, `${professor.name}家的企业`) : `${course.courseName}课教授家的企业`,
+      inviterCharacterId: professor?.id || '',
+      inviterLabel: professorLabel,
+      label: `${professorLabel}发出的实习邀请`,
+      professorCourseId: aPlusCourseId,
+      professorCourseName: course.courseName
+    });
+    setInternshipOfferState(runtime, 'graduation', UPPER_TERM_ID, sourceKey, 'accepted');
+    const message = `${professorLabel}邀请你毕业实习去他家的企业进行实习。`;
+    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${message}`);
+    await waitForTextModal('实习邀请', message);
+    return true;
+  }
+
+  function waitForInternshipSelection(runtime) {
+    return new Promise((resolve) => {
+      openModal({
+        type: 'internship-picker',
+        title: '选择毕业实习',
+        offers: runtime.flags.internships.acceptedOffers.slice(),
+        resolver: resolve
+      });
+    });
+  }
+
+  async function maybeSelectGraduationInternship(runtime, dateText) {
+    const graduationTerm = getTermMetaByFullId(GRADUATION_TERM_ID);
+    if (!graduationTerm || dateText !== graduationTerm.start || runtime.flags.internships.selectionResolved) {
+      return false;
+    }
+    const selectionId = await waitForInternshipSelection(runtime);
+    const selection = resolveInternshipSelection(runtime.flags.internships.acceptedOffers, selectionId);
+    if (!selection) {
+      throw new Error('选择的实习邀请不存在。');
+    }
+
+    clearCharacterGlobalFlag(runtime, '实习上司');
+    runtime.player.graduationInternship = selection.locationText;
+    runtime.player.graduationInternshipBossId = selection.inviterCharacterId;
+    runtime.player.graduationInternshipOfferId = selection.offerId;
+    runtime.flags.internships.selectionResolved = true;
+    const inviter = selection.inviterCharacterId ? getCharacterById(runtime, selection.inviterCharacterId) : null;
+    if (inviter) {
+      setCharacterScopedFlag(inviter, 'global', '实习上司', true);
+    }
+    const selectedOffer = runtime.flags.internships.acceptedOffers.find((offer) => offer.id === selection.offerId);
+    const choiceText = selection.offerId === 'school'
+      ? '学校分配的实习'
+      : (selectedOffer?.label || '已接受的实习邀请');
+    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}选择了${choiceText}，毕业实习地点为${selection.locationText}。`);
     return true;
   }
 
@@ -5245,24 +5293,6 @@ ${promptContextLines.join('\n')}`;
         updatePlayerFatigue(runtime, -100);
         await executeStoryEvent('班级度假事件', dateText, { characterIds: runtime.characters.map((item) => item.id) });
         break;
-      case '参观毕业典礼':
-        {
-          const graduatingCharacterIds = [];
-          for (const character of runtime.characters) {
-            if (character.grade > 0) {
-              character.grade += 1;
-              if (character.grade >= 5) {
-                if (String(character.school || '').includes('兰斯特皇家学院')) {
-                  graduatingCharacterIds.push(character.id);
-                }
-                character.grade = 0;
-                character.school = '无';
-              }
-            }
-          }
-          await executeStoryEvent('参观毕业典礼事件', dateText, { characterIds: graduatingCharacterIds });
-        }
-        break;
       case '参加毕业典礼':
         {
           const graduation = getGraduationStatus(runtime);
@@ -5381,12 +5411,6 @@ ${promptContextLines.join('\n')}`;
       return;
     }
     await maybePromptAssistantRole(runtime, dateText);
-    await maybePromptCharacterInternship(runtime, dateText, getHighestFavorabilityCharacter(getCharactersForCourse(runtime, plan.courseId, '教授')), {
-      minimumFavorability: RELATIONSHIP_THRESHOLDS.admirer,
-      sourcePrefix: `course:${plan.courseId}`,
-      graduationProbability: 0.3,
-      holidayProbability: 0.3
-    });
     addActionHistory(runtime, dateText, `上了${course.courseName}。`, { plan });
   }
 
@@ -5433,6 +5457,18 @@ ${promptContextLines.join('\n')}`;
     addActionHistory(runtime, dateText, '去打工发传单。');
   }
 
+  async function executeWinterJob(runtime, dateText) {
+    updatePlayerFatigue(runtime, 8);
+    updatePlayerMoney(runtime, 600);
+    if (!hasTriggeredEvent(runtime, '寒假百货礼宾打工事件') || chance(0.2)) {
+      await executeStoryEvent('寒假百货礼宾打工事件', dateText, {
+        characterIds: runtime.characters.map((item) => item.id)
+      });
+      return;
+    }
+    addActionHistory(runtime, dateText, '在高级百货做了一天新年礼宾临时工。');
+  }
+
   async function executeTutor(runtime, dateText) {
     const tutorPay = 400;
     updatePlayerFatigue(runtime, 6);
@@ -5447,8 +5483,7 @@ ${promptContextLines.join('\n')}`;
     await maybePromptCharacterInternship(runtime, dateText, runtime.characters.find((item) => item.id === runtime.flags.tutor.parentCharacterId), {
       minimumFavorability: RELATIONSHIP_THRESHOLDS.admirer,
       sourcePrefix: 'tutor-parent',
-      graduationProbability: 0.3,
-      holidayProbability: 0.3
+      graduationProbability: 0.3
     });
     const tutorStudent = runtime.characters.find((item) => item.id === runtime.flags.tutor.studentCharacterId);
     const tutorParent = runtime.characters.find((item) => item.id === runtime.flags.tutor.parentCharacterId);
@@ -5484,26 +5519,27 @@ ${promptContextLines.join('\n')}`;
     const courseId = assistantRole?.courseId || null;
     const course = courseId ? runtime.courses[courseId] : null;
     const courseName = assistantRole?.courseName || course?.courseName || ASSISTANT_COURSE.courseName;
-    const professor = courseId ? getHighestFavorabilityCharacter(getCharactersForCourse(runtime, courseId, '教授')) : null;
+    const professor = courseId ? getHighestFavorabilityCharacter(getCharactersForCourse(runtime, courseId, '教授', courseName)) : null;
     updatePlayerFatigue(runtime, 6);
     updatePlayerMoney(runtime, 900);
     runtime.flags.assistant.completedWeeks[getWeekStart(dateText)] = true;
-    if (term && courseId && !runtime.flags.assistant.firstDoneByTerm[term.id] && !professor) {
+    if (term && courseId && !runtime.flags.assistant.firstDoneByTerm[term.id]) {
       await executeStoryEvent('第一次担任助教事件', dateText, {
         characterIds: runtime.characters.map((item) => item.id),
+        courseId,
+        courseName,
         replacements: { 'xxx课': courseName }
       });
-      runtime.flags.assistant.firstDoneByTerm[term.id] = true;
+      if (getCharactersForCourse(runtime, courseId, '教授', courseName).length) {
+        runtime.flags.assistant.firstDoneByTerm[term.id] = true;
+      }
       return;
     }
-    await maybePromptCharacterInternship(runtime, dateText, professor, {
-      sourcePrefix: `assistant:${courseId || 'unknown'}`,
-      graduationProbability: 0.1,
-      holidayProbability: 0.1
-    });
     if (professor && chance(0.3)) {
       await executeStoryEvent('助教和教授事件', dateText, {
         characterIds: [professor.id],
+        courseId,
+        courseName,
         replacements: { 'xxx课': courseName }
       });
       return;
@@ -5551,8 +5587,7 @@ ${promptContextLines.join('\n')}`;
           await maybePromptCharacterInternship(runtime, dateText, character, {
             minimumFavorability: 70,
             sourcePrefix: `date:${character.id}`,
-            graduationProbability: 0.2,
-            holidayProbability: 0.2
+            graduationProbability: 0.2
           });
           return;
         }
@@ -5567,8 +5602,7 @@ ${promptContextLines.join('\n')}`;
           await maybePromptCharacterInternship(runtime, dateText, character, {
             minimumFavorability: 70,
             sourcePrefix: `date:${character.id}`,
-            graduationProbability: 0.2,
-            holidayProbability: 0.2
+            graduationProbability: 0.2
           });
           return;
         }
@@ -5580,48 +5614,61 @@ ${promptContextLines.join('\n')}`;
       await maybePromptCharacterInternship(runtime, dateText, character, {
         minimumFavorability: 70,
         sourcePrefix: `date:${character.id}`,
-        graduationProbability: 0.2,
-        holidayProbability: 0.2
+        graduationProbability: 0.2
       });
     } else {
       addActionHistory(runtime, dateText, '赴了一场约会。', { plan });
     }
   }
 
-  async function executeInternship(runtime, dateText, locationText, specKey) {
+  async function executeInternship(runtime, dateText, locationText) {
     updatePlayerFatigue(runtime, 6);
     updatePlayerMoney(runtime, 500);
-    if (specKey === '毕业实习') {
-      updateGraduationProgress(runtime, 'graduation-internship', GRADUATION_ACTION_PROGRESS, '毕业实习进度');
-    }
+    updateGraduationProgress(runtime, 'graduation-internship', GRADUATION_ACTION_PROGRESS, '毕业实习进度');
 
     var effectiveLocationText = locationText || '实习单位';
-    var referrerCharacterId = specKey === '毕业实习'
-      ? runtime.player.graduationInternshipReferrer
-      : runtime.player.holidayInternshipReferrer;
-    var referrerCharacter = referrerCharacterId ? getCharacterById(runtime, referrerCharacterId) : null;
-    if (referrerCharacter) {
-      effectiveLocationText = `${referrerCharacter.name}自家的产业${effectiveLocationText}`;
-    }
+    var bossCharacterId = runtime.player.graduationInternshipBossId;
+    var bossCharacter = bossCharacterId ? getCharacterById(runtime, bossCharacterId) : null;
+    var selectedOffer = runtime.flags.internships.acceptedOffers.find(function (offer) {
+      return offer.id === runtime.player.graduationInternshipOfferId;
+    }) || null;
 
     var baseCharacterIds = runtime.characters.map(function (item) { return item.id; });
-    if (referrerCharacter && !baseCharacterIds.includes(referrerCharacter.id)) {
-      baseCharacterIds.push(referrerCharacter.id);
+    if (bossCharacter && !baseCharacterIds.includes(bossCharacter.id)) {
+      baseCharacterIds.push(bossCharacter.id);
     }
 
-    var extraCharacterIds = referrerCharacter ? [referrerCharacter.id] : [];
-    var referrerNameOption = referrerCharacter ? { referrerName: referrerCharacter.name } : {};
-    const firstSeenKey = `${specKey}:${locationText || '未定'}`;
+    var extraCharacterIds = bossCharacter ? [bossCharacter.id] : [];
+    const firstSeenKey = `毕业实习:${locationText || '未定'}`;
     if (!runtime.flags.internships.firstSeenLocations[firstSeenKey]) {
-      await executeStoryEvent('第一天实习事件', dateText, Object.assign({
-        characterIds: baseCharacterIds,
-        extraCharacterIds: extraCharacterIds,
-        locationText: effectiveLocationText
-      }, referrerNameOption));
-      runtime.flags.internships.firstSeenLocations[firstSeenKey] = true;
-      if (specKey === '假期实习') {
-        await maybePromptInternshipUpgrade(runtime, dateText, locationText);
+      if (bossCharacter) {
+        setCharacterScopedFlag(bossCharacter, 'global', '实习上司', true);
+        await executeStoryEvent('邀请人担任实习上司事件', dateText, {
+          characterIds: [bossCharacter.id],
+          locationText: effectiveLocationText
+        });
+      } else if (selectedOffer?.professorCourseName) {
+        const knownCharacterIds = new Set(runtime.characters.map((character) => character.id));
+        await executeStoryEvent('第一次实习-教授邀请事件', dateText, {
+          characterIds: baseCharacterIds,
+          locationText: effectiveLocationText,
+          courseId: selectedOffer.professorCourseId,
+          courseName: selectedOffer.professorCourseName
+        });
+        const professor = runtime.characters.find((character) => !knownCharacterIds.has(character.id)) || null;
+        if (!professor) {
+          return;
+        }
+        setCharacterScopedFlag(professor, 'global', '实习上司', true);
+        runtime.player.graduationInternshipBossId = professor.id;
+        selectedOffer.inviterCharacterId = professor.id;
+      } else {
+        await executeStoryEvent('第一天实习事件', dateText, {
+          characterIds: baseCharacterIds,
+          locationText: effectiveLocationText
+        });
       }
+      runtime.flags.internships.firstSeenLocations[firstSeenKey] = true;
       return;
     }
     if (chance(0.1)) {
@@ -5630,9 +5677,6 @@ ${promptContextLines.join('\n')}`;
         extraCharacterIds: extraCharacterIds,
         locationText: effectiveLocationText
       });
-      if (specKey === '假期实习') {
-        await maybePromptInternshipUpgrade(runtime, dateText, locationText);
-      }
       return;
     }
     if (getCharactersByRelation(runtime, (item) => item.isLover).length && chance(0.1)) {
@@ -5641,15 +5685,9 @@ ${promptContextLines.join('\n')}`;
         extraCharacterIds: extraCharacterIds,
         locationText: effectiveLocationText
       });
-      if (specKey === '假期实习') {
-        await maybePromptInternshipUpgrade(runtime, dateText, locationText);
-      }
       return;
     }
     addActionHistory(runtime, dateText, `前往${effectiveLocationText}实习。`);
-    if (specKey === '假期实习') {
-      await maybePromptInternshipUpgrade(runtime, dateText, locationText);
-    }
   }
 
   function executeGraduationThesis(runtime, dateText) {
@@ -5772,10 +5810,15 @@ ${promptContextLines.join('\n')}`;
       .map((item) => `${item.courseName}：日常分 ${item.homeworkAverage} / 考试分 ${item.examScore} / 总评 ${item.finalGrade}`)
       .join('\n');
     await waitForTextModal(`${termLabel}成绩`, text);
-    return handleTermOutcome(runtime, termId, summary, dateText);
+    const ended = await handleTermOutcome(runtime, termId, summary, dateText);
+    if (!ended && runtime.phase !== 'ended' && termId === UPPER_TERM_ID) {
+      await maybeAddProfessorInternshipOffer(runtime, dateText);
+    }
+    return ended;
   }
 
   async function runPrePlanAddDaySteps(runtime, dateText, weekDates) {
+    await maybeSelectGraduationInternship(runtime, dateText); // 2. 下学期首日确定毕业实习
     const ended = await maybeShowSundayExamResults(runtime, dateText, weekDates); // 2. 周日考试成绩弹窗
     if (ended || runtime.phase === 'ended') {
       return { hospitalized: false, skipPlan: true, ended: true };
@@ -5916,11 +5959,11 @@ ${promptContextLines.join('\n')}`;
       case 'date':
         await executeDate(runtime, plan, dateText);
         break;
-      case 'holiday-internship':
-        await executeInternship(runtime, dateText, runtime.player.holidayInternship, '假期实习');
+      case 'winter-job':
+        await executeWinterJob(runtime, dateText);
         break;
       case 'graduation-internship':
-        await executeInternship(runtime, dateText, runtime.player.graduationInternship, '毕业实习');
+        await executeInternship(runtime, dateText, runtime.player.graduationInternship);
         break;
       case 'graduation-thesis':
         executeGraduationThesis(runtime, dateText);
@@ -6011,14 +6054,6 @@ ${promptContextLines.join('\n')}`;
 
     const nextDate = addDays(lastDate, 1);
     const nextTerm = getTermMeta(nextDate);
-    if (previousTerm?.isBreak && nextTerm && !nextTerm.isBreak) {
-      runtime.player.holidayInternship = null;
-      runtime.player.holidayInternshipReferrer = '';
-      clearCharacterGlobalFlag(runtime, '实习上司');
-    }
-    if (nextTerm?.id === GRADUATION_TERM_ID) {
-      ensureGraduationInternshipPlacement(runtime, nextDate);
-    }
     // 仅在真正更换学期/进入假期时才结算成绩，跳过作业期→间隙期的过渡
     var shouldFinalize = previousTerm && !previousTerm.isBreak;
     if (shouldFinalize && nextTerm && !nextTerm.isBreak && nextTerm.id.endsWith('-break')) {
@@ -6257,7 +6292,7 @@ ${promptContextLines.join('\n')}`;
           courseId: null,
           courseName: '创业企划书',
           isThesis: false,
-          requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg', name: '用户抱怨' }]
+          requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260916201558', name: '用户抱怨' }]
         }];
       } else {
         refreshMergeTasks();
@@ -6847,6 +6882,9 @@ ${promptContextLines.join('\n')}`;
           <div class="schedule-summary-actions">
             <button class="secondary" data-action="open-scores" ${state.ui.interactionLocked ? 'disabled' : ''}>成绩</button>
             <button class="secondary" data-action="open-outfits" ${state.ui.interactionLocked ? 'disabled' : ''}>礼服</button>
+            ${runtime.player.currentDate < getTermMetaByFullId(GRADUATION_TERM_ID).start
+              ? `<button class="secondary" data-action="open-internship-offers" ${state.ui.interactionLocked ? 'disabled' : ''}>实习机会</button>`
+              : ''}
           </div>
         </div>
         ${isAdminUser() && state.ui.status ? `<div class="schedule-meta-note"><div class="status ${state.ui.statusTone || ''}" style="white-space:pre-wrap;font-size:13px;">${escapeHtml(state.ui.status)}</div></div>` : ''}
@@ -7004,7 +7042,7 @@ ${promptContextLines.join('\n')}`;
             <button class="${textPresetMode === 'builtin' ? 'primary' : 'secondary'}" data-action="set-text-preset-mode" data-mode="builtin">游戏内置预设</button>
           </div>
           <div class="subtle" style="margin-top:8px;">
-            酒馆模式会采用当前预设的文风与生成参数；聊天楼层、角色卡、玩家 Persona、世界书和作者注释仍由游戏自己的资料替代。
+            酒馆模式会采用当前预设的文风与生成参数，并保留玩家启用的世界书内容；游戏剧本设定会在世界书附近注入，输出格式和写作要求紧邻最后的事件指令。完整 AI 回复会保存在酒馆聊天楼层，游戏内只显示和记录所需内容。
           </div>
         </div>
 
@@ -7131,6 +7169,57 @@ ${promptContextLines.join('\n')}`;
                     <strong>${escapeHtml(action.label)}</strong>
                   </button>
                 `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (modal.type === 'internship-picker') {
+      return `
+        <div class="modal-backdrop">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>${escapeHtml(modal.title)}</h2>
+            </div>
+            <div class="modal-body">
+              <div class="subtle">请选择本学期最终参加的毕业实习。选择后不能更改。</div>
+              <div class="action-list">
+                ${modal.offers.map((offer) => `
+                  <button class="action-card action-picker-button" data-action="select-internship-offer" data-offer-id="${escapeHtml(offer.id)}">
+                    <strong>${escapeHtml(offer.label)}</strong>
+                    <small>${escapeHtml(offer.locationText)}</small>
+                  </button>
+                `).join('')}
+                <button class="action-card action-picker-button" data-action="select-internship-offer" data-offer-id="school">
+                  <strong>学校分配的实习</strong>
+                  <small>兰斯特皇家学院合作实习基地</small>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (modal.type === 'internship-offers') {
+      return `
+        <div class="modal-backdrop">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>${escapeHtml(modal.title)}</h2>
+              <button class="secondary" data-action="close-modal">关闭</button>
+            </div>
+            <div class="modal-body">
+              <div class="muted-box">目前共有 ${modal.offers.length} 份毕业实习邀请。</div>
+              <div class="action-list">
+                ${modal.offers.length ? modal.offers.map((offer) => `
+                  <div class="action-card">
+                    <strong>${escapeHtml(offer.label)}</strong>
+                    <small>${escapeHtml(offer.locationText)}</small>
+                  </div>
+                `).join('') : '<div class="muted-box">目前还没有收到毕业实习邀请。</div>'}
               </div>
             </div>
           </div>
@@ -7816,6 +7905,16 @@ ${promptContextLines.join('\n')}`;
           }
           chooseDayAction(button.dataset.date, button.dataset.token);
           return;
+        case 'select-internship-offer':
+          if (state.ui.modal?.type === 'internship-picker') {
+            const resolver = state.ui.modal.resolver;
+            state.ui.modal.resolver = null;
+            closeModal();
+            if (resolver) {
+              resolver(button.dataset.offerId);
+            }
+          }
+          return;
         case 'execute-week':
           await executeCurrentWeek();
           return;
@@ -7911,6 +8010,9 @@ ${promptContextLines.join('\n')}`;
           return;
         case 'open-outfits':
           openOutfitModal();
+          return;
+        case 'open-internship-offers':
+          openInternshipOffersModal();
           return;
         case 'set-save-mode':
           state.ui.saveMode = button.dataset.mode;

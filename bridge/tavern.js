@@ -1,11 +1,11 @@
-import { generateImage, validateImageConfig } from './image-providers.js';
-import { makeGenerationId, sanitizeAiText } from './text.js';
+import { generateImage, validateImageConfig } from './image-providers.js?build=20260916201558';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916201558';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js';
+} from './worldbook.js?build=20260916201558';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const IMAGE_CONFIG_KEY = 'noble-school.image-config.v1';
@@ -48,14 +48,11 @@ function buildOrderedPrompts(payload) {
   return ordered;
 }
 
-function buildGameInjection(payload) {
+function buildSupportingContextInjection(payload) {
   const options = payload?.options || {};
   const parts = [];
   if (options.retryMarker) {
     parts.push(String(options.retryMarker));
-  }
-  if (options.gameSystemInstruction) {
-    parts.push(String(options.gameSystemInstruction));
   }
   if (options.historySystemInstruction) {
     parts.push(String(options.historySystemInstruction));
@@ -66,10 +63,15 @@ function buildGameInjection(payload) {
   if (options.locationInstruction) {
     parts.push(`以下是此前已经确定的地点描述，后续章节可据此保持一致：\n${String(options.locationInstruction)}`);
   }
-  if (options.writingPointsInstruction) {
-    parts.push(String(options.writingPointsInstruction));
-  }
   return parts.map((part) => part.trim()).filter(Boolean).join('\n\n');
+}
+
+function buildPenultimateUserInstruction(payload) {
+  const options = payload?.options || {};
+  return [options.outputFormatInstruction, options.writingPointsInstruction]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join('\n\n');
 }
 
 function emptyPromptOverrides() {
@@ -78,12 +80,10 @@ function emptyPromptOverrides() {
     char_personality: '',
     scenario: '',
     persona_description: '',
-    world_info_before: '',
-    world_info_after: '',
     dialogue_examples: '',
     chat_history: {
       prompts: [],
-      with_depth_entries: false,
+      with_depth_entries: true,
       author_note: ''
     }
   };
@@ -92,6 +92,23 @@ function emptyPromptOverrides() {
 function isImagePayload(payload) {
   const modalities = String(payload?.options?.responseModalities || '').toUpperCase();
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
+}
+
+async function appendFullTextResponseToChat(helper, text) {
+  const message = String(text || '').trim();
+  if (!message) return;
+  if (typeof helper?.createChatMessages !== 'function') {
+    throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整 AI 回复写入聊天楼层；请更新酒馆助手。');
+  }
+  await helper.createChatMessages([{
+    role: 'assistant',
+    message,
+    data: { nobleSchoolGameResponse: true },
+    extra: { source: 'noble-school-tavern-card' }
+  }], {
+    insert_before: 'end',
+    refresh: 'affected'
+  });
 }
 
 export function createTavernBridge({ hostWindow, apiWindow = globalThis, getImageConfig, onOpenImageSettings = null }) {
@@ -127,21 +144,43 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, getImag
         if (typeof apiWindow.generate !== 'function') {
           throw new Error('当前酒馆助手缺少 generate 接口，无法读取酒馆当前预设；请更新酒馆助手，或在“系统”页切换为“游戏内置预设”。');
         }
-        const gameInjection = buildGameInjection(payload);
+        const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
+        const supportingContextInstruction = buildSupportingContextInjection(payload);
+        const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
+        const injects = [];
+        if (scriptSettingsInstruction) {
+          injects.push({
+            role: 'system',
+            content: scriptSettingsInstruction,
+            position: 'before_prompt',
+            depth: 0,
+            should_scan: true
+          });
+        }
+        if (supportingContextInstruction) {
+          injects.push({
+            role: 'system',
+            content: supportingContextInstruction,
+            position: 'in_chat',
+            depth: 2,
+            should_scan: false
+          });
+        }
+        if (penultimateUserInstruction) {
+          injects.push({
+            role: 'user',
+            content: penultimateUserInstruction,
+            position: 'in_chat',
+            depth: 1,
+            should_scan: false
+          });
+        }
         text = await apiWindow.generate({
           preset_name: 'in_use',
           user_input: prompt,
           should_silence: true,
           max_chat_history: 0,
-          injects: gameInjection
-            ? [{
-                role: 'system',
-                content: gameInjection,
-                position: 'in_chat',
-                depth: 0,
-                should_scan: false
-              }]
-            : [],
+          injects,
           overrides: emptyPromptOverrides(),
           generation_id: makeGenerationId()
         });
@@ -158,9 +197,11 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, getImag
           generation_id: makeGenerationId()
         });
       }
+      const fullText = typeof text === 'string' ? text : String(text?.content || '');
+      await appendFullTextResponseToChat(helper, fullText);
       return {
-        output: { textParts: [sanitizeAiText(text)], thoughtParts: [], imageParts: [] },
-        raw: {}
+        output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
+        raw: { fullText }
       };
     },
     async testImage(config) {

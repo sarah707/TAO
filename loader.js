@@ -1,10 +1,10 @@
-import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js';
+import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js?build=20260916201558';
 import {
   BRIDGE_KEY,
   createTavernBridge,
   loadImageConfig,
   saveImageConfig
-} from './bridge/tavern.js';
+} from './bridge/tavern.js?build=20260916201558';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
