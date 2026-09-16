@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916224350';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916231606';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260916224350';
+} from './worldbook.js?build=20260916231606';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -244,7 +244,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         };
       }
       try {
-        return await api.getStatus();
+        return await api.getStatus({ provider: 'gemini' });
       } catch (error) {
         return {
           installed: true,
