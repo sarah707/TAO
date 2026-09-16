@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#F3E5F5"/>
+  <!-- 弹开的雨滴/风险 -->
+  <path d="M 25 25 L 20 35" stroke="#BA68C8" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 75 25 L 80 35" stroke="#BA68C8" stroke-width="3" stroke-linecap="round"/>
+  <!-- 伞柄 -->
+  <path d="M 50 50 L 50 80 A 6 6 0 0 0 62 80" fill="none" stroke="#4A148C" stroke-width="4" stroke-linecap="round"/>
+  <!-- 伞面 -->
+  <path d="M 15 55 C 15 15 85 15 85 55 Q 67.5 48 50 55 Q 32.5 48 15 55 Z" fill="#CE93D8" stroke="#4A148C" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 伞顶的小尖尖 -->
+  <line x1="50" y1="20" x2="50" y2="12" stroke="#4A148C" stroke-width="4" stroke-linecap="round"/>
+  <!-- 伞面的安心笑脸 -->
+  <circle cx="40" cy="45" r="2" fill="#4A148C"/>
+  <circle cx="60" cy="45" r="2" fill="#4A148C"/>
+  <path d="M 47 48 Q 50 51 53 48" stroke="#4A148C" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

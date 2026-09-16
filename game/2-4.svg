@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#6EE7B7" />
+  
+  <g stroke="#064E3B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Bottom Book -->
+    <rect x="25" y="70" width="50" height="12" rx="2" fill="#059669" />
+    <line x1="28" y1="76" x2="72" y2="76" stroke="#A7F3D0" stroke-width="1.5" />
+    
+    <!-- Middle Book -->
+    <rect x="28" y="58" width="44" height="12" rx="2" fill="#10B981" />
+    <line x1="31" y1="64" x2="69" y2="64" stroke="#6EE7B7" stroke-width="1.5" />
+    
+    <!-- Top Book (The Smart One) -->
+    <rect x="32" y="30" width="36" height="28" rx="3" fill="#FFFFFF" />
+    
+    <!-- Bookmark in Top Book -->
+    <path d="M 55 58 L 55 68 L 60 65 L 65 68 L 65 58 Z" fill="#FDE047" />
+
+    <!-- Content Smart Face -->
+    <path d="M 42 42 Q 44 40 46 42" fill="none" />
+    <path d="M 54 42 Q 56 40 58 42" fill="none" />
+    <ellipse cx="38" cy="46" rx="2" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <ellipse cx="62" cy="46" rx="2" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <path d="M 47 48 Q 50 51 53 48" fill="none" />
+  </g>
+</svg>

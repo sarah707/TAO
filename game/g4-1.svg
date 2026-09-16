@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#F3E5F5"/>
+  <!-- 爱心光晕 -->
+  <path d="M 50 40 C 50 20 20 25 20 50 C 20 70 50 90 50 90 C 50 90 80 70 80 50 C 80 25 50 20 50 40 Z" fill="none" stroke="#E1BEE7" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 爱心主体 -->
+  <path d="M 50 40 C 50 20 25 25 25 50 C 25 70 50 85 50 85 C 50 85 75 70 75 50 C 75 25 50 20 50 40 Z" fill="#CE93D8" stroke="#4A148C" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 爱心上的表情 -->
+  <circle cx="42" cy="52" r="2.5" fill="#4A148C"/>
+  <circle cx="58" cy="52" r="2.5" fill="#4A148C"/>
+  <path d="M 47 57 Q 50 61 53 57" stroke="#4A148C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="36" cy="55" r="4" fill="#FF8A80" opacity="0.6"/>
+  <circle cx="64" cy="55" r="4" fill="#FF8A80" opacity="0.6"/>
+  <!-- 初心星光 -->
+  <path d="M 25 25 L 28 32 L 21 32 Z" fill="#FFD54F"/>
+  <path d="M 75 20 L 78 28 L 72 28 Z" fill="#FFD54F"/>
+</svg>

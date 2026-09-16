@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#FFE4E1"/>
+  <!-- 坐标轴 -->
+  <line x1="20" y1="75" x2="80" y2="75" stroke="#C2185B" stroke-width="4" stroke-linecap="round"/>
+  <!-- 柱子1 -->
+  <rect x="25" y="55" width="14" height="20" rx="3" fill="#FFB6C1" stroke="#C2185B" stroke-width="3"/>
+  <!-- 柱子2 -->
+  <rect x="45" y="40" width="14" height="35" rx="3" fill="#FF69B4" stroke="#C2185B" stroke-width="3"/>
+  <!-- 柱子3 -->
+  <rect x="65" y="20" width="14" height="55" rx="3" fill="#FF1493" stroke="#C2185B" stroke-width="3"/>
+  <!-- 增长趋势箭头 -->
+  <path d="M 25 45 Q 45 20 70 10" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M 60 10 L 70 10 L 72 20" fill="none" stroke="#FFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 柱子3上的笑脸 -->
+  <circle cx="69" cy="30" r="2" fill="#FFF"/>
+  <circle cx="75" cy="30" r="2" fill="#FFF"/>
+  <path d="M 70 34 Q 72 37 74 34" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#FFE4E1"/>
+  <!-- 乌云本体 -->
+  <path d="M 35 35 A 15 15 0 0 1 65 35 A 18 18 0 0 1 80 55 A 15 15 0 0 1 65 70 L 30 70 A 15 15 0 0 1 30 40 A 10 10 0 0 1 35 35 Z" fill="#FFB6C1" stroke="#C2185B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 委屈的眼睛 (斜线) -->
+  <line x1="42" y1="48" x2="48" y2="52" stroke="#C2185B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="58" y1="48" x2="52" y2="52" stroke="#C2185B" stroke-width="3" stroke-linecap="round"/>
+  <!-- 哭泣的嘴巴 -->
+  <path d="M 47 60 Q 50 56 53 60" stroke="#C2185B" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <!-- 蓝粉色泪滴 -->
+  <path d="M 45 75 Q 45 85 41 85 Q 37 85 41 75 Z" fill="#81D4FA" stroke="#C2185B" stroke-width="2"/>
+  <path d="M 60 78 Q 60 88 56 88 Q 52 88 56 78 Z" fill="#81D4FA" stroke="#C2185B" stroke-width="2"/>
+</svg>

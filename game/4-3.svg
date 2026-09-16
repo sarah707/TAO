@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#D8B4FE" />
+  
+  <g stroke="#4C1D95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Base & Pillar -->
+    <path d="M 35 80 L 65 80 L 58 65 L 42 65 Z" fill="#A855F7" />
+    <rect x="46" y="35" width="8" height="30" fill="#FFFFFF" />
+    
+    <!-- Beam -->
+    <rect x="20" y="30" width="60" height="6" rx="3" fill="#C084FC" />
+    
+    <!-- Left Pan -->
+    <line x1="25" y1="36" x2="15" y2="55" stroke-width="1.5" />
+    <line x1="25" y1="36" x2="35" y2="55" stroke-width="1.5" />
+    <path d="M 12 55 L 38 55 L 30 62 L 20 62 Z" fill="#F3E8FF" />
+    
+    <!-- Right Pan -->
+    <line x1="75" y1="36" x2="65" y2="55" stroke-width="1.5" />
+    <line x1="75" y1="36" x2="85" y2="55" stroke-width="1.5" />
+    <path d="M 62 55 L 88 55 L 80 62 L 70 62 Z" fill="#F3E8FF" />
+    
+    <!-- Center Pivot Face -->
+    <circle cx="50" cy="33" r="10" fill="#FDE047" />
+    <circle cx="47" cy="31" r="1.5" fill="#4C1D95" stroke="none" />
+    <circle cx="53" cy="31" r="1.5" fill="#4C1D95" stroke="none" />
+    <path d="M 48 35 Q 50 38 52 35" fill="none" />
+    <ellipse cx="44" cy="34" rx="1.5" ry="1" fill="#F9A8D4" stroke="none" />
+    <ellipse cx="56" cy="34" rx="1.5" ry="1" fill="#F9A8D4" stroke="none" />
+  </g>
+</svg>

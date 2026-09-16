@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#34D399" />
+  
+  <g stroke="#064E3B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Flowchart Lines -->
+    <line x1="50" y1="44" x2="50" y2="54" />
+    <line x1="30" y1="54" x2="70" y2="54" />
+    <line x1="30" y1="54" x2="30" y2="64" />
+    <line x1="70" y1="54" x2="70" y2="64" />
+    
+    <!-- Bottom Nodes -->
+    <rect x="15" y="64" width="30" height="16" rx="3" fill="#A7F3D0" />
+    <line x1="22" y1="72" x2="38" y2="72" />
+    
+    <rect x="55" y="64" width="30" height="16" rx="3" fill="#A7F3D0" />
+    <line x1="62" y1="72" x2="78" y2="72" />
+
+    <!-- Top Node (Main Framework) -->
+    <rect x="30" y="20" width="40" height="24" rx="4" fill="#FFFFFF" />
+    
+    <!-- Smart Glasses Face -->
+    <circle cx="41" cy="32" r="4" fill="#ECFDF5" />
+    <circle cx="59" cy="32" r="4" fill="#ECFDF5" />
+    <line x1="45" y1="32" x2="55" y2="32" />
+    <!-- Eyes -->
+    <circle cx="41" cy="32" r="1.5" fill="#064E3B" stroke="none" />
+    <circle cx="59" cy="32" r="1.5" fill="#064E3B" stroke="none" />
+    <path d="M 47 38 Q 50 40 53 38" fill="none" />
+  </g>
+</svg>

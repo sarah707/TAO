@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#E0F7FA"/>
+  <!-- 手机外壳 -->
+  <rect x="28" y="15" width="44" height="70" rx="6" fill="#4FC3F7" stroke="#01579B" stroke-width="3"/>
+  <!-- 手机屏幕 -->
+  <rect x="32" y="25" width="36" height="50" rx="3" fill="#E1F5FE" stroke="#01579B" stroke-width="2"/>
+  <!-- 听筒和Home键 -->
+  <line x1="45" y1="20" x2="55" y2="20" stroke="#01579B" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="50" cy="80" r="2.5" fill="#01579B"/>
+  <!-- 屏幕内的线框元素 -->
+  <circle cx="50" cy="40" r="10" fill="#B3E5FC" stroke="#01579B" stroke-width="2"/>
+  <rect x="37" y="55" width="26" height="6" rx="3" fill="#81D4FA" stroke="#01579B" stroke-width="2"/>
+  <rect x="42" y="65" width="16" height="4" rx="2" fill="#81D4FA" stroke="#01579B" stroke-width="2"/>
+  <!-- 头像框里的表情 -->
+  <circle cx="46" cy="38" r="1.5" fill="#01579B"/>
+  <circle cx="54" cy="38" r="1.5" fill="#01579B"/>
+  <path d="M 48 42 Q 50 44 52 42" stroke="#01579B" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+</svg>

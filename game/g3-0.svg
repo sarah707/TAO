@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#E8F5E9"/>
+  <!-- 钱袋袋口折边 -->
+  <polygon points="35,28 65,28 72,15 28,15" fill="#81C784" stroke="#1B5E20" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 钱袋主体 (水滴胖胖形状) -->
+  <path d="M 22 65 A 28 28 0 0 0 78 65 Q 78 40 65 28 L 35 28 Q 22 40 22 65 Z" fill="#A5D6A7" stroke="#1B5E20" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 钱袋绑带 -->
+  <rect x="33" y="25" width="34" height="8" rx="4" fill="#4CAF50" stroke="#1B5E20" stroke-width="3"/>
+  <!-- 钱袋正面的金币印记 -->
+  <circle cx="50" cy="50" r="10" fill="#FFD54F" stroke="#1B5E20" stroke-width="2"/>
+  <path d="M 50 44 L 50 56 M 47 47 Q 53 47 53 50 Q 47 53 53 53" fill="none" stroke="#1B5E20" stroke-width="2" stroke-linecap="round"/>
+  <!-- 钱袋的可爱表情 -->
+  <circle cx="38" cy="65" r="2.5" fill="#1B5E20"/>
+  <circle cx="62" cy="65" r="2.5" fill="#1B5E20"/>
+  <path d="M 46 68 Q 50 72 54 68" stroke="#1B5E20" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <circle cx="30" cy="67" r="4" fill="#FF8A80" opacity="0.6"/>
+  <circle cx="70" cy="67" r="4" fill="#FF8A80" opacity="0.6"/>
+  <!-- 闪烁的魔法财富星光 -->
+  <path d="M 15 35 L 18 40 L 15 45 L 12 40 Z" fill="#FFD54F"/>
+  <path d="M 85 45 L 89 52 L 85 59 L 81 52 Z" fill="#FFD54F"/>
+  <circle cx="82" cy="30" r="2" fill="#FFD54F"/>
+</svg>

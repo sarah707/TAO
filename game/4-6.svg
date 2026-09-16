@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#9333EA" />
+  
+  <g stroke="#4C1D95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Folded Draft Paper -->
+    <path d="M 25 15 L 55 15 L 75 35 L 75 85 L 25 85 Z" fill="#FFFFFF" />
+    <path d="M 55 15 L 55 35 L 75 35 Z" fill="#D8B4FE" />
+    
+    <!-- Discussion Dialogue Doodles on Paper -->
+    <rect x="35" y="45" width="25" height="8" rx="4" fill="#E9D5FF" />
+    <rect x="45" y="58" width="20" height="8" rx="4" fill="#C084FC" />
+    
+    <!-- Struggling / Hardworking Face -->
+    <path d="M 38 72 L 42 75 L 38 78" fill="none" />
+    <path d="M 62 72 L 58 75 L 62 78" fill="none" />
+    <path d="M 46 82 Q 50 79 54 82" fill="none" />
+    <ellipse cx="36" cy="78" rx="2.5" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <ellipse cx="64" cy="78" rx="2.5" ry="1.5" fill="#F9A8D4" stroke="none" />
+    
+    <!-- Sweat Drop -->
+    <path d="M 65 62 C 65 62, 69 67, 69 70 C 69 73, 65 74, 63 72 C 61 70, 65 62, 65 62 Z" fill="#C084FC" />
+    
+    <!-- Little Quill/Pen -->
+    <path d="M 15 35 L 25 50 L 22 52 L 12 37 Z" fill="#FDE047" />
+    <path d="M 25 50 L 28 58 L 22 52 Z" fill="#A855F7" />
+  </g>
+</svg>

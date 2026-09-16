@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#F3E5F5"/>
+  <!-- 路线图卷轴上下画轴 -->
+  <rect x="25" y="24" width="50" height="10" rx="4" fill="#BA68C8" stroke="#4A148C" stroke-width="3"/>
+  <rect x="25" y="76" width="50" height="10" rx="4" fill="#BA68C8" stroke="#4A148C" stroke-width="3"/>
+  <!-- 展开的图纸 -->
+  <rect x="30" y="30" width="40" height="50" fill="#FFF" stroke="#4A148C" stroke-width="3"/>
+  <!-- 蜿蜒的路线 -->
+  <path d="M 40 70 C 30 55 70 55 50 40" fill="none" stroke="#CE93D8" stroke-width="4" stroke-dasharray="5 4" stroke-linecap="round"/>
+  <!-- 终点目标的红色坐标钉 -->
+  <path d="M 50 42 Q 44 32 44 28 A 6 6 0 1 1 56 28 Q 56 32 50 42 Z" fill="#FF8A80" stroke="#4A148C" stroke-width="2"/>
+  <circle cx="50" cy="28" r="2" fill="#FFF"/>
+  <!-- 顶部的最高级金色小皇冠 -->
+  <path d="M 40 8 L 45 18 L 50 6 L 55 18 L 60 8 L 62 22 L 38 22 Z" fill="#FFD54F" stroke="#4A148C" stroke-width="2" stroke-linejoin="round"/>
+  <!-- 图纸底部的自信笑脸 -->
+  <circle cx="44" cy="62" r="2" fill="#4A148C"/>
+  <circle cx="56" cy="62" r="2" fill="#4A148C"/>
+  <path d="M 48 66 Q 50 69 52 66" stroke="#4A148C" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="39" cy="64" r="2.5" fill="#FF8A80" opacity="0.6"/>
+  <circle cx="61" cy="64" r="2.5" fill="#FF8A80" opacity="0.6"/>
+</svg>

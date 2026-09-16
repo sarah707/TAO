@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#FECACA" />
+  
+  <g stroke="#7F1D1D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Flask Back & Body -->
+    <path d="M 42 20 L 58 20 L 58 35 L 75 75 A 5 5 0 0 1 70 85 L 30 85 A 5 5 0 0 1 25 75 L 42 35 Z" fill="#FFFFFF" />
+    
+    <!-- Red Liquid -->
+    <path d="M 32 60 L 68 60 L 73 75 A 5 5 0 0 1 68 85 L 32 85 A 5 5 0 0 1 27 75 L 32 60 Z" fill="#FCA5A5" />
+    
+    <!-- Flask Rim -->
+    <rect x="38" y="16" width="24" height="6" rx="2" fill="#F87171" />
+    
+    <!-- Bubbles -->
+    <circle cx="45" cy="50" r="3" fill="#FEE2E2" />
+    <circle cx="55" cy="40" r="2" fill="#FEE2E2" />
+    <circle cx="48" cy="30" r="2.5" fill="#FEE2E2" />
+
+    <!-- Cute Face -->
+    <circle cx="43" cy="70" r="2.5" fill="#7F1D1D" stroke="none" />
+    <circle cx="57" cy="70" r="2.5" fill="#7F1D1D" stroke="none" />
+    <ellipse cx="37" cy="73" rx="3" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <ellipse cx="63" cy="73" rx="3" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <path d="M 47 73 Q 50 77 53 73" fill="none" />
+  </g>
+</svg>

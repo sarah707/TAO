@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#E8F5E9"/>
+  <g transform="translate(50, 50) rotate(-15) translate(-50, -50)">
+    <!-- 标签挂绳 -->
+    <path d="M 50 10 L 50 30 Q 30 15 20 25" fill="none" stroke="#81C784" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- 标签主体 -->
+    <polygon points="50,25 75,40 75,85 25,85 25,40" fill="#A5D6A7" stroke="#1B5E20" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="25,85 75,85 75,70 25,70" fill="#4CAF50" stroke="#1B5E20" stroke-width="3" stroke-linejoin="round"/>
+    <!-- 标签打孔 -->
+    <circle cx="50" cy="38" r="4" fill="#E8F5E9" stroke="#1B5E20" stroke-width="2"/>
+    <!-- 标签中间的星星 -->
+    <path d="M 50 48 L 53 54 L 60 55 L 55 60 L 56 66 L 50 63 L 44 66 L 45 60 L 40 55 L 47 54 Z" fill="#FFD54F" stroke="#1B5E20" stroke-width="2" stroke-linejoin="round"/>
+    <!-- 底部绿色区域的表情 -->
+    <circle cx="43" cy="77" r="1.5" fill="#FFF"/>
+    <circle cx="57" cy="77" r="1.5" fill="#FFF"/>
+    <path d="M 48 80 Q 50 82 52 80" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  </g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#E1F5FE"/>
+  <!-- 钻石轮廓与切面 -->
+  <path d="M 25 40 L 40 25 L 60 25 L 75 40 L 50 75 Z" fill="#B3E5FC" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 25 40 L 75 40" stroke="#01579B" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 40 25 L 40 40 L 50 75 L 60 40 L 60 25" fill="#4FC3F7" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 40 40 L 60 40" stroke="#01579B" stroke-width="3"/>
+  <!-- 钻石中心的表情 -->
+  <circle cx="45" cy="50" r="2" fill="#01579B"/>
+  <circle cx="55" cy="50" r="2" fill="#01579B"/>
+  <path d="M 48 54 Q 50 57 52 54" stroke="#01579B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="41" cy="52" r="3" fill="#FF8A80" opacity="0.6"/>
+  <circle cx="59" cy="52" r="3" fill="#FF8A80" opacity="0.6"/>
+  <!-- 星光点缀 -->
+  <path d="M 20 20 L 23 25 L 20 30 L 17 25 Z" fill="#03A9F4"/>
+  <path d="M 80 55 L 84 60 L 80 65 L 76 60 Z" fill="#03A9F4"/>
+</svg>

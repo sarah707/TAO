@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#FFF0F5"/>
+  <!-- 书的白页 -->
+  <path d="M 20 35 Q 50 25 50 35 Q 50 25 80 35 L 80 75 Q 50 65 50 75 Q 50 65 20 75 Z" fill="#FFF" stroke="#C2185B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 书的封面（左/右半边粉色） -->
+  <path d="M 20 35 Q 50 25 50 35 L 50 75 Q 50 65 20 75 Z" fill="#FFB6C1" stroke="#C2185B" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 50 35 Q 50 25 80 35 L 80 75 Q 50 65 50 75 Z" fill="#FF69B4" stroke="#C2185B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 中间的深粉色书签 -->
+  <rect x="47" y="25" width="6" height="60" fill="#FF1493" stroke="#C2185B" stroke-width="2"/>
+  <!-- 顶部的金色小皇冠，代表最高级成果 -->
+  <path d="M 42 12 L 46 22 L 50 10 L 54 22 L 58 12 L 60 26 L 40 26 Z" fill="#FFD54F" stroke="#C2185B" stroke-width="2" stroke-linejoin="round"/>
+  <!-- 右侧书页上的自信笑脸 -->
+  <circle cx="60" cy="55" r="2.5" fill="#FFF"/>
+  <circle cx="70" cy="55" r="2.5" fill="#FFF"/>
+  <path d="M 63 60 Q 65 63 67 60" stroke="#FFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

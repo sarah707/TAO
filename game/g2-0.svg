@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#E1F5FE"/>
+  <!-- 盒子主体 -->
+  <rect x="25" y="45" width="50" height="40" rx="3" fill="#4FC3F7" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 盒子盖子 -->
+  <rect x="20" y="35" width="60" height="12" rx="3" fill="#03A9F4" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 垂直丝带 -->
+  <rect x="43" y="35" width="14" height="50" fill="#B3E5FC" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 顶部蝴蝶结 -->
+  <path d="M 50 35 C 30 10 10 30 43 35 Z" fill="#03A9F4" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 50 35 C 70 10 90 30 57 35 Z" fill="#03A9F4" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 盒子左侧的可爱表情 -->
+  <circle cx="31" cy="62" r="2.5" fill="#FFF"/>
+  <circle cx="39" cy="62" r="2.5" fill="#FFF"/>
+  <path d="M 33 66 Q 35 69 37 66" stroke="#FFF" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="27" cy="64" r="3" fill="#FF8A80" opacity="0.6"/>
+  <circle cx="43" cy="64" r="3" fill="#FF8A80" opacity="0.6"/>
+  <!-- 魔法闪光 -->
+  <path d="M 15 25 L 20 30 L 15 35 L 10 30 Z" fill="#03A9F4"/>
+  <path d="M 85 20 L 90 25 L 85 30 L 80 25 Z" fill="#03A9F4"/>
+  <circle cx="80" cy="65" r="2" fill="#03A9F4"/>
+</svg>

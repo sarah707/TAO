@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#F3E8FF" />
+  
+  <g stroke="#4C1D95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Big Question Mark Body -->
+    <path d="M 35 35 C 35 15, 65 15, 65 35 C 65 48, 50 52, 50 65" fill="none" stroke="#D8B4FE" stroke-width="14" />
+    <path d="M 35 35 C 35 15, 65 15, 65 35 C 65 48, 50 52, 50 65" fill="none" stroke-width="2.5" />
+    
+    <!-- Question Mark Dot -->
+    <circle cx="50" cy="80" r="7" fill="#D8B4FE" />
+    
+    <!-- Sleepy / Curious Face -->
+    <path d="M 44 28 Q 46 30 48 28" fill="none" />
+    <path d="M 52 28 Q 54 30 56 28" fill="none" />
+    <circle cx="50" cy="34" r="1.5" fill="#4C1D95" stroke="none"/>
+    <ellipse cx="41" cy="31" rx="2" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <ellipse cx="59" cy="31" rx="2" ry="1.5" fill="#F9A8D4" stroke="none" />
+    
+    <!-- Mini floating question marks -->
+    <path d="M 25 50 C 20 45, 30 45, 30 50 C 30 53, 27 55, 27 58" fill="none" stroke="#A855F7" />
+    <circle cx="27" cy="62" r="1" fill="#A855F7" stroke="none" />
+  </g>
+</svg>

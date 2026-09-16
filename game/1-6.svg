@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#3B82F6" />
+  
+  <g stroke="#1E3A8A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Folded Paper -->
+    <path d="M 25 15 L 55 15 L 75 35 L 75 85 L 25 85 Z" fill="#FFFFFF" />
+    <path d="M 55 15 L 55 35 L 75 35 Z" fill="#BFDBFE" />
+    
+    <!-- Scribbles (Draft Text) -->
+    <path d="M 35 45 Q 40 42 45 45 T 55 45 T 65 45" fill="none" />
+    <path d="M 35 55 Q 40 52 45 55 T 55 55" fill="none" />
+    
+    <!-- Hardworking Face -->
+    <path d="M 39 68 L 43 71 L 39 74" fill="none" />
+    <path d="M 61 68 L 57 71 L 61 74" fill="none" />
+    <path d="M 46 78 Q 50 75 54 78" fill="none" />
+    <ellipse cx="37" cy="74" rx="3" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <ellipse cx="63" cy="74" rx="3" ry="1.5" fill="#FBCFE8" stroke="none" />
+    
+    <!-- Sweat Drop -->
+    <path d="M 63 60 C 63 60, 67 65, 67 68 C 67 71, 63 72, 61 70 C 59 68, 63 60, 63 60 Z" fill="#93C5FD" />
+  </g>
+</svg>

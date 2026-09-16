@@ -1,0 +1,39 @@
+{
+  "description": "毕业学年课程 ID 映射表，适用于 .editsch-schedule.txt 和 .editsch-homework.txt。",
+  "usage": {
+    ".editsch-schedule.txt": "assignments 里的值是课程 ID，例如 2003-09-08 -> y4-upper-1。",
+    ".editsch-homework.txt": "settings 里的键是普通课程 ID；毕业实习和毕业论文由游戏内行程推进。"
+  },
+  "courses": {
+    "y4-upper-1": {
+      "termId": "y4-upper",
+      "termLabel": "毕业学年上学期",
+      "courseName": "金融工程学"
+    },
+    "y4-upper-2": {
+      "termId": "y4-upper",
+      "termLabel": "毕业学年上学期",
+      "courseName": "衍生金融工具"
+    },
+    "y4-upper-3": {
+      "termId": "y4-upper",
+      "termLabel": "毕业学年上学期",
+      "courseName": "固定收益证券"
+    },
+    "y4-upper-4": {
+      "termId": "y4-upper",
+      "termLabel": "毕业学年上学期",
+      "courseName": "金融实证分析"
+    },
+    "y4-lower-1": {
+      "termId": "y4-lower",
+      "termLabel": "毕业学年下学期",
+      "courseName": "投资银行学"
+    },
+    "y4-lower-2": {
+      "termId": "y4-lower",
+      "termLabel": "毕业学年下学期",
+      "courseName": "私募股权与风险投资"
+    }
+  }
+}

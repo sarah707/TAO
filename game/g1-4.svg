@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#FFE4E1"/>
+  <!-- 拍立得边框 -->
+  <rect x="25" y="20" width="50" height="60" rx="4" fill="#FFF" stroke="#C2185B" stroke-width="3"/>
+  <!-- 照片区域 -->
+  <rect x="30" y="25" width="40" height="35" rx="2" fill="#FFB6C1" stroke="#C2185B" stroke-width="3"/>
+  <!-- 用户的猫耳 -->
+  <path d="M 40 40 L 40 28 L 48 35" fill="#FF69B4" stroke="#C2185B" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M 60 40 L 60 28 L 52 35" fill="#FF69B4" stroke="#C2185B" stroke-width="2" stroke-linejoin="round"/>
+  <!-- 用户的脸 -->
+  <circle cx="50" cy="45" r="12" fill="#FF69B4" stroke="#C2185B" stroke-width="2"/>
+  <circle cx="45" cy="45" r="2" fill="#FFF"/>
+  <circle cx="55" cy="45" r="2" fill="#FFF"/>
+  <path d="M 48 49 Q 50 51 50 49 Q 50 51 52 49" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- 画像说明文字（装饰线） -->
+  <line x1="32" y1="68" x2="68" y2="68" stroke="#C2185B" stroke-width="3" stroke-linecap="round"/>
+  <line x1="32" y1="74" x2="55" y2="74" stroke="#C2185B" stroke-width="3" stroke-linecap="round"/>
+  <!-- 爱心贴纸 -->
+  <path d="M 72 68 A 4 4 0 0 0 65 68 A 4 4 0 0 0 58 68 Q 58 73 65 80 Q 72 73 72 68 Z" fill="#FF1493"/>
+</svg>

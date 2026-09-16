@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#F1F8E9"/>
+  <!-- 底部发光的金币 -->
+  <circle cx="50" cy="65" r="22" fill="#FFD54F" stroke="#1B5E20" stroke-width="3"/>
+  <circle cx="50" cy="65" r="14" fill="none" stroke="#FBC02D" stroke-width="2" stroke-dasharray="4 4"/>
+  <!-- 金币上的表情 -->
+  <circle cx="43" cy="63" r="2" fill="#1B5E20"/>
+  <circle cx="57" cy="63" r="2" fill="#1B5E20"/>
+  <path d="M 47 68 Q 50 71 53 68" stroke="#1B5E20" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- 头顶长出的小绿芽 -->
+  <path d="M 50 43 L 50 25" stroke="#1B5E20" stroke-width="3" stroke-linecap="round"/>
+  <path d="M 50 35 C 35 35 35 15 50 25 Z" fill="#A5D6A7" stroke="#1B5E20" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M 50 30 C 65 30 65 10 50 20 Z" fill="#81C784" stroke="#1B5E20" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 星光点缀 -->
+  <circle cx="25" cy="50" r="2.5" fill="#4CAF50"/>
+  <circle cx="75" cy="40" r="2.5" fill="#4CAF50"/>
+</svg>

@@ -1,0 +1,121 @@
+{
+  "spec": "chara_card_v3",
+  "spec_version": "3.0",
+  "name": "贵族学校的特招生",
+  "description": "大学毕业前的最后一年，你以特招生身份转入贵族学院。",
+  "personality": "",
+  "scenario": "",
+  "first_mes": "<games0>请打开酒馆助手并启用本卡的界面脚本。游戏会在独立浮窗中运行。</games0>",
+  "mes_example": "",
+  "creatorcomment": "需要安装并启用酒馆助手。文字模型使用酒馆当前连接；生图模型在首次打开浮窗时单独配置。",
+  "avatar": "none",
+  "talkativeness": "0.5",
+  "fav": false,
+  "tags": [
+    "游戏",
+    "养成",
+    "酒馆助手",
+    "贵族学校"
+  ],
+  "create_date": "2026-09-16T13:15:42.455Z",
+  "data": {
+    "name": "贵族学校的特招生",
+    "description": "大学毕业前的最后一年，你以特招生身份转入贵族学院。游戏规则、剧情和存档由浮窗管理。",
+    "personality": "",
+    "scenario": "",
+    "first_mes": "<games0>请打开酒馆助手并启用本卡的界面脚本。游戏会在独立浮窗中运行。</games0>",
+    "mes_example": "",
+    "creator_notes": "需要酒馆助手。卡内只保留加载入口。远程加载入口：https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.0/bootstrap.js",
+    "system_prompt": "",
+    "post_history_instructions": "",
+    "tags": [
+      "游戏",
+      "养成",
+      "酒馆助手",
+      "贵族学校"
+    ],
+    "creator": "sasa",
+    "character_version": "1.0.0",
+    "alternate_greetings": [],
+    "group_only_greetings": [],
+    "character_book": {
+      "name": "贵族学校的特招生",
+      "description": "",
+      "scan_depth": 2,
+      "token_budget": 2048,
+      "recursive_scanning": false,
+      "extensions": {},
+      "entries": []
+    },
+    "extensions": {
+      "talkativeness": "0.5",
+      "fav": false,
+      "world": "",
+      "depth_prompt": {
+        "prompt": "",
+        "depth": 4,
+        "role": "system"
+      },
+      "regex_scripts": [
+        {
+          "id": "noble-school-hide-launcher-display",
+          "scriptName": "隐藏游戏启动说明",
+          "findRegex": "<games0>[\\s\\S]*?<\\/games0>",
+          "replaceString": "",
+          "trimStrings": [],
+          "placement": [
+            2
+          ],
+          "disabled": false,
+          "markdownOnly": true,
+          "promptOnly": false,
+          "runOnEdit": true,
+          "substituteRegex": 0,
+          "minDepth": null,
+          "maxDepth": null
+        },
+        {
+          "id": "noble-school-remove-launcher-prompt",
+          "scriptName": "启动说明不发送给模型",
+          "findRegex": "<games0>[\\s\\S]*?<\\/games0>",
+          "replaceString": "",
+          "trimStrings": [],
+          "placement": [
+            2
+          ],
+          "disabled": false,
+          "markdownOnly": false,
+          "promptOnly": true,
+          "runOnEdit": true,
+          "substituteRegex": 0,
+          "minDepth": null,
+          "maxDepth": null
+        }
+      ],
+      "tavern_helper": [
+        [
+          "scripts",
+          [
+            {
+              "type": "script",
+              "enabled": true,
+              "name": "游戏浮窗加载器",
+              "id": "noble-school-loader-v1",
+              "content": "import 'https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.0/bootstrap.js';",
+              "info": "版本号：1.0.0\n",
+              "button": {
+                "enabled": false,
+                "buttons": []
+              },
+              "data": {}
+            }
+          ]
+        ],
+        [
+          "variables",
+          {}
+        ]
+      ]
+    }
+  }
+}

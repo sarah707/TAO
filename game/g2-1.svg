@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#E0F7FA"/>
+  <!-- 灯泡发光特效 -->
+  <line x1="50" y1="10" x2="50" y2="18" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+  <line x1="25" y1="25" x2="31" y2="31" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+  <line x1="75" y1="25" x2="69" y2="31" stroke="#4FC3F7" stroke-width="3" stroke-linecap="round"/>
+  <!-- 灯泡玻璃 -->
+  <path d="M 50 20 C 30 20 30 50 40 60 L 40 70 L 60 70 L 60 60 C 70 50 70 20 50 20 Z" fill="#B3E5FC" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 灯泡底座 -->
+  <rect x="42" y="70" width="16" height="8" rx="2" fill="#4FC3F7" stroke="#01579B" stroke-width="3"/>
+  <path d="M 46 82 L 54 82 L 52 86 L 48 86 Z" fill="#03A9F4" stroke="#01579B" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 灯泡表情 -->
+  <circle cx="44" cy="42" r="2.5" fill="#01579B"/>
+  <circle cx="56" cy="42" r="2.5" fill="#01579B"/>
+  <path d="M 48 47 Q 50 51 52 47" stroke="#01579B" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <circle cx="39" cy="45" r="4" fill="#FF8A80" opacity="0.5"/>
+  <circle cx="61" cy="45" r="4" fill="#FF8A80" opacity="0.5"/>
+</svg>

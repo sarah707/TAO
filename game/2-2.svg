@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#D1FAE5" />
+  
+  <g stroke="#064E3B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Index Card -->
+    <rect x="20" y="30" width="60" height="40" rx="4" fill="#FFFFFF" />
+    
+    <!-- Highlighter Line (Behind Face) -->
+    <line x1="30" y1="42" x2="55" y2="42" stroke="#FDE047" stroke-width="6" stroke-linecap="round" />
+    <line x1="30" y1="52" x2="70" y2="52" stroke="#E5E7EB" stroke-width="2" />
+    <line x1="30" y1="60" x2="60" y2="60" stroke="#E5E7EB" stroke-width="2" />
+
+    <!-- Focused Face (Tongue sticking out slightly) -->
+    <circle cx="40" cy="42" r="2" fill="#064E3B" stroke="none" />
+    <circle cx="50" cy="42" r="2" fill="#064E3B" stroke="none" />
+    <ellipse cx="34" cy="45" rx="2" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <ellipse cx="56" cy="45" rx="2" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <line x1="43" y1="46" x2="47" y2="46" />
+    <path d="M 45 46 v 2 a 1 1 0 0 0 2 0 v -2" fill="#FCA5A5" stroke="none" />
+    
+    <!-- Push Pin -->
+    <circle cx="50" cy="20" r="4" fill="#EF4444" />
+    <line x1="50" y1="24" x2="50" y2="34" />
+  </g>
+</svg>

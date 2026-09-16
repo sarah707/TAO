@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#A855F7" />
+  
+  <g stroke="#4C1D95" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Base -->
+    <path d="M 35 75 L 65 75 L 60 85 L 40 85 Z" fill="#7E22CE" />
+    <rect x="42" y="70" width="16" height="5" fill="#D8B4FE" />
+    
+    <!-- Crystal Ball -->
+    <circle cx="50" cy="45" r="28" fill="#F3E8FF" />
+    <circle cx="50" cy="45" r="20" fill="#FFFFFF" stroke="none" />
+    
+    <!-- Glowing Star Inside -->
+    <path d="M 50 20 L 53 30 L 63 32 L 55 38 L 57 48 L 50 42 L 43 48 L 45 38 L 37 32 L 47 30 Z" fill="#FDE047" stroke-width="2" />
+    
+    <!-- Wise / Serene Face on Ball -->
+    <path d="M 42 55 Q 45 52 48 55" fill="none" />
+    <path d="M 52 55 Q 55 52 58 55" fill="none" />
+    <ellipse cx="38" cy="57" rx="2.5" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <ellipse cx="62" cy="57" rx="2.5" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <path d="M 48 60 Q 50 63 52 60" fill="none" />
+  </g>
+</svg>

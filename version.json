@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "releaseRef": "v1.0.0",
+  "loaderUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.0/loader.js",
+  "bootstrapUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.0/bootstrap.js",
+  "builtAt": "2026-09-16T13:15:42.457Z"
+}

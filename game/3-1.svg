@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <circle cx="50" cy="50" r="48" fill="#FEE2E2" />
+  
+  <g stroke="#7F1D1D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Glowing Data Dot -->
+    <path d="M 75 20 C 75 30, 70 35, 60 35 C 70 35, 75 40, 75 50 C 75 40, 80 35, 90 35 C 80 35, 75 30, 75 20 Z" fill="#F87171" />
+    
+    <!-- Magnifying Glass Handle -->
+    <line x1="40" y1="60" x2="25" y2="75" stroke-width="8" stroke="#FCA5A5" />
+    <line x1="38" y1="58" x2="27" y2="69" stroke="#7F1D1D" /> <!-- Handle grip detail -->
+
+    <!-- Magnifying Glass Frame -->
+    <circle cx="50" cy="45" r="20" fill="#FFFFFF" />
+    <circle cx="50" cy="45" r="15" fill="#FECACA" stroke="none" />
+
+    <!-- Sleepy / Surprised Face -->
+    <path d="M 44 43 Q 46 45 48 43" fill="none" />
+    <path d="M 52 43 Q 54 45 56 43" fill="none" />
+    <circle cx="50" cy="49" r="1.5" fill="#7F1D1D" stroke="none"/>
+    <ellipse cx="40" cy="46" rx="2.5" ry="1.5" fill="#F9A8D4" stroke="none" />
+    <ellipse cx="60" cy="46" rx="2.5" ry="1.5" fill="#F9A8D4" stroke="none" />
+  </g>
+</svg>

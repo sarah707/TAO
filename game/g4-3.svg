@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="120" height="120">
+  <circle cx="50" cy="50" r="45" fill="#F3E5F5"/>
+  <!-- 小山峰 -->
+  <path d="M 15 85 Q 50 35 85 85 Z" fill="#E1BEE7" stroke="#4A148C" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 山顶积雪 -->
+  <path d="M 38 52 Q 50 65 62 52 L 50 35 Z" fill="#FFF" stroke="#4A148C" stroke-width="2" stroke-linejoin="round"/>
+  <!-- 旗杆 -->
+  <line x1="50" y1="18" x2="50" y2="45" stroke="#4A148C" stroke-width="4" stroke-linecap="round"/>
+  <!-- 飘扬的旗帜 -->
+  <path d="M 50 20 L 75 30 L 50 40 Z" fill="#BA68C8" stroke="#4A148C" stroke-width="3" stroke-linejoin="round"/>
+  <!-- 旗帜上的表情 -->
+  <circle cx="56" cy="28" r="1.5" fill="#FFF"/>
+  <circle cx="64" cy="30" r="1.5" fill="#FFF"/>
+  <path d="M 58 32 Q 60 34 62 33" stroke="#FFF" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- 山峰的表情 -->
+  <circle cx="40" cy="72" r="2" fill="#4A148C"/>
+  <circle cx="60" cy="72" r="2" fill="#4A148C"/>
+  <path d="M 47 75 Q 50 78 53 75" stroke="#4A148C" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>

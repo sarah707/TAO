@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="200" height="200">
+  <!-- Background -->
+  <circle cx="50" cy="50" r="48" fill="#D1FAE5" />
+  
+  <g stroke="#064E3B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Back Pages -->
+    <path d="M 65 30 L 75 35 L 75 80 L 65 75 Z" fill="#FFFFFF" />
+    <path d="M 69 32 L 79 37 L 79 72 L 69 67 Z" fill="#ECFDF5" />
+    
+    <!-- Book Cover -->
+    <rect x="25" y="25" width="40" height="50" rx="4" fill="#34D399" />
+    
+    <!-- Bookmark -->
+    <path d="M 45 75 L 45 85 L 50 82 L 55 85 L 55 75 Z" fill="#FDE047" />
+    
+    <!-- Sprout on top -->
+    <path d="M 45 25 C 45 15, 35 15, 35 15 C 42 18, 45 25, 45 25 Z" fill="#10B981" />
+    <path d="M 45 25 C 45 12, 58 15, 58 15 C 50 18, 45 25, 45 25 Z" fill="#6EE7B7" />
+
+    <!-- Cute Face -->
+    <circle cx="38" cy="50" r="2.5" fill="#064E3B" stroke="none" />
+    <circle cx="52" cy="50" r="2.5" fill="#064E3B" stroke="none" />
+    <ellipse cx="32" cy="53" rx="3" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <ellipse cx="58" cy="53" rx="3" ry="1.5" fill="#FBCFE8" stroke="none" />
+    <path d="M 42 53 Q 45 57 48 53" fill="none" />
+  </g>
+</svg>
