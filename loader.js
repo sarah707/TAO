@@ -1,10 +1,10 @@
-import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js?build=20260916202706';
+import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js?build=20260916203357';
 import {
   BRIDGE_KEY,
   createTavernBridge,
   loadImageConfig,
   saveImageConfig
-} from './bridge/tavern.js?build=20260916202706';
+} from './bridge/tavern.js?build=20260916203357';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -34,9 +34,9 @@ function overlayCss() {
 #${OVERLAY_ID} *, #${OVERLAY_ID} *::before, #${OVERLAY_ID} *::after { box-sizing:border-box; }
 #${OVERLAY_ID} [hidden] { display:none!important; }
 #${OVERLAY_ID} .noble-school-stage { position:fixed; inset:0; width:100vw; width:100dvw; height:100vh; height:100dvh; pointer-events:none; }
-#${OVERLAY_ID} #${ROOT_ID} { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(100%,960px); padding:0 1rem; pointer-events:none; touch-action:none; will-change:transform; }
-#${OVERLAY_ID} .noble-school-card { display:flex; flex-direction:column; max-width:600px; max-height:calc(100vh - 16px); max-height:calc(100dvh - 16px); margin:auto; overflow:hidden; background:#fff; border:1px solid rgba(0,0,0,.125); border-radius:.5rem; box-shadow:0 .125rem .25rem rgba(0,0,0,.075); pointer-events:all; }
-#${OVERLAY_ID} .noble-school-body { flex:1 1 auto; height:clamp(360px,calc(100vh - 150px),792px); height:clamp(360px,calc(100dvh - 150px),792px); min-height:0; max-height:clamp(360px,calc(100vh - 150px),792px); max-height:clamp(360px,calc(100dvh - 150px),792px); overflow:hidden; background:#fff; pointer-events:all; }
+#${OVERLAY_ID} #${ROOT_ID} { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(100%,960px); height:calc(100vh - 32px); height:calc(100dvh - 32px); padding:0 1rem; pointer-events:none; touch-action:none; will-change:transform; }
+#${OVERLAY_ID} .noble-school-card { display:flex; flex-direction:column; width:100%; max-width:600px; height:100%; max-height:100%; margin:auto; overflow:hidden; background:#fff; border:1px solid rgba(0,0,0,.125); border-radius:.5rem; box-shadow:0 .125rem .25rem rgba(0,0,0,.075); pointer-events:all; }
+#${OVERLAY_ID} .noble-school-body { flex:1 1 0; height:auto; min-height:0; max-height:none; overflow:hidden; background:#fff; pointer-events:all; }
 #${OVERLAY_ID} .noble-school-frame { display:block; width:100%; height:100%; border:0; background:#fff; }
 #${OVERLAY_ID} .noble-school-config { height:100%; overflow-y:auto; padding:0 1.25rem 1.25rem; overscroll-behavior:contain; }
 #${OVERLAY_ID} .noble-school-config-titlebar { position:sticky; top:0; z-index:2; display:flex; align-items:center; justify-content:center; min-height:68px; margin:0 -1.25rem 1rem; padding:14px 64px 12px 16px; color:#4a377d; background:linear-gradient(180deg,rgba(251,248,255,.99),rgba(251,248,255,.94),rgba(251,248,255,.84)); backdrop-filter:blur(14px); cursor:grab; user-select:none; }
@@ -331,7 +331,6 @@ function mount() {
       const defaults = getDefaultImageConfig(provider.value);
       form.elements.apiUrl.value = defaults.apiUrl;
       form.elements.model.value = defaults.model;
-      form.elements.size.value = defaults.size;
       form.elements.location.value = defaults.location;
       updateVisibility();
     };

@@ -1,11 +1,11 @@
-import { generateImage, validateImageConfig } from './image-providers.js?build=20260916202706';
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916202706';
+import { generateImage, validateImageConfig } from './image-providers.js?build=20260916203357';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916203357';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260916202706';
+} from './worldbook.js?build=20260916203357';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const IMAGE_CONFIG_KEY = 'noble-school.image-config.v1';
