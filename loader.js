@@ -1,4 +1,4 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260916231606';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260916234853';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -121,7 +121,7 @@ function makePluginNoticeMarkup(status) {
   const installed = Boolean(status?.installed);
   const title = installed ? '生图插件尚未配置' : '可选生图插件未安装';
   const message = installed
-    ? '已经检测到“小游戏轻度生图插件”，但还没有可用的专用 API Key。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。'
+    ? '已经检测到“小游戏轻度生图插件”，但当前选中的生图服务尚未配置完整。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。'
     : '没有检测到“小游戏轻度生图插件”。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。';
   return `
     <div class="noble-school-config noble-school-plugin-notice">

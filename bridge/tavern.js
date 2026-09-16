@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916231606';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916234853';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260916231606';
+} from './worldbook.js?build=20260916234853';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -244,7 +244,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         };
       }
       try {
-        return await api.getStatus({ provider: 'gemini' });
+        return await api.getStatus();
       } catch (error) {
         return {
           installed: true,
@@ -261,8 +261,6 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           throw new Error('未安装“小游戏轻度生图插件”，已跳过本次图片生成。');
         }
         const generated = await api.generate({
-          provider: 'gemini',
-          model: String(payload?.modelId || 'gemini-3.1-flash-image'),
           prompt: payload?.prompt,
           aspectRatio: '1:1',
           imageSize: '1K',
