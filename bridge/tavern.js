@@ -1,11 +1,11 @@
-import { generateImage, validateImageConfig } from './image-providers.js?build=20260916201558';
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916201558';
+import { generateImage, validateImageConfig } from './image-providers.js?build=20260916202706';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916202706';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260916201558';
+} from './worldbook.js?build=20260916202706';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const IMAGE_CONFIG_KEY = 'noble-school.image-config.v1';
@@ -128,8 +128,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, getImag
       if (isImagePayload(payload)) {
         const image = await generateImage(getImageConfig(), {
           prompt: payload?.prompt,
-          aspectRatio: payload?.options?.aspectRatio || '1:1',
-          size: payload?.options?.size
+          aspectRatio: '1:1',
+          size: '1024x1024'
         });
         return {
           output: { textParts: [], thoughtParts: [], imageParts: [{ mimeType: image.mimeType, data: image.data }] },

@@ -14,6 +14,8 @@ const PROVIDERS_WITH_OPTIONAL_KEY = new Set(['vertex', 'a1111', 'comfyui']);
 const PROVIDERS_WITH_OPTIONAL_MODEL = new Set(['stability', 'a1111', 'bfl', 'comfyui']);
 const VERTEX_SCOPE = 'https://www.googleapis.com/auth/cloud-platform';
 const VERTEX_TOKEN_URL = 'https://oauth2.googleapis.com/token';
+const FIXED_ASPECT_RATIO = '1:1';
+const FIXED_IMAGE_SIZE = '1024x1024';
 const vertexTokenCache = new Map();
 
 function getProvider(rawProvider) {
@@ -29,8 +31,8 @@ export function normalizeImageConfig(raw = {}) {
     apiKey: String(raw.apiKey || '').trim(),
     model: String(raw.model ?? defaults.model).trim(),
     quality: String(raw.quality || 'auto').trim(),
-    size: String(raw.size || '1024x1024').trim(),
-    aspectRatio: String(raw.aspectRatio || '1:1').trim(),
+    size: FIXED_IMAGE_SIZE,
+    aspectRatio: FIXED_ASPECT_RATIO,
     negativePrompt: String(raw.negativePrompt || '').trim(),
     steps: Math.max(1, Math.min(150, Number(raw.steps || 24))),
     workflowJson: String(raw.workflowJson || '').trim(),
@@ -454,8 +456,8 @@ export async function generateImage(rawConfig, request) {
   const config = validateImageConfig(rawConfig);
   const normalizedRequest = {
     prompt: String(request?.prompt || '').trim(),
-    aspectRatio: String(request?.aspectRatio || config.aspectRatio),
-    size: String(request?.size || config.size)
+    aspectRatio: FIXED_ASPECT_RATIO,
+    size: FIXED_IMAGE_SIZE
   };
   if (!normalizedRequest.prompt) throw new Error('生图提示词不能为空。');
   return GENERATORS[config.provider](config, normalizedRequest);

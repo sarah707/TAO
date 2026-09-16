@@ -1,10 +1,10 @@
-import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js?build=20260916201558';
+import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js?build=20260916202706';
 import {
   BRIDGE_KEY,
   createTavernBridge,
   loadImageConfig,
   saveImageConfig
-} from './bridge/tavern.js?build=20260916201558';
+} from './bridge/tavern.js?build=20260916202706';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -170,20 +170,6 @@ function makeConfigMarkup(config, initial) {
           <label for="noble-vertex-service-account">Vertex 服务账号 JSON</label>
           <textarea id="noble-vertex-service-account" name="serviceAccountJson" spellcheck="false" placeholder='粘贴包含 client_email、private_key 和 project_id 的完整 JSON'>${escapeHtml(value.serviceAccountJson)}</textarea>
           <small class="noble-school-help">配置只保存在当前浏览器本地。建议使用专用服务账号，并仅授予调用 Vertex AI 所需权限。</small>
-        </div>
-        <div class="noble-school-grid">
-          <div class="noble-school-field">
-            <label for="noble-image-ratio">默认比例</label>
-            <select id="noble-image-ratio" name="aspectRatio">
-              ${['1:1','3:4','4:3','9:16','16:9'].map((item) => `<option value="${item}" ${value.aspectRatio === item ? 'selected' : ''}>${item}</option>`).join('')}
-            </select>
-          </div>
-          <div class="noble-school-field" data-providers="openai a1111 bfl comfyui">
-            <label for="noble-image-size">目标图片尺寸</label>
-            <select id="noble-image-size" name="size">
-              ${['1024x1024','1024x1536','1536x1024','auto'].map((item) => `<option value="${item}" ${value.size === item ? 'selected' : ''}>${item}</option>`).join('')}
-            </select>
-          </div>
         </div>
         <div class="noble-school-field" data-providers="stability a1111 comfyui">
           <label for="noble-image-negative">负面提示词</label>
