@@ -70,12 +70,20 @@
     const method = String(init.method || (typeof input !== 'string' && input?.method) || 'GET').toUpperCase();
     if (!/(?:^|\/)api\//.test(path)) return originalFetch(input, init);
 
-    if (path.endsWith('/api/auth/status')) {
-      return jsonResponse({ authenticated: true, username: 'tavern-card', role: 'user', isAdmin: false, isBlocked: false });
-    }
     if (path.endsWith('/api/game/bootstrap')) return jsonResponse(await bootstrapResponse());
     if (path.endsWith('/api/ai-settings')) {
       return jsonResponse({ settings: { provider: 'aiStudio', modelId: 'gemini-2.5-flash', configured: true } });
+    }
+    if (path.endsWith('/api/card-storage/chat') && method === 'GET') {
+      return jsonResponse(await bridge().loadGameStorage());
+    }
+    if (path.endsWith('/api/card-storage/chat') && method === 'POST') {
+      const payload = await getRequestBody(input, init);
+      return jsonResponse(await bridge().saveGameStorage(payload.data, payload.chatId));
+    }
+    if (path.endsWith('/api/card-images/upload') && method === 'POST') {
+      const payload = await getRequestBody(input, init);
+      return jsonResponse(await bridge().uploadImage(payload));
     }
     if (path.endsWith('/api/generate') && method === 'POST') {
       const payload = await getRequestBody(input, init);
@@ -87,9 +95,6 @@
       const job = jobs.get(decodeURIComponent(jobMatch[1]));
       if (!job) return jsonResponse({ error: 'AI 任务不存在。' }, 404);
       return jsonResponse({ job: { id: job.id, status: job.status, result: job.result, error: job.error } });
-    }
-    if (path.endsWith('/api/auth/logout')) {
-      return jsonResponse({ authenticated: true, username: 'tavern-card', role: 'user', isAdmin: false, isBlocked: false });
     }
     return jsonResponse({ error: `酒馆版不支持接口：${path}` }, 404);
   };

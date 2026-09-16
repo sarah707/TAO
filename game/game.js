@@ -33,7 +33,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260916203357';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260916224350';
   const DAILY_COST = 25;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -52,6 +52,9 @@
   const GLOBAL_AI_ACTIVITY_KEY = 'games0.ai.activity.global';
   const GLOBAL_CHAPTER_DEBUG_KEY = 'games0.chapter.debug';
   const CHAPTER_MODAL_SESSION_KEY = 'games0.ui.chapter-modal';
+  const CHAT_STORAGE_URL = 'api/card-storage/chat';
+  const CHAT_CACHE_META_KEY = 'games0.chat-cache-id.tavern-card';
+  const CHAT_STORAGE_SCOPES = ['runtime', 'save.auto', 'save.slot1', 'save.slot2', 'save.slot3'];
   const EVENT_ACTIVITY_SKIP_HINTS = new Set(['参观校内马术障碍赛', '校庆晚宴', '慈善拍卖会', '新年舞会', '春游野餐会', '校园音乐节', '校内音乐节', '仲夏夜假面舞会']);
   const EVENT_SPECS = GAME_PROMPTS.eventSpecs;
   const buildPromptModules = GAME_PROMPTS.buildPromptModules;
@@ -166,51 +169,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260916203357', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260916224350', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260916203357', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260916203357', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260916203357', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260916203357', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260916203357', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260916203357', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260916203357', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260916224350', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260916224350', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260916224350', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260916224350', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260916224350', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260916224350', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260916224350', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260916203357', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260916224350', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260916203357', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260916203357', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260916203357', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260916203357', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260916203357', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260916203357', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260916203357', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260916224350', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260916224350', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260916224350', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260916224350', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260916224350', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260916224350', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260916224350', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260916203357', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260916224350', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260916203357', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260916203357', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260916203357', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260916203357', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260916203357', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260916203357', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260916203357', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260916224350', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260916224350', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260916224350', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260916224350', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260916224350', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260916224350', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260916224350', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260916203357', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260916224350', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260916203357', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260916203357', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260916203357', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260916203357', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260916203357', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260916203357', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260916203357', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260916224350', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260916224350', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260916224350', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260916224350', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260916224350', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260916224350', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260916224350', name: '讨论定稿' }
       ]
     }
   ];
@@ -219,51 +222,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260916203357', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260916224350', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260916203357', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260916203357', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260916203357', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260916203357', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260916203357', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260916203357', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260916203357', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260916224350', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260916224350', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260916224350', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260916224350', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260916224350', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260916224350', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260916224350', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260916203357', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260916224350', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260916203357', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260916203357', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260916203357', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260916203357', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260916203357', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260916203357', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260916203357', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260916224350', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260916224350', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260916224350', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260916224350', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260916224350', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260916224350', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260916224350', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260916203357', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260916224350', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260916203357', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260916203357', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260916203357', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260916203357', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260916203357', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260916203357', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260916203357', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260916224350', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260916224350', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260916224350', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260916224350', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260916224350', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260916224350', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260916224350', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260916203357', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260916224350', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260916203357', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260916203357', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260916203357', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260916203357', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260916203357', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260916203357', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260916203357', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260916224350', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260916224350', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260916224350', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260916224350', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260916224350', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260916224350', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260916224350', name: '落地路线图' }
       ]
     }
   ];
@@ -361,7 +364,6 @@
   }
 
   const state = {
-    auth: null,
     bootstrap: null,
     runtime: null,
     specs: {
@@ -374,8 +376,8 @@
       page: 'schedule',
       selectedDate: null,
       saveMode: 'save',
-      status: '请先登录。',
-      statusTone: 'warning',
+      status: '',
+      statusTone: '',
       loading: true,
       interactionLocked: false,
       execTrace: null,
@@ -632,18 +634,16 @@
   function safeStorageRemove(key) {
     try {
       window.localStorage.removeItem(key);
+      if (isChatStorageKey(key) && !chatStorageHydrating) {
+        queueChatStorageSync();
+      }
     } catch (error) {
       setStatus('浏览器本地存储删除失败。', 'error');
     }
   }
 
   function makeScopedKey(scope) {
-    const username = state.auth?.username || 'guest';
-    return `games0.${scope}.${username}`;
-  }
-
-  function isAdminUser() {
-    return Boolean(state.auth?.isAdmin);
+    return `games0.${scope}.tavern-card`;
   }
 
   function loadJson(key, fallback = null) {
@@ -659,7 +659,91 @@
   }
 
   function saveJson(key, value) {
-    return safeStorageSet(key, JSON.stringify(value));
+    const saved = safeStorageSet(key, JSON.stringify(value));
+    if (saved && isChatStorageKey(key) && !chatStorageHydrating) {
+      queueChatStorageSync();
+    }
+    return saved;
+  }
+
+  let chatStorageHydrating = false;
+  let chatStorageTimer = null;
+  let chatStorageWriteChain = Promise.resolve();
+  let activeChatStorageId = '';
+
+  function isChatStorageKey(key) {
+    return CHAT_STORAGE_SCOPES.some((scope) => key === makeScopedKey(scope));
+  }
+
+  function collectChatStorageSnapshot() {
+    const values = {};
+    for (const scope of CHAT_STORAGE_SCOPES) {
+      const raw = safeStorageGet(makeScopedKey(scope));
+      if (!raw) continue;
+      try {
+        values[scope] = JSON.parse(raw);
+      } catch {
+        // 损坏的本地缓存不上传到对话变量。
+      }
+    }
+    return { version: 1, values };
+  }
+
+  async function persistChatStorage(snapshot = collectChatStorageSnapshot()) {
+    return postJson(CHAT_STORAGE_URL, { data: snapshot, chatId: activeChatStorageId });
+  }
+
+  function queueChatStorageSync() {
+    if (chatStorageHydrating) return;
+    if (chatStorageTimer) window.clearTimeout(chatStorageTimer);
+    chatStorageTimer = window.setTimeout(() => {
+      chatStorageTimer = null;
+      const snapshot = collectChatStorageSnapshot();
+      chatStorageWriteChain = chatStorageWriteChain
+        .catch(() => null)
+        .then(() => persistChatStorage(snapshot))
+        .catch((error) => {
+          setStatus(`跨设备存档同步失败：${error.message || error}`, 'error');
+        });
+    }, 120);
+  }
+
+  async function hydrateChatStorage() {
+    const remote = await requestJson(CHAT_STORAGE_URL);
+    const chatId = String(remote?.chatId || 'current-chat');
+    activeChatStorageId = chatId;
+    const previousChatId = String(safeStorageGet(CHAT_CACHE_META_KEY) || '');
+    const remoteValues = remote?.data?.values && typeof remote.data.values === 'object'
+      ? remote.data.values
+      : {};
+    const hasRemoteData = CHAT_STORAGE_SCOPES.some((scope) => Object.hasOwn(remoteValues, scope));
+    const hasLocalData = CHAT_STORAGE_SCOPES.some((scope) => Boolean(safeStorageGet(makeScopedKey(scope))));
+    const changedChat = Boolean(previousChatId && chatId && previousChatId !== chatId);
+
+    chatStorageHydrating = true;
+    try {
+      if (hasRemoteData) {
+        for (const scope of CHAT_STORAGE_SCOPES) {
+          const key = makeScopedKey(scope);
+          if (Object.hasOwn(remoteValues, scope)) {
+            safeStorageSet(key, JSON.stringify(remoteValues[scope]));
+          } else {
+            safeStorageRemove(key);
+          }
+        }
+      } else if (changedChat) {
+        for (const scope of CHAT_STORAGE_SCOPES) {
+          safeStorageRemove(makeScopedKey(scope));
+        }
+      }
+      safeStorageSet(CHAT_CACHE_META_KEY, chatId);
+    } finally {
+      chatStorageHydrating = false;
+    }
+
+    if (!hasRemoteData && hasLocalData && !changedChat) {
+      await persistChatStorage();
+    }
   }
 
   // ---- IndexedDB image store ----
@@ -726,25 +810,25 @@
     for (const character of runtime.characters || []) {
       const entry = images[`char:${character.id}`];
       if (entry) {
-        if (entry.avatarUrl) character.avatarUrl = entry.avatarUrl;
-        if (entry.avatarOriginalUrl) character.avatarOriginalUrl = entry.avatarOriginalUrl;
+        if (entry.avatarUrl && (!character.avatarUrl || character.avatarUrl === PLACEHOLDER_AVATAR)) character.avatarUrl = entry.avatarUrl;
+        if (entry.avatarOriginalUrl && !character.avatarOriginalUrl) character.avatarOriginalUrl = entry.avatarOriginalUrl;
       }
       if (!character.avatarUrl) character.avatarUrl = PLACEHOLDER_AVATAR;
     }
     for (const outfit of runtime.outfits || []) {
       const entry = images[`outfit:${outfit.id}`];
       if (entry) {
-        if (entry.imageUrl) outfit.imageUrl = entry.imageUrl;
-        if (entry.imageOriginalUrl) outfit.imageOriginalUrl = entry.imageOriginalUrl;
+        if (entry.imageUrl && !outfit.imageUrl) outfit.imageUrl = entry.imageUrl;
+        if (entry.imageOriginalUrl && !outfit.imageOriginalUrl) outfit.imageOriginalUrl = entry.imageOriginalUrl;
       }
     }
   }
 
-  async function flushImagesToIDB(images, scope = 'runtime', username = state.auth?.username || 'guest') {
+  async function flushImagesToIDB(images, scope = 'runtime', namespace = 'tavern-card') {
     const db = await openImageDB();
     const tx = db.transaction(IMAGE_STORE, 'readwrite');
     const store = tx.objectStore(IMAGE_STORE);
-    const prefix = makeImageScopePrefix(scope, username);
+    const prefix = makeImageScopePrefix(scope, namespace);
     const completion = new Promise((resolve, reject) => {
       tx.oncomplete = () => resolve();
       tx.onerror = () => reject(tx.error);
@@ -771,16 +855,14 @@
     await completion;
   }
 
-  function enqueueImageWrite(images, scope, username = state.auth?.username || 'guest') {
+  function enqueueImageWrite(images, scope, namespace = 'tavern-card') {
     pendingImageWrites = pendingImageWrites
       .catch(() => true)
-      .then(() => flushImagesToIDB(images, scope, username))
+      .then(() => flushImagesToIDB(images, scope, namespace))
       .then(() => true)
       .catch((error) => {
         console.error('图片存入 IndexedDB 失败。', error);
-        if (state.auth?.username === username) {
-          setStatus(`图片存储失败：${error.message || 'IndexedDB 不可用'}`, 'error');
-        }
+        setStatus(`图片存储失败：${error.message || 'IndexedDB 不可用'}`, 'error');
         return false;
       });
     return pendingImageWrites;
@@ -790,10 +872,10 @@
     return pendingImageWrites;
   }
 
-  function enqueueImageScopeDeletion(scope, username = state.auth?.username || 'guest') {
+  function enqueueImageScopeDeletion(scope, namespace = 'tavern-card') {
     pendingImageWrites = pendingImageWrites
       .catch(() => true)
-      .then(() => deleteImagesForScope(scope, username))
+      .then(() => deleteImagesForScope(scope, namespace))
       .then(() => true)
       .catch((error) => {
         console.error('清理 IndexedDB 图片失败。', error);
@@ -802,7 +884,7 @@
     return pendingImageWrites;
   }
 
-  async function loadImagesFromIDB(scope = 'runtime', username = state.auth?.username || 'guest') {
+  async function loadImagesFromIDB(scope = 'runtime', namespace = 'tavern-card') {
     try {
       const db = await openImageDB();
       const tx = db.transaction(IMAGE_STORE, 'readonly');
@@ -820,7 +902,7 @@
       const [allKeys, allValues] = await Promise.all([allKeysPromise, allValuesPromise]);
       const images = {};
       const legacyImages = {};
-      const prefix = makeImageScopePrefix(scope, username);
+      const prefix = makeImageScopePrefix(scope, namespace);
       for (let i = 0; i < allKeys.length; i += 1) {
         const key = String(allKeys[i]);
         if (key.startsWith(prefix)) {
@@ -836,12 +918,12 @@
     }
   }
 
-  async function deleteImagesForScope(scope, username = state.auth?.username || 'guest') {
+  async function deleteImagesForScope(scope, namespace = 'tavern-card') {
     try {
       const db = await openImageDB();
       const tx = db.transaction(IMAGE_STORE, 'readwrite');
       const store = tx.objectStore(IMAGE_STORE);
-      const prefix = makeImageScopePrefix(scope, username);
+      const prefix = makeImageScopePrefix(scope, namespace);
       const completion = new Promise((resolve, reject) => {
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
@@ -893,7 +975,7 @@
         if (!imageScope) continue;
 
         // 先可靠写入图片，再把轻量数据写回 localStorage，避免迁移中断导致丢图。
-        await flushImagesToIDB(images, imageScope.scope, imageScope.username);
+        await flushImagesToIDB(images, imageScope.scope, imageScope.namespace);
         if (data?.runtime) {
           // 是存档包装格式 {savedAt, runtime}
           saveJson(key, { savedAt: data.savedAt, runtime });
@@ -993,7 +1075,7 @@
 
   function isPromptCooldownQueueableError(error) {
     const message = String(error?.message || '');
-    return message.includes('同一账号发送 prompt 需要等待')
+    return message.includes('发送 prompt 需要等待')
       || message.includes('Too Many Requests')
       || message.includes('RESOURCE_EXHAUSTED')
       || message.includes('rate limit')
@@ -1020,6 +1102,53 @@
 
   function imagePartToDataUrl(imagePart) {
     return `data:${imagePart.mimeType || 'image/png'};base64,${imagePart.data}`;
+  }
+
+  async function uploadGeneratedImageDataUrl(dataUrl, fileName) {
+    const match = String(dataUrl || '').match(/^data:([^;,]+);base64,(.+)$/s);
+    if (!match) throw new Error('生成图片格式无效，无法保存到酒馆。');
+    const result = await postJson('api/card-images/upload', {
+      mimeType: match[1],
+      data: match[2],
+      fileName
+    });
+    if (!result?.url) throw new Error('酒馆没有返回图片保存地址。');
+    return result.url;
+  }
+
+  async function migrateRuntimeDataImagesToServer(runtime) {
+    const uploaded = new Map();
+    let changed = false;
+    let failed = false;
+    const migrateField = async (owner, key, prefix) => {
+      const dataUrl = String(owner?.[key] || '');
+      if (!dataUrl.startsWith('data:')) return;
+      try {
+        let url = uploaded.get(dataUrl);
+        if (!url) {
+          url = await uploadGeneratedImageDataUrl(
+            dataUrl,
+            `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+          );
+          uploaded.set(dataUrl, url);
+        }
+        owner[key] = url;
+        changed = true;
+      } catch (error) {
+        failed = true;
+        console.error('旧图片迁移到酒馆服务器失败。', error);
+      }
+    };
+
+    for (const character of runtime?.characters || []) {
+      await migrateField(character, 'avatarOriginalUrl', 'legacy-avatar-original');
+      await migrateField(character, 'avatarUrl', 'legacy-avatar-display');
+    }
+    for (const outfit of runtime?.outfits || []) {
+      await migrateField(outfit, 'imageOriginalUrl', 'legacy-outfit-original');
+      await migrateField(outfit, 'imageUrl', 'legacy-outfit-display');
+    }
+    return { changed, failed };
   }
 
   function getCharacterDisplayAvatarUrl(character) {
@@ -1554,17 +1683,7 @@
 
   async function refreshAiSettings() {
     const result = await requestJson('api/ai-settings');
-    const serverSettings = normalizeServerAiSettings(result?.settings || {});
-    if (isAdminUser() && !serverSettings.configured) {
-      const legacySettings = loadAiSettings();
-      state.aiSettings = {
-        ...serverSettings,
-        ...legacySettings,
-        configured: false
-      };
-      return state.aiSettings;
-    }
-    state.aiSettings = serverSettings;
+    state.aiSettings = normalizeServerAiSettings(result?.settings || {});
     return state.aiSettings;
   }
 
@@ -2038,31 +2157,6 @@
     });
   }
 
-  async function ensureAccountValidForAi() {
-    if (!state.auth?.authenticated) {
-      await handleLogout();
-      throw new Error('登录态已失效，请重新登录。');
-    }
-    try {
-      const status = await requestJson('api/auth/status');
-      if (!status.authenticated) {
-        await handleLogout();
-        throw new Error('账号不存在或已被移除，已强制登出。');
-      }
-      if (status.isBlocked) {
-        await handleLogout();
-        throw new Error('账号已被拉黑，已强制登出。');
-      }
-      state.auth = status;
-    } catch (error) {
-      if (error.status === 401 || error.status === 404) {
-        await handleLogout();
-        throw new Error('登录态已失效，请重新登录。');
-      }
-      throw error;
-    }
-  }
-
   async function executeAiRequest(label, endpoint, payload, options = {}) {
     if (AI_DISABLED) {
       const loadingMsg = options.message || `正在等待 AI 完成：${label}`;
@@ -2079,7 +2173,6 @@
       recordAiSuccess(buildLoggedPrompt(payload), mockOutput, label, nowIso(), nowIso());
       return mockOutput;
     }
-    await ensureAccountValidForAi();
     const shouldBlock = options.blocking !== false;
     const sentAt = nowIso();
     const loggedPrompt = buildLoggedPrompt(payload);
@@ -4311,7 +4404,19 @@ ${promptContextLines.join('\n')}`;
   async function queueCharacterAvatarGeneration(characterId) {
     const character = state.runtime?.characters.find((item) => item.id === characterId);
     if (!character) {
-      return;
+      return false;
+    }
+
+    const imageBridge = getTavernBridge();
+    if (typeof imageBridge?.getImageGeneratorStatus === 'function') {
+      const imageStatus = await imageBridge.getImageGeneratorStatus();
+      if (!imageStatus?.ready) {
+        character.avatarStatus = 'failed';
+        saveCurrentRuntime();
+        render();
+        setStatus(`${imageStatus?.message || '生图插件尚未就绪。'} 你可以继续游戏，配置完成后再点“重新生成头像”。`, 'warning');
+        return false;
+      }
     }
 
     try {
@@ -4320,7 +4425,7 @@ ${promptContextLines.join('\n')}`;
       character.avatarStatus = 'failed';
       saveCurrentRuntime();
       render();
-      return;
+      return false;
     }
 
     if (state.timers.avatarJobs.has(characterId)) {
@@ -4344,7 +4449,7 @@ ${promptContextLines.join('\n')}`;
 
         try {
           const payload = buildAiPayload(buildBackgroundAvatarPrompt(freshCharacter), {
-            modelId: 'gemini-3.1-flash-image-preview',
+            modelId: 'gemini-3.1-flash-image',
             options: {
               systemInstruction: '',
               temperature: 1,
@@ -4363,13 +4468,20 @@ ${promptContextLines.join('\n')}`;
           const result = await executeAiRequest('角色头像生成', 'api/generate', payload, { blocking: false });
           const image = result.output?.imageParts?.[0];
           if (image?.data) {
-            const originalUrl = imagePartToDataUrl(image);
-            freshCharacter.avatarOriginalUrl = originalUrl;
+            const originalDataUrl = imagePartToDataUrl(image);
+            let displayDataUrl = originalDataUrl;
             try {
-              freshCharacter.avatarUrl = await resizeImageToAvatarDataUrl(image);
+              displayDataUrl = await resizeImageToAvatarDataUrl(image);
             } catch (error) {
-              freshCharacter.avatarUrl = originalUrl;
+              // 缩略图失败时仍保存并显示原图。
             }
+            const uploadStamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            const originalUrl = await uploadGeneratedImageDataUrl(originalDataUrl, `avatar-${uploadStamp}-original`);
+            const displayUrl = displayDataUrl === originalDataUrl
+              ? originalUrl
+              : await uploadGeneratedImageDataUrl(displayDataUrl, `avatar-${uploadStamp}-display`);
+            freshCharacter.avatarOriginalUrl = originalUrl;
+            freshCharacter.avatarUrl = displayUrl;
             freshCharacter.avatarStatus = 'ready';
           } else {
             freshCharacter.avatarStatus = 'failed';
@@ -4383,6 +4495,7 @@ ${promptContextLines.join('\n')}`;
     }, 100);
 
     state.timers.avatarJobs.set(characterId, timerId);
+    return true;
   }
 
   async function queueOutfitImageGeneration(outfitId) {
@@ -4421,7 +4534,7 @@ ${promptContextLines.join('\n')}`;
 
         try {
           const payload = buildAiPayload(buildOutfitImagePrompt(freshOutfit.description), {
-            modelId: 'gemini-3.1-flash-image-preview',
+            modelId: 'gemini-3.1-flash-image',
             options: {
               systemInstruction: '',
               temperature: 1,
@@ -4440,8 +4553,20 @@ ${promptContextLines.join('\n')}`;
           const result = await executeAiRequest('礼服图片生成', 'api/generate', payload, { blocking: false });
           const image = result.output?.imageParts?.[0];
           if (image?.data) {
-            freshOutfit.imageOriginalUrl = imagePartToDataUrl(image);
-            freshOutfit.imageUrl = await resizeImageToOutfitDataUrl(image);
+            const originalDataUrl = imagePartToDataUrl(image);
+            let displayDataUrl = originalDataUrl;
+            try {
+              displayDataUrl = await resizeImageToOutfitDataUrl(image);
+            } catch (error) {
+              // 缩略图失败时仍保存并显示原图。
+            }
+            const uploadStamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+            const originalUrl = await uploadGeneratedImageDataUrl(originalDataUrl, `outfit-${uploadStamp}-original`);
+            const displayUrl = displayDataUrl === originalDataUrl
+              ? originalUrl
+              : await uploadGeneratedImageDataUrl(displayDataUrl, `outfit-${uploadStamp}-display`);
+            freshOutfit.imageOriginalUrl = originalUrl;
+            freshOutfit.imageUrl = displayUrl;
             freshOutfit.imageStatus = 'ready';
           } else {
             freshOutfit.imageStatus = 'failed';
@@ -4611,18 +4736,8 @@ ${promptContextLines.join('\n')}`;
       await waitForChapterModal(chapterId);
     } catch (error) {
       if (/AI Studio API Key|Vertex 服务账号 JSON|Vertex Project ID|AI 连接尚未配置/.test(String(error.message || ''))) {
-        if (isAdminUser()) {
-          await refreshAiSettings();
-          state.aiActivity = loadAiActivity();
-          openModal({
-            type: 'ai-settings',
-            title: 'AI 设定'
-          });
-          setStatus('请先完成 AI 连接设置，再点击“前往报到”。', 'warning');
-        } else {
-          openErrorRetryModal('剧情生成失败', 'AI 连接尚未配置，请联系管理员处理后再重试。', runFirstOpeningCeremony);
-          setStatus('AI 连接尚未配置，请联系管理员。', 'error');
-        }
+        openErrorRetryModal('剧情生成失败', '文字生成连接尚未配置，请检查酒馆当前连接或切换文字生成预设后再重试。', runFirstOpeningCeremony);
+        setStatus('文字生成连接尚未配置。', 'error');
         return;
       }
       openErrorRetryModal('剧情生成失败', formatAiErrorMessage(error), runFirstOpeningCeremony);
@@ -6292,7 +6407,7 @@ ${promptContextLines.join('\n')}`;
           courseId: null,
           courseName: '创业企划书',
           isThesis: false,
-          requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260916203357', name: '用户抱怨' }]
+          requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260916224350', name: '用户抱怨' }]
         }];
       } else {
         refreshMergeTasks();
@@ -6765,37 +6880,6 @@ ${promptContextLines.join('\n')}`;
     return `<div class="merge-game-wrapper"><div class="merge-game-container">${renderMergeGameContent()}</div></div>`;
   }
 
-  function renderLogin() {
-    return `
-      <div class="page">
-        <div class="panel section auth-layout">
-          <div class="topbar">
-            <div>
-              <h1>登录</h1>
-              <p class="subtle">请输入管理员创建的用户名和密码。首次登录会把你输入的密码写入账号。</p>
-            </div>
-          </div>
-          <form id="loginForm" class="grid-2">
-            <div class="field">
-              <label for="loginUsername">用户名</label>
-              <input id="loginUsername" name="username" autocomplete="username" placeholder="请输入用户名" />
-            </div>
-            <div class="field">
-              <label for="loginPassword">密码</label>
-              <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" />
-            </div>
-            <div class="inline-actions">
-              <button class="primary" type="submit">登录 / 初始化密码</button>
-            </div>
-          </form>
-        </div>
-        <div class="panel section">
-          <div class="status ${state.ui.statusTone ? state.ui.statusTone : ''}">${escapeHtml(state.ui.status)}</div>
-        </div>
-      </div>
-    `;
-  }
-
   function renderIntro() {
     if (!state.runtime) {
       return '';
@@ -6822,7 +6906,7 @@ ${promptContextLines.join('\n')}`;
     return `
       <div class="panel section">
         <h2>入学申请书</h2>
-        <p class="subtle">没有检测到当前账号的运行中数据或存档，请先创建主角。</p>
+        <p class="subtle">没有检测到运行中数据或存档，请先创建主角。</p>
         <form id="applicationForm" class="grid-2" style="margin-top:18px;">
           <div class="field">
             <label for="playerName">姓名（限四字）</label>
@@ -6887,7 +6971,7 @@ ${promptContextLines.join('\n')}`;
               : ''}
           </div>
         </div>
-        ${isAdminUser() && state.ui.status ? `<div class="schedule-meta-note"><div class="status ${state.ui.statusTone || ''}" style="white-space:pre-wrap;font-size:13px;">${escapeHtml(state.ui.status)}</div></div>` : ''}
+        ${state.ui.status ? `<div class="schedule-meta-note"><div class="status ${state.ui.statusTone || ''}" style="white-space:pre-wrap;font-size:13px;">${escapeHtml(state.ui.status)}</div></div>` : ''}
         <div class="schedule-week-layout">
           ${weekRows.map((row, rowIndex) => `
             <div class="schedule-week-row ${rowIndex === 0 ? 'schedule-week-row-three' : 'schedule-week-row-four'}">
@@ -7019,9 +7103,8 @@ ${promptContextLines.join('\n')}`;
             <h2></h2>
           </div>
           <div class="inline-actions">
-            <button class="secondary" data-action="open-image-settings">设定</button>
+            <button class="secondary" data-action="open-image-settings">生图设定</button>
             <button class="danger" data-action="restart-runtime">重开</button>
-            <button class="secondary" data-action="logout">退出登录</button>
           </div>
         </div>
         <div class="inline-actions" style="margin-top:18px;">
@@ -7123,10 +7206,6 @@ ${promptContextLines.join('\n')}`;
             <div class="modal-body">
               <div class="story-content">${formatStoryContentHtml(modal.chapter.content)}</div>
               <div class="modal-actions">
-                ${isAdminUser() ? `
-                  <button class="secondary" data-action="show-chapter-prompt" data-chapter-id="${modal.chapter.id}">prompt json</button>
-                  <button class="secondary" data-action="show-chapter-raw-response" data-chapter-id="${modal.chapter.id}">ai返回内容</button>
-                ` : ''}
                 <button class="primary" data-action="close-modal">确定</button>
               </div>
             </div>
@@ -7278,7 +7357,6 @@ ${promptContextLines.join('\n')}`;
               <div class="modal-actions inline-actions">
                 <button class="primary" data-action="retry-modal">重试</button>
                 ${canRetryWithBuiltInPreset ? '<button class="secondary" data-action="retry-with-builtin-preset">改用游戏内置预设并重试</button>' : ''}
-                ${isAdminUser() ? '<button class="secondary" data-action="open-ai-settings-from-error">AI连接</button>' : ''}
               </div>
             </div>
           </div>
@@ -7415,9 +7493,8 @@ ${promptContextLines.join('\n')}`;
     }
 
     if (modal.type === 'ai-settings') {
-      if (!isAdminUser()) {
-        return '';
-      }
+      return '';
+      /* istanbul ignore next -- legacy web-only panel is unreachable in the role card */
       const settings = state.aiSettings || getDefaultAiSettings();
       const activity = state.aiActivity || loadAiActivity();
       return `
@@ -7459,7 +7536,7 @@ ${promptContextLines.join('\n')}`;
                   <textarea id="aiServiceAccountJson" placeholder="使用 Vertex 时填写">${escapeHtml(settings.serviceAccountJson)}</textarea>
                 </div>
               </div>
-              <div class="muted-box">${settings.configured ? '当前 AI 设置已保存在服务器，所有账号共用这套配置。' : '当前服务器还没有可用的 AI 设置。管理员保存后，所有账号都会共用这套配置。'}</div>
+              <div class="muted-box">${settings.configured ? '当前 AI 设置已保存。' : '当前没有可用的 AI 设置。'}</div>
               <div class="inline-actions ai-settings-actions">
                 <button class="primary" data-action="save-ai-settings">保存设定</button>
                 <button class="secondary" data-action="test-ai-settings">测试连接</button>
@@ -7595,7 +7672,7 @@ ${promptContextLines.join('\n')}`;
       return;
     }
 
-    app.innerHTML = (state.auth?.authenticated ? renderMain() : renderLogin()) + renderModal() + renderAiLoading();
+    app.innerHTML = renderMain() + renderModal() + renderAiLoading();
     if (state.ui.modal?.type === 'chapter' && typeof window !== 'undefined') {
       window.requestAnimationFrame(() => {
         const modalBody = document.querySelector('.modal-body');
@@ -7627,11 +7704,6 @@ ${promptContextLines.join('\n')}`;
     `;
   }
 
-  async function refreshAuthStatus() {
-    state.auth = await requestJson('api/auth/status');
-    return state.auth;
-  }
-
   async function ensureBootstrap() {
     const [bootstrap] = await Promise.all([
       requestJson(GAME_BOOTSTRAP_URL),
@@ -7643,16 +7715,26 @@ ${promptContextLines.join('\n')}`;
     }
   }
 
-  async function initializeAppAfterLogin() {
+  async function initializeGame() {
     await ensureBootstrap();
     await refreshAiSettings();
     state.aiActivity = loadAiActivity();
+    await hydrateChatStorage();
     await migrateImagesToIDB();
     state.runtime = loadPreferredRuntime();
     state.mergeGame = null;
     if (state.runtime) {
       const images = await loadImagesFromIDB('runtime');
       restoreRuntimeImages(state.runtime, images);
+      const imageMigration = await migrateRuntimeDataImagesToServer(state.runtime);
+      if (imageMigration.changed) {
+        saveCurrentRuntime();
+        await persistChatStorage();
+      }
+      if (imageMigration.failed) {
+        state.ui.status = '部分旧图片未能迁移到酒馆服务器；本机仍会保留这些图片，可稍后重新打开游戏再试。';
+        state.ui.statusTone = 'error';
+      }
       if (syncSchedulePlansWithBootstrap(state.runtime)) {
         saveCurrentRuntime();
       }
@@ -7689,41 +7771,13 @@ ${promptContextLines.join('\n')}`;
     state.ui.loading = true;
     render();
     try {
-      await refreshAuthStatus();
-      if (state.auth.authenticated) {
-        await initializeAppAfterLogin();
-        setStatus('登录状态已恢复。', 'success');
-      }
+      await initializeGame();
     } catch (error) {
       setStatus(error.message || '初始化失败。', 'error');
     } finally {
       state.ui.loading = false;
       render();
     }
-  }
-
-  async function submitLogin(form) {
-    const username = String(form.get('username') || '').trim();
-    const password = String(form.get('password') || '');
-    if (!username || !password) {
-      throw new Error('请输入用户名和密码。');
-    }
-    const result = await postJson('api/auth/login', { username, password });
-    state.auth = result;
-    await initializeAppAfterLogin();
-    setStatus(result.firstLogin ? `账号 ${result.username} 已设置初始密码并登录。` : '登录成功。', 'success');
-  }
-
-  async function handleLogout() {
-    state.auth = await postJson('api/auth/logout', {});
-    state.bootstrap = null;
-    state.runtime = null;
-    state.mergeGame = null;
-    state.aiSettings = null;
-    clearChapterModalState();
-    state.ui.page = 'schedule';
-    state.ui.selectedDate = null;
-    setStatus('已退出登录。', 'warning');
   }
 
   function submitApplication(form) {
@@ -7819,7 +7873,7 @@ ${promptContextLines.join('\n')}`;
     const settings = validateAiSettings(collectAiModalSettings(), { requireCredentials: true });
     const saved = await postJson('api/admin/ai-settings', settings);
     state.aiSettings = normalizeServerAiSettings(saved?.settings || settings);
-    setStatus('AI 设定已保存到服务器，所有账号会共用这套配置。', 'success');
+    setStatus('AI 设定已保存。', 'success');
     closeModal();
   }
 
@@ -7870,9 +7924,7 @@ ${promptContextLines.join('\n')}`;
     event.preventDefault();
     const form = new FormData(event.target);
     try {
-      if (event.target.id === 'loginForm') {
-        await submitLogin(form);
-      } else if (event.target.id === 'applicationForm') {
+      if (event.target.id === 'applicationForm') {
         submitApplication(form);
       }
     } catch (error) {
@@ -7889,9 +7941,6 @@ ${promptContextLines.join('\n')}`;
     const { action } = button.dataset;
     try {
       switch (action) {
-        case 'logout':
-          await handleLogout();
-          break;
         case 'switch-page':
           setCurrentPage(button.dataset.page);
           return;
@@ -8082,38 +8131,6 @@ ${promptContextLines.join('\n')}`;
             render();
           });
           return;
-        case 'open-ai-settings':
-          if (!isAdminUser()) {
-            throw new Error('只有管理员可以修改 AI 设定。');
-          }
-          await refreshAiSettings();
-          state.aiActivity = loadAiActivity();
-          openModal({ type: 'ai-settings', title: 'AI 设定' });
-          return;
-        case 'open-ai-settings-from-error':
-          if (!isAdminUser()) {
-            throw new Error('只有管理员可以修改 AI 设定。');
-          }
-          await refreshAiSettings();
-          state.aiActivity = loadAiActivity();
-          openModal({
-            type: 'ai-settings',
-            title: 'AI 设定',
-            returnToModal: state.ui.modal
-          });
-          return;
-        case 'save-ai-settings':
-          if (!isAdminUser()) {
-            throw new Error('只有管理员可以修改 AI 设定。');
-          }
-          await saveAiSettingsFromModal();
-          return;
-        case 'test-ai-settings':
-          if (!isAdminUser()) {
-            throw new Error('只有管理员可以测试 AI 设定。');
-          }
-          await testAiSettingsFromModal();
-          return;
         case 'invite-character':
           handleInvite(button.dataset.characterId);
           return;
@@ -8124,8 +8141,9 @@ ${promptContextLines.join('\n')}`;
           openOutfitImagePreview(button.dataset.outfitId);
           return;
         case 'retry-avatar':
-          await queueCharacterAvatarGeneration(button.dataset.characterId);
-          setStatus('已重新提交头像生成请求。', 'success');
+          if (await queueCharacterAvatarGeneration(button.dataset.characterId)) {
+            setStatus('已重新提交头像生成请求。', 'success');
+          }
           return;
         case 'pick-date':
           if (state.ui.modal?.type === 'date-picker') {

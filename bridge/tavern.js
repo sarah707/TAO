@@ -1,32 +1,76 @@
-import { generateImage, validateImageConfig } from './image-providers.js?build=20260916203357';
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916203357';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916224350';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260916203357';
+} from './worldbook.js?build=20260916224350';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
-export const IMAGE_CONFIG_KEY = 'noble-school.image-config.v1';
+export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
 
-function getStorage(hostWindow) {
-  return hostWindow.localStorage;
+function getHelper(apiWindow = globalThis) {
+  return apiWindow?.TavernHelper || apiWindow;
 }
 
-export function loadImageConfig(hostWindow) {
+
+function getMiniGameImageApi(hostWindow, apiWindow) {
+  return hostWindow?.STMiniGameImage || apiWindow?.STMiniGameImage || null;
+}
+
+function getHostContext(hostWindow, apiWindow) {
+  return hostWindow?.SillyTavern?.getContext?.()
+    || apiWindow?.SillyTavern?.getContext?.()
+    || null;
+}
+
+function normalizeServerImagePath(value, hostWindow) {
+  const raw = String(value || '').trim();
+  if (!raw) return raw;
   try {
-    const raw = getStorage(hostWindow).getItem(IMAGE_CONFIG_KEY);
-    return raw ? validateImageConfig(JSON.parse(raw)) : null;
+    const url = new URL(raw, hostWindow.location?.origin || hostWindow.location?.href);
+    if (url.pathname.includes('/user/images/')) {
+      return `${url.pathname}${url.search}${url.hash}`;
+    }
   } catch {
-    return null;
+    if (raw.includes('/user/images/')) {
+      return raw.slice(raw.indexOf('/user/images/'));
+    }
+  }
+  return raw;
+}
+
+function resolveServerImageUrl(value, hostWindow) {
+  const raw = String(value || '').trim();
+  if (!raw.includes('/user/images/')) return raw;
+  const path = raw.slice(raw.indexOf('/user/images/'));
+  try {
+    return new URL(path, hostWindow.location?.origin || hostWindow.location?.href).href;
+  } catch {
+    return raw;
   }
 }
 
-export function saveImageConfig(hostWindow, config) {
-  const normalized = validateImageConfig(config);
-  getStorage(hostWindow).setItem(IMAGE_CONFIG_KEY, JSON.stringify(normalized));
-  return normalized;
+function mapStoredImageUrls(value, mapper) {
+  if (Array.isArray(value)) return value.map((item) => mapStoredImageUrls(item, mapper));
+  if (!value || typeof value !== 'object') return value;
+  const result = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (['avatarUrl', 'avatarOriginalUrl', 'imageUrl', 'imageOriginalUrl'].includes(key) && typeof item === 'string') {
+      result[key] = mapper(item);
+    } else {
+      result[key] = mapStoredImageUrls(item, mapper);
+    }
+  }
+  return result;
+}
+
+function sanitizeUploadName(value) {
+  return String(value || `image-${Date.now()}`)
+    .replace(/\.[a-z0-9]+$/i, '')
+    .replace(/[^a-zA-Z0-9_-]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80) || `image-${Date.now()}`;
 }
 
 function buildOrderedPrompts(payload) {
@@ -111,29 +155,124 @@ async function appendFullTextResponseToChat(helper, text) {
   });
 }
 
-export function createTavernBridge({ hostWindow, apiWindow = globalThis, getImageConfig, onOpenImageSettings = null }) {
+export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
   const helper = apiWindow.TavernHelper || apiWindow;
   const getCurrentChatId = () => String(
     hostWindow?.SillyTavern?.getCurrentChatId?.()
       || apiWindow?.SillyTavern?.getCurrentChatId?.()
+      || getHostContext(hostWindow, apiWindow)?.chatId
+      || helper?.getCurrentChatId?.()
       || ''
   );
   return {
     version: 1,
+    async loadGameStorage() {
+      if (typeof helper?.getVariables !== 'function') {
+        throw new Error('当前酒馆助手缺少对话变量读取接口，无法读取跨设备存档；请更新并启用酒馆助手。');
+      }
+      const variables = await helper.getVariables({ type: 'chat' });
+      const stored = variables?.[CHAT_STORAGE_VARIABLE];
+      return {
+        chatId: getCurrentChatId(),
+        data: stored && typeof stored === 'object'
+          ? mapStoredImageUrls(stored, (value) => resolveServerImageUrl(value, hostWindow))
+          : null
+      };
+    },
+    async saveGameStorage(data, expectedChatId = '') {
+      if (typeof helper?.insertOrAssignVariables !== 'function') {
+        throw new Error('当前酒馆助手缺少对话变量写入接口，无法保存跨设备存档；请更新并启用酒馆助手。');
+      }
+      const currentChatId = getCurrentChatId();
+      if (expectedChatId && currentChatId && String(expectedChatId) !== currentChatId) {
+        throw new Error('当前对话已经切换，已取消上一段对话的延迟存档写入。');
+      }
+      const stored = data && typeof data === 'object'
+        ? mapStoredImageUrls(data, (value) => normalizeServerImagePath(value, hostWindow))
+        : null;
+      await helper.insertOrAssignVariables({ [CHAT_STORAGE_VARIABLE]: stored }, { type: 'chat' });
+      return { ok: true, chatId: currentChatId };
+    },
+    async uploadImage({ data, mimeType, fileName } = {}) {
+      const base64Data = String(data || '').replace(/^data:[^;,]+;base64,/, '');
+      if (!base64Data) throw new Error('待保存的图片数据为空。');
+      const normalizedMimeType = String(mimeType || 'image/png').toLowerCase();
+      const format = normalizedMimeType.includes('jpeg') || normalizedMimeType.includes('jpg')
+        ? 'jpg'
+        : normalizedMimeType.includes('webp')
+          ? 'webp'
+          : 'png';
+      const context = getHostContext(hostWindow, apiWindow);
+      if (typeof context?.getRequestHeaders !== 'function') {
+        throw new Error('当前酒馆没有提供图片上传鉴权接口，请更新 SillyTavern。');
+      }
+      const endpoint = new URL('/api/images/upload', hostWindow.location?.origin || hostWindow.location?.href).href;
+      const response = await hostWindow.fetch(endpoint, {
+        method: 'POST',
+        headers: context.getRequestHeaders(),
+        body: JSON.stringify({
+          image: base64Data,
+          format,
+          ch_name: 'noble-school',
+          filename: sanitizeUploadName(fileName)
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result?.path) {
+        throw new Error(result?.error || `图片保存到酒馆失败（HTTP ${response.status}）。`);
+      }
+      const path = normalizeServerImagePath(result.path, hostWindow);
+      return { path, url: resolveServerImageUrl(path, hostWindow) };
+    },
     openImageSettings() {
-      if (typeof onOpenImageSettings !== 'function') throw new Error('生图设置界面尚未就绪。');
-      onOpenImageSettings();
+      const api = getMiniGameImageApi(hostWindow, apiWindow);
+      if (typeof api?.openSettings !== 'function') {
+        hostWindow.open?.('https://github.com/sarah707/SillyTavern-MiniGame-Image-API', '_blank', 'noopener,noreferrer');
+        return false;
+      }
+      hostWindow.nobleSchoolOverlay?.minimize?.();
+      return api.openSettings();
+    },
+    async getImageGeneratorStatus() {
+      const api = getMiniGameImageApi(hostWindow, apiWindow);
+      if (!api || typeof api.getStatus !== 'function') {
+        return {
+          installed: false,
+          configured: false,
+          ready: false,
+          message: '未检测到“小游戏轻度生图插件”。'
+        };
+      }
+      try {
+        return await api.getStatus();
+      } catch (error) {
+        return {
+          installed: true,
+          configured: false,
+          ready: false,
+          message: error.message || '生图插件状态检测失败。'
+        };
+      }
     },
     async request(payload) {
       if (isImagePayload(payload)) {
-        const image = await generateImage(getImageConfig(), {
+        const api = getMiniGameImageApi(hostWindow, apiWindow);
+        if (!api || typeof api.generate !== 'function') {
+          throw new Error('未安装“小游戏轻度生图插件”，已跳过本次图片生成。');
+        }
+        const generated = await api.generate({
+          provider: 'gemini',
+          model: String(payload?.modelId || 'gemini-3.1-flash-image'),
           prompt: payload?.prompt,
           aspectRatio: '1:1',
-          size: '1024x1024'
+          imageSize: '1K',
+          saveToSillyTavern: false
         });
+        const image = generated?.images?.[0];
+        if (!image?.data) throw new Error('生图插件没有返回图片数据。');
         return {
           output: { textParts: [], thoughtParts: [], imageParts: [{ mimeType: image.mimeType, data: image.data }] },
-          raw: image.raw
+          raw: generated.raw
         };
       }
       const prompt = String(payload?.prompt || '').trim();
@@ -203,13 +342,6 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, getImag
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
         raw: { fullText }
       };
-    },
-    async testImage(config) {
-      const image = await generateImage(config, {
-        prompt: 'A single pink camellia on a clean ivory background, elegant game UI asset, no text',
-        aspectRatio: '1:1'
-      });
-      return { mimeType: image.mimeType, data: image.data };
     },
     async syncWorldbook(runtime, previousSync = {}, options = {}) {
       if (typeof helper.getOrCreateChatWorldbook !== 'function'

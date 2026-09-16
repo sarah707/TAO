@@ -169,17 +169,17 @@
     };
   }
 
-  function makeImageScopePrefix(scope, username = 'guest') {
-    return `${IMAGE_KEY_VERSION}|${encodeURIComponent(username)}|${scope}|`;
+  function makeImageScopePrefix(scope, namespace = 'tavern-card') {
+    return `${IMAGE_KEY_VERSION}|${encodeURIComponent(namespace)}|${scope}|`;
   }
 
   function getImageScopeFromSaveKey(key) {
     let match = String(key || '').match(/^games0\.runtime\.([A-Za-z0-9_-]+)$/);
-    if (match) return { scope: 'runtime', username: match[1] };
+    if (match) return { scope: 'runtime', namespace: match[1] };
     match = String(key || '').match(/^games0\.save\.auto\.([A-Za-z0-9_-]+)$/);
-    if (match) return { scope: 'auto', username: match[1] };
+    if (match) return { scope: 'auto', namespace: match[1] };
     match = String(key || '').match(/^games0\.save\.(slot[1-3])\.([A-Za-z0-9_-]+)$/);
-    return match ? { scope: match[1], username: match[2] } : null;
+    return match ? { scope: match[1], namespace: match[2] } : null;
   }
 
   function migrateRuntimeVersion(candidate, currentVersion = 1) {

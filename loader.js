@@ -1,14 +1,9 @@
-import { getDefaultImageConfig, normalizeImageConfig } from './bridge/image-providers.js?build=20260916203357';
-import {
-  BRIDGE_KEY,
-  createTavernBridge,
-  loadImageConfig,
-  saveImageConfig
-} from './bridge/tavern.js?build=20260916203357';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260916224350';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
 const ROOT_ID = 'noble-school-root';
+const IMAGE_EXTENSION_URL = 'https://github.com/sarah707/SillyTavern-MiniGame-Image-API';
 
 const hostWindow = (() => {
   try {
@@ -52,17 +47,23 @@ function overlayCss() {
 #${OVERLAY_ID} .noble-school-help { display:block; margin-top:.3rem; color:#806d74; font-size:.82rem; line-height:1.45; }
 #${OVERLAY_ID} .noble-school-grid { display:grid; grid-template-columns:1fr 1fr; gap:0 1rem; }
 #${OVERLAY_ID} .noble-school-actions { display:flex; flex-wrap:wrap; gap:.65rem; margin-top:1.2rem; }
-#${OVERLAY_ID} .noble-school-button { border:0; border-radius:8px; padding:.7rem 1rem; background:#f8d7da; color:#3b2930; font:inherit; font-weight:700; cursor:pointer; }
-#${OVERLAY_ID} .noble-school-button.secondary { background:#f4eef0; }
-#${OVERLAY_ID} .noble-school-button:disabled { cursor:wait; opacity:.6; }
+#${OVERLAY_ID} .noble-school-button { border:0; border-radius:16px; padding:12px 16px; color:#fff; background:linear-gradient(135deg,#a78bfa,#8b5cf6); font:inherit; font-weight:700; cursor:pointer; transition:transform .15s ease,opacity .15s ease; }
+#${OVERLAY_ID} .noble-school-button:hover { transform:translateY(-1px); }
+#${OVERLAY_ID} .noble-school-button.secondary { color:#342a55; background:rgba(255,255,255,.95); border:1px solid rgba(151,125,211,.22); }
+#${OVERLAY_ID} .noble-school-button:disabled { cursor:wait; opacity:.55; transform:none; }
 #${OVERLAY_ID} .noble-school-status { min-height:1.5rem; margin-top:.9rem; color:#825566; white-space:pre-wrap; }
 #${OVERLAY_ID} .noble-school-test-image { display:none; max-width:180px; max-height:180px; margin:1rem auto 0; border-radius:10px; object-fit:cover; }
 #${OVERLAY_ID} .noble-school-test-image.visible { display:block; }
-#${OVERLAY_ID} .noble-school-minimized { position:fixed; left:0; right:0; bottom:max(8px,calc(24px + env(safe-area-inset-bottom))); width:min(140px,calc(100dvw - 16px)); height:min(96px,calc(100dvh - 16px)); margin-left:auto; margin-right:auto; padding:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#000; background:#f8d7da; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,.2); pointer-events:all; cursor:grab; user-select:none; }
+#${OVERLAY_ID} .noble-school-plugin-notice { display:flex; min-height:100%; flex-direction:column; }
+#${OVERLAY_ID} .noble-school-plugin-notice-main { flex:1; display:flex; flex-direction:column; justify-content:center; padding:1rem 0 2rem; }
+#${OVERLAY_ID} .noble-school-plugin-notice code { overflow-wrap:anywhere; color:#4a377d; }
+#${OVERLAY_ID} .noble-school-plugin-link { color:#6d4fc2; font-weight:650; text-decoration:none; }
+#${OVERLAY_ID} .noble-school-plugin-link:hover { text-decoration:underline; }
+#${OVERLAY_ID} .noble-school-minimized { position:fixed; left:0; right:0; bottom:max(8px,calc(24px + env(safe-area-inset-bottom))); width:min(140px,calc(100dvw - 16px)); height:min(96px,calc(100dvh - 16px)); margin-left:auto; margin-right:auto; padding:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#4a377d; background:linear-gradient(180deg,rgba(251,248,255,.98),rgba(251,248,255,.8),rgba(247,243,255,.96)); border-radius:12px; box-shadow:0 6px 16px rgba(83,58,140,.2); pointer-events:all; cursor:grab; user-select:none; }
 #${OVERLAY_ID} .noble-school-minimized[hidden], #${OVERLAY_ID} .noble-school-card[hidden] { display:none!important; }
 #${OVERLAY_ID} .noble-school-minimized strong { font-size:.92rem; text-align:center; }
 #${OVERLAY_ID} .noble-school-minimized button { border:0; border-radius:6px; padding:6px 12px; background:#fff; box-shadow:0 3px 8px rgba(0,0,0,.15); font:inherit; font-size:.9rem; cursor:pointer; }
-#${OVERLAY_ID} .noble-school-minimized button:hover { background:#f5c6cb; }
+#${OVERLAY_ID} .noble-school-minimized button:hover { background:#ede9fe; }
 @media (max-width:576px), (max-height:560px) {
   #${OVERLAY_ID} #${ROOT_ID} { top:0; left:0; transform:none!important; width:100%; height:100%; padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left)); touch-action:auto; }
   #${OVERLAY_ID} .noble-school-card { width:100%; max-width:none; height:100%; max-height:none; margin:0; border-radius:clamp(0px,1.5vw,8px); }
@@ -116,87 +117,30 @@ function setupDrag(handle, target, getPosition, setPosition, excludedSelector, d
   return () => handle.removeEventListener('pointerdown', start);
 }
 
-function makeConfigMarkup(config, initial) {
-  const value = normalizeImageConfig(config || getDefaultImageConfig());
+function makePluginNoticeMarkup(status) {
+  const installed = Boolean(status?.installed);
+  const title = installed ? '生图插件尚未配置' : '可选生图插件未安装';
+  const message = installed
+    ? '已经检测到“小游戏轻度生图插件”，但还没有可用的专用 API Key。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。'
+    : '没有检测到“小游戏轻度生图插件”。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。';
   return `
-    <div class="noble-school-config">
+    <div class="noble-school-config noble-school-plugin-notice">
       <div class="noble-school-config-titlebar" data-overlay-drag-handle>
         <h1>贵族学院的特招生</h1>
         <button class="noble-school-title-minimize" type="button" data-overlay-action="minimize" title="最小化">—</button>
       </div>
-      <h2>${initial ? '开始前配置生图模型' : '生图模型配置'}</h2>
-      <p>文字剧情直接使用酒馆当前连接。这里仅设置角色头像和礼服图片，不会写入游戏存档或世界书。</p>
-      <form id="noble-school-image-form">
-        <div class="noble-school-grid">
-          <div class="noble-school-field">
-            <label for="noble-image-provider">接口类型</label>
-            <select id="noble-image-provider" name="provider">
-              <option value="gemini" ${value.provider === 'gemini' ? 'selected' : ''}>Gemini AI Studio（API Key）</option>
-              <option value="vertex" ${value.provider === 'vertex' ? 'selected' : ''}>Gemini Vertex AI（服务账号 JSON）</option>
-              <option value="openai" ${value.provider === 'openai' ? 'selected' : ''}>OpenAI Images 兼容</option>
-              <option value="stability" ${value.provider === 'stability' ? 'selected' : ''}>Stability AI</option>
-              <option value="a1111" ${value.provider === 'a1111' ? 'selected' : ''}>AUTOMATIC1111 WebUI</option>
-              <option value="bfl" ${value.provider === 'bfl' ? 'selected' : ''}>Black Forest Labs / FLUX</option>
-              <option value="comfyui" ${value.provider === 'comfyui' ? 'selected' : ''}>ComfyUI API 工作流</option>
-            </select>
-          </div>
-          <div class="noble-school-field" data-providers="gemini vertex openai a1111">
-            <label for="noble-image-model">生图模型</label>
-            <input id="noble-image-model" name="model" value="${escapeHtml(value.model)}" autocomplete="off" />
-            <small class="noble-school-help">A1111 留空时使用当前加载的 checkpoint。</small>
-          </div>
-        </div>
-        <div class="noble-school-field" data-providers="gemini vertex openai stability a1111 bfl comfyui">
-          <label for="noble-image-url">API 地址</label>
-          <input id="noble-image-url" name="apiUrl" value="${escapeHtml(value.apiUrl)}" autocomplete="off" />
-          <small class="noble-school-help" data-providers="vertex">Vertex 使用默认地址时，会根据 Location 自动选择 global 或区域端点。</small>
-        </div>
-        <div class="noble-school-field" data-providers="gemini openai stability a1111 bfl comfyui">
-          <label for="noble-image-key">API Key</label>
-          <input id="noble-image-key" name="apiKey" type="password" value="${escapeHtml(value.apiKey)}" autocomplete="off" />
-          <small class="noble-school-help">A1111、ComfyUI 本地无鉴权服务可留空；A1111 Basic Auth 可填写“用户名:密码”。</small>
-        </div>
-        <div class="noble-school-grid" data-providers="vertex">
-          <div class="noble-school-field">
-            <label for="noble-vertex-project">Vertex Project ID</label>
-            <input id="noble-vertex-project" name="projectId" value="${escapeHtml(value.projectId)}" autocomplete="off" placeholder="可从服务账号 JSON 自动读取" />
-          </div>
-          <div class="noble-school-field">
-            <label for="noble-vertex-location">Vertex Location</label>
-            <input id="noble-vertex-location" name="location" value="${escapeHtml(value.location)}" autocomplete="off" placeholder="global" />
-          </div>
-        </div>
-        <div class="noble-school-field" data-providers="vertex">
-          <label for="noble-vertex-service-account">Vertex 服务账号 JSON</label>
-          <textarea id="noble-vertex-service-account" name="serviceAccountJson" spellcheck="false" placeholder='粘贴包含 client_email、private_key 和 project_id 的完整 JSON'>${escapeHtml(value.serviceAccountJson)}</textarea>
-          <small class="noble-school-help">配置只保存在当前浏览器本地。建议使用专用服务账号，并仅授予调用 Vertex AI 所需权限。</small>
-        </div>
-        <div class="noble-school-field" data-providers="stability a1111 comfyui">
-          <label for="noble-image-negative">负面提示词</label>
-          <input id="noble-image-negative" name="negativePrompt" value="${escapeHtml(value.negativePrompt)}" autocomplete="off" />
-        </div>
-        <div class="noble-school-field" data-providers="a1111">
-          <label for="noble-image-steps">采样步数</label>
-          <input id="noble-image-steps" name="steps" type="number" min="1" max="150" value="${escapeHtml(value.steps)}" />
-        </div>
-        <div class="noble-school-field" data-providers="bfl">
-          <label for="noble-image-proxy">BFL 图片 CORS 代理</label>
-          <input id="noble-image-proxy" name="imageProxyUrl" value="${escapeHtml(value.imageProxyUrl)}" placeholder="https://example.com/image-proxy?url= 或含 {url}" autocomplete="off" />
-          <small class="noble-school-help">BFL 官方交付地址禁止浏览器跨域读取且图片十分钟失效。要存进游戏存档，必须填一个由玩家控制、能返回图片字节并允许 CORS 的代理。</small>
-        </div>
-        <div class="noble-school-field" data-providers="comfyui">
-          <label for="noble-image-workflow">ComfyUI API 格式工作流 JSON</label>
-          <textarea id="noble-image-workflow" name="workflowJson" spellcheck="false" placeholder='从 ComfyUI 导出 API 格式工作流；把正面提示文本写成 {{prompt}}'>${escapeHtml(value.workflowJson)}</textarea>
-          <small class="noble-school-help">支持占位符 {{prompt}}、{{negative_prompt}}、{{seed}}、{{width}}、{{height}}；工作流需包含 SaveImage 或 PreviewImage 输出。</small>
-        </div>
+      <div class="noble-school-plugin-notice-main">
+        <h2>${title}</h2>
+        <p>${message}</p>
+        <p>安装后刷新一次酒馆；游玩途中安装也没关系，刷新后点击角色头像下方的“重新生成头像”即可使用。</p>
+        <p><a class="noble-school-plugin-link" href="${IMAGE_EXTENSION_URL}" target="_blank" rel="noopener noreferrer">小游戏轻度生图插件安装地址</a></p>
         <div class="noble-school-actions">
-          <button class="noble-school-button secondary" type="button" data-config-action="test">测试生图</button>
-          <button class="noble-school-button" type="submit">${initial ? '保存并开始游戏' : '保存配置'}</button>
-          ${initial ? '' : '<button class="noble-school-button secondary" type="button" data-config-action="cancel">返回游戏</button>'}
+          ${installed ? '<button class="noble-school-button" type="button" data-plugin-action="settings">打开插件设置</button>' : '<button class="noble-school-button" type="button" data-plugin-action="install">查看安装页面</button>'}
+          <button class="noble-school-button secondary" type="button" data-plugin-action="retry">重新检测</button>
+          <button class="noble-school-button secondary" type="button" data-plugin-action="continue">暂不使用生图，继续游戏</button>
         </div>
-        <div class="noble-school-status" aria-live="polite"></div>
-        <img class="noble-school-test-image" alt="生图测试结果" />
-      </form>
+        <div class="noble-school-status" aria-live="polite">${escapeHtml(status?.message || '')}</div>
+      </div>
     </div>`;
 }
 
@@ -212,7 +156,7 @@ async function loadGameDocument(iframe) {
   await loaded;
 }
 
-function mount() {
+async function mount() {
   hostDocument.getElementById(OVERLAY_ID)?.remove();
   installStyle();
 
@@ -236,7 +180,6 @@ function mount() {
   const card = overlay.querySelector('.noble-school-card');
   const body = overlay.querySelector('.noble-school-body');
   const minimized = overlay.querySelector('.noble-school-minimized');
-  let imageConfig = loadImageConfig(hostWindow);
   let frame = null;
   let cardPosition = { x: 0, y: 0 };
   let minimizedPosition = null;
@@ -247,12 +190,7 @@ function mount() {
     root.style.transform = `translate(calc(-50% + ${cardPosition.x}px),calc(-50% + ${cardPosition.y}px))`;
   };
 
-  const bridge = createTavernBridge({
-    hostWindow,
-    apiWindow: window,
-    getImageConfig: () => imageConfig,
-    onOpenImageSettings: () => showConfig(false)
-  });
+  const bridge = createTavernBridge({ hostWindow, apiWindow: window });
   hostWindow[BRIDGE_KEY] = bridge;
 
   const showGame = async () => {
@@ -314,54 +252,23 @@ function mount() {
     }
   };
 
-  const readForm = (form) => Object.fromEntries(new FormData(form).entries());
-  const showConfig = (initial = false) => {
-    body.innerHTML = makeConfigMarkup(imageConfig, initial);
-    const form = body.querySelector('#noble-school-image-form');
-    const provider = form.elements.provider;
-    const status = form.querySelector('.noble-school-status');
-    const testImage = form.querySelector('.noble-school-test-image');
-    const buttons = [...form.querySelectorAll('button')];
-    const updateVisibility = () => {
-      form.querySelectorAll('[data-providers]').forEach((field) => {
-        field.hidden = !field.dataset.providers.split(/\s+/).includes(provider.value);
-      });
-    };
-    const updateProviderDefaults = () => {
-      const defaults = getDefaultImageConfig(provider.value);
-      form.elements.apiUrl.value = defaults.apiUrl;
-      form.elements.model.value = defaults.model;
-      form.elements.location.value = defaults.location;
-      updateVisibility();
-    };
-    provider.addEventListener('change', updateProviderDefaults);
-    updateVisibility();
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      try {
-        imageConfig = saveImageConfig(hostWindow, readForm(form));
-        status.textContent = '配置已保存。';
-        await showGame();
-      } catch (error) {
-        status.textContent = error.message || '配置保存失败。';
-      }
+  const showPluginNotice = async (providedStatus = null) => {
+    const status = providedStatus || await bridge.getImageGeneratorStatus();
+    body.innerHTML = makePluginNoticeMarkup(status);
+    body.querySelector('[data-plugin-action="continue"]')?.addEventListener('click', showGame);
+    body.querySelector('[data-plugin-action="install"]')?.addEventListener('click', () => {
+      hostWindow.open(IMAGE_EXTENSION_URL, '_blank', 'noopener,noreferrer');
     });
-    form.querySelector('[data-config-action="test"]')?.addEventListener('click', async () => {
-      buttons.forEach((button) => { button.disabled = true; });
-      status.textContent = '正在测试生图，请稍候……';
-      testImage.classList.remove('visible');
-      try {
-        const result = await bridge.testImage(readForm(form));
-        testImage.src = `data:${result.mimeType};base64,${result.data}`;
-        testImage.classList.add('visible');
-        status.textContent = '生图测试成功。测试图片不会写入游戏存档。';
-      } catch (error) {
-        status.textContent = error.message || '生图测试失败。';
-      } finally {
-        buttons.forEach((button) => { button.disabled = false; });
-      }
+    body.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', () => {
+      bridge.openImageSettings();
     });
-    form.querySelector('[data-config-action="cancel"]')?.addEventListener('click', showGame);
+    body.querySelector('[data-plugin-action="retry"]')?.addEventListener('click', async () => {
+      const message = body.querySelector('.noble-school-status');
+      if (message) message.textContent = '正在重新检测插件……';
+      const nextStatus = await bridge.getImageGeneratorStatus();
+      if (nextStatus.ready) await showGame();
+      else await showPluginNotice(nextStatus);
+    });
   };
 
   const minimize = () => {
@@ -442,9 +349,10 @@ function mount() {
   };
 
   window.addEventListener('pagehide', destroy, { once: true });
-  hostWindow.nobleSchoolOverlay = { minimize, restore, showSettings: () => showConfig(false), destroy };
-  if (imageConfig) showGame();
-  else showConfig(true);
+  hostWindow.nobleSchoolOverlay = { minimize, restore, showSettings: () => bridge.openImageSettings(), destroy };
+  const imageStatus = await bridge.getImageGeneratorStatus();
+  if (imageStatus.ready) showGame();
+  else showPluginNotice(imageStatus);
 }
 
-mount();
+void mount();
