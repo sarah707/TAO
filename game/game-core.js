@@ -175,11 +175,14 @@
     }
 
     if (eventName === '第一次做家教事件' && generated.length) {
+      const parentByIdentity = generated.find((character) => String(character.identity || '').includes('家教学生的家长')) || null;
       const student = generated.find((character) => (
         String(character.identity || '').includes('家教学生')
         && !String(character.identity || '').includes('家教学生的家长')
-      )) || generated.find((character) => Number(character.age) === 18) || first;
-      const parent = generated.find((character) => String(character.identity || '').includes('家教学生的家长'))
+      )) || generated.find((character) => character !== parentByIdentity && Number(character.age) === 18)
+        || generated.find((character) => character !== parentByIdentity)
+        || first;
+      const parent = parentByIdentity
         || generated.find((character) => character !== student)
         || null;
       if (student) {
