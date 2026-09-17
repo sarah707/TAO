@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917181957';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917182239';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917181957';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917181957';
+} from './overlay-position.js?build=20260917182239';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917182239';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -132,6 +132,7 @@ function makePluginNoticeMarkup(status) {
     : installed
     ? '已经检测到“小游戏轻度生图插件”，但当前选中的生图服务尚未配置完整。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。'
     : '没有检测到“小游戏轻度生图插件”。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。';
+  const continueLabel = ready ? '返回游戏' : '跳过本次检测，继续游戏';
   return `
     <div class="noble-school-config noble-school-plugin-notice">
       <div class="noble-school-config-titlebar" data-overlay-drag-handle>
@@ -145,10 +146,10 @@ function makePluginNoticeMarkup(status) {
         <p>安装后刷新一次酒馆；游玩途中安装也没关系，刷新后点击角色头像下方的“重新生成头像”即可使用。</p>
         <p><a class="noble-school-plugin-link" href="${IMAGE_EXTENSION_URL}" target="_blank" rel="noopener noreferrer">小游戏轻度生图插件安装地址</a></p>
         <div class="noble-school-actions">
-          ${installed ? '<button class="noble-school-button" type="button" data-plugin-action="settings">打开插件设置</button>' : '<button class="noble-school-button" type="button" data-plugin-action="install">查看安装页面</button>'}
+          ${installed ? '' : '<button class="noble-school-button" type="button" data-plugin-action="install">查看安装页面</button>'}
           ${installed ? '<button class="noble-school-button" type="button" data-plugin-action="test">生成测试图并验证</button>' : ''}
           <button class="noble-school-button secondary" type="button" data-plugin-action="retry">重新检测</button>
-          <button class="noble-school-button secondary" type="button" data-plugin-action="continue">暂不使用生图，继续游戏</button>
+          <button class="noble-school-button secondary" type="button" data-plugin-action="continue">${continueLabel}</button>
         </div>
         <div class="noble-school-status" aria-live="polite">${escapeHtml(status?.message || '')}</div>
       </div>
@@ -296,17 +297,6 @@ async function mount() {
     notice?.querySelector('[data-plugin-action="continue"]')?.addEventListener('click', returnToGame);
     notice?.querySelector('[data-plugin-action="install"]')?.addEventListener('click', () => {
       hostWindow.open(IMAGE_EXTENSION_URL, '_blank', 'noopener,noreferrer');
-    });
-    notice?.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', async () => {
-      const message = notice.querySelector('.noble-school-status');
-      try {
-        const opened = await bridge.openImageSettings();
-        if (!opened && message) {
-          message.textContent = '生图插件设置面板尚未加载完成，请稍后重试或刷新酒馆。';
-        }
-      } catch (error) {
-        if (message) message.textContent = `打开生图插件设置失败：${error.message || error}`;
-      }
     });
     notice?.querySelector('[data-plugin-action="test"]')?.addEventListener('click', async () => {
       const message = notice.querySelector('.noble-school-status');
