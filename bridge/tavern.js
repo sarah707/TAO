@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917034440';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917040023';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917034440';
+} from './worldbook.js?build=20260917040023';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -255,6 +255,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const name = String(
         persona?.name
         || callFirstAvailable(surfaces, 'getCurrentPersonaName')
+        || surfaces.map((surface) => surface?.name1).find(Boolean)
         || contexts.map((context) => context?.name1).find(Boolean)
         || expandMacro('{{user}}', expanders)
         || recentUserName
@@ -263,6 +264,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       ).trim();
       const description = String(
         persona?.description
+        || surfaces.map((surface) => surface?.powerUserSettings?.persona_description || surface?.persona_description).find(Boolean)
         || contexts.map((context) => context?.powerUserSettings?.persona_description).find(Boolean)
         || expandMacro('{{persona}}', expanders)
         || readPersonaDomValue(hostWindow, apiWindow, '#persona_description')
