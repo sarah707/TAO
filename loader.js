@@ -1,4 +1,9 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917002410';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917014334';
+import {
+  clampFloatingPosition,
+  getDefaultMinimizedPosition,
+  getVisibleViewportBounds
+} from './overlay-position.js?build=20260917014334';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -290,6 +295,18 @@ async function mount() {
   const minimize = () => {
     card.hidden = true;
     minimized.hidden = false;
+    const bounds = minimized.getBoundingClientRect();
+    const viewport = getVisibleViewportBounds(hostWindow);
+    minimizedPosition = minimizedPosition
+      ? clampFloatingPosition(minimizedPosition, bounds, viewport)
+      : getDefaultMinimizedPosition(bounds, viewport);
+    Object.assign(minimized.style, {
+      left: `${minimizedPosition.x}px`,
+      top: `${minimizedPosition.y}px`,
+      right: 'auto',
+      bottom: 'auto',
+      margin: '0'
+    });
   };
   const restore = () => {
     minimized.hidden = true;
@@ -321,14 +338,12 @@ async function mount() {
       return { x: rect.left, y: rect.top };
     },
     (x, y) => {
-      const viewport = hostWindow.visualViewport;
-      const viewportWidth = viewport?.width || hostWindow.innerWidth;
-      const viewportHeight = viewport?.height || hostWindow.innerHeight;
       const bounds = minimized.getBoundingClientRect();
-      minimizedPosition = {
-        x: Math.min(Math.max(4, x), Math.max(4, viewportWidth - bounds.width - 4)),
-        y: Math.min(Math.max(4, y), Math.max(4, viewportHeight - bounds.height - 4))
-      };
+      minimizedPosition = clampFloatingPosition(
+        { x, y },
+        bounds,
+        getVisibleViewportBounds(hostWindow)
+      );
       Object.assign(minimized.style, { left: `${minimizedPosition.x}px`, top: `${minimizedPosition.y}px`, right: 'auto', bottom: 'auto', margin: '0' });
     },
     'button'
@@ -341,24 +356,26 @@ async function mount() {
     }
     if (minimizedPosition) {
       const rect = minimized.getBoundingClientRect();
-      const viewport = hostWindow.visualViewport;
-      const viewportWidth = viewport?.width || hostWindow.innerWidth;
-      const viewportHeight = viewport?.height || hostWindow.innerHeight;
-      minimizedPosition = {
-        x: Math.min(Math.max(4, minimizedPosition.x), Math.max(4, viewportWidth - rect.width - 4)),
-        y: Math.min(Math.max(4, minimizedPosition.y), Math.max(4, viewportHeight - rect.height - 4))
-      };
+      minimizedPosition = clampFloatingPosition(
+        minimizedPosition,
+        rect,
+        getVisibleViewportBounds(hostWindow)
+      );
       Object.assign(minimized.style, { left: `${minimizedPosition.x}px`, top: `${minimizedPosition.y}px` });
     }
   };
   hostWindow.addEventListener('resize', fitToViewport);
   hostWindow.visualViewport?.addEventListener('resize', fitToViewport);
+  hostWindow.visualViewport?.addEventListener('scroll', fitToViewport);
+  hostWindow.addEventListener('orientationchange', fitToViewport);
 
   const destroy = () => {
     removeCardDrag();
     removeMinimizedDrag();
     hostWindow.removeEventListener('resize', fitToViewport);
     hostWindow.visualViewport?.removeEventListener('resize', fitToViewport);
+    hostWindow.visualViewport?.removeEventListener('scroll', fitToViewport);
+    hostWindow.removeEventListener('orientationchange', fitToViewport);
     overlay.remove();
     hostDocument.getElementById(STYLE_ID)?.remove();
     if (hostWindow[BRIDGE_KEY] === bridge) delete hostWindow[BRIDGE_KEY];
