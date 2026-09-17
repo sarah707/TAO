@@ -1139,6 +1139,7 @@
       cursor: pointer;
       pointer-events: auto;
       touch-action: none;
+      -webkit-user-drag: none;
       will-change: transform;
       backface-visibility: hidden;
     }
@@ -1327,23 +1328,23 @@
       box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
       border: 2px solid #f59e0b;
       animation: merge-tutorial-float 1.5s ease-in-out infinite;
-      z-index: 101;
+      z-index: 104;
       pointer-events: none;
     }
 
     @keyframes merge-tutorial-float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
+      0%, 100% { transform: translate(-50%, 0); }
+      50% { transform: translate(-50%, -8px); }
     }
   </style>
 </head>
 <body>
   <div class="title-safe">贵族学院的特招生</div>
   <div id="app"></div>
-  <script src="tavern-runtime.js?build=20260917041011"></script>
-  <script src="client-common.js?build=20260917041011"></script>
-  <script src="game-core.js?build=20260917041011"></script>
-  <script src="prompts.js?build=20260917041011"></script>
-  <script src="game.js?build=20260917041011"></script>
+  <script src="tavern-runtime.js?build=20260917041903"></script>
+  <script src="client-common.js?build=20260917041903"></script>
+  <script src="game-core.js?build=20260917041903"></script>
+  <script src="prompts.js?build=20260917041903"></script>
+  <script src="game.js?build=20260917041903"></script>
 </body>
 </html>
