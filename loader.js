@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917182239';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917182453';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917182239';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917182239';
+} from './overlay-position.js?build=20260917182453';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917182453';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -123,7 +123,7 @@ function setupDrag(handle, target, getPosition, setPosition, excludedSelector, d
   return () => handle.removeEventListener('pointerdown', start);
 }
 
-function makePluginNoticeMarkup(status) {
+function makePluginNoticeMarkup(status, { openedFromGame = false } = {}) {
   const installed = Boolean(status?.installed);
   const ready = Boolean(status?.ready);
   const title = ready ? '生图插件已就绪' : installed ? '生图插件尚未配置' : '可选生图插件未安装';
@@ -132,7 +132,7 @@ function makePluginNoticeMarkup(status) {
     : installed
     ? '已经检测到“小游戏轻度生图插件”，但当前选中的生图服务尚未配置完整。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。'
     : '没有检测到“小游戏轻度生图插件”。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。';
-  const continueLabel = ready ? '返回游戏' : '跳过本次检测，继续游戏';
+  const continueLabel = openedFromGame || ready ? '返回游戏' : '跳过本次检测，继续游戏';
   return `
     <div class="noble-school-config noble-school-plugin-notice">
       <div class="noble-school-config-titlebar" data-overlay-drag-handle>
@@ -281,7 +281,7 @@ async function mount() {
         if (child !== retainedFrame) child.remove();
       }
       retainedFrame.hidden = true;
-      body.insertAdjacentHTML('beforeend', makePluginNoticeMarkup(status));
+      body.insertAdjacentHTML('beforeend', makePluginNoticeMarkup(status, { openedFromGame: true }));
     } else {
       body.innerHTML = makePluginNoticeMarkup(status);
     }
