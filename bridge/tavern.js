@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917155137';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917160510';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917155137';
+} from './worldbook.js?build=20260917160510';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -193,6 +193,44 @@ function buildPenultimateUserInstruction(payload) {
     .join('\n\n');
 }
 
+function buildVisibleTextPrompt(payload, textPresetMode) {
+  const options = payload?.options || {};
+  const prompt = String(payload?.prompt || '').trim();
+  const sections = [];
+  const pushSection = (label, content) => {
+    const text = String(content || '').trim();
+    if (text) sections.push(`===== ${label} =====\n${text}`);
+  };
+
+  if (textPresetMode === 'tavern') {
+    pushSection('SYSTEM｜before_prompt｜游戏剧本设定', options.scriptSettingsInstruction);
+    pushSection('SYSTEM｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
+    pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
+    pushSection('USER｜user_input｜本次事件', prompt);
+  } else {
+    pushSection('SYSTEM｜游戏完整内置预设', options.systemInstruction);
+    pushSection('ASSISTANT｜旧章节正文', options.assistantInstruction);
+    pushSection('ASSISTANT｜地点资料', options.locationInstruction);
+    pushSection('USER｜user_input｜本次事件', prompt);
+  }
+
+  return sections.join('\n\n');
+}
+
+function wrapPromptForChat(prompt, textPresetMode) {
+  const source = String(prompt || '').trim();
+  let longestBacktickRun = 0;
+  for (const match of source.matchAll(/`+/g)) {
+    longestBacktickRun = Math.max(longestBacktickRun, match[0].length);
+  }
+  const fence = '`'.repeat(Math.max(3, longestBacktickRun + 1));
+  const modeLabel = textPresetMode === 'tavern' ? '酒馆当前预设' : '游戏内置预设';
+  const note = textPresetMode === 'tavern'
+    ? '以下按实际角色和注入顺序展示游戏提交的全部内容；酒馆当前预设和已启用世界书由酒馆在生成时继续装配。'
+    : '以下按实际消息角色和顺序展示本次提交的全部内容。';
+  return `【贵族学校的特招生｜本次发送给 AI 的完整提示词】\n模式：${modeLabel}\n${note}\n\n${fence}text\n${source}\n${fence}`;
+}
+
 function emptyPromptOverrides() {
   return {
     char_description: '',
@@ -317,18 +355,27 @@ function isImagePayload(payload) {
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
 }
 
-async function appendFullTextResponseToChat(helper, text) {
-  const message = String(text || '').trim();
-  if (!message) return;
+async function appendTextExchangeToChat(helper, prompt, response, textPresetMode) {
+  const promptMessage = wrapPromptForChat(prompt, textPresetMode);
+  const responseMessage = String(response || '').trim();
+  if (!responseMessage) return;
   if (typeof helper?.createChatMessages !== 'function') {
-    throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整 AI 回复写入聊天楼层；请更新酒馆助手。');
+    throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整提示词和 AI 回复写入聊天楼层；请更新酒馆助手。');
   }
-  await helper.createChatMessages([{
-    role: 'assistant',
-    message,
-    data: { nobleSchoolGameResponse: true },
-    extra: { source: 'noble-school-tavern-card' }
-  }], {
+  await helper.createChatMessages([
+    {
+      role: 'user',
+      message: promptMessage,
+      data: { nobleSchoolGamePrompt: true },
+      extra: { source: 'noble-school-tavern-card' }
+    },
+    {
+      role: 'assistant',
+      message: responseMessage,
+      data: { nobleSchoolGameResponse: true },
+      extra: { source: 'noble-school-tavern-card' }
+    }
+  ], {
     insert_before: 'end',
     refresh: 'affected'
   });
@@ -529,6 +576,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const prompt = String(payload?.prompt || '').trim();
       if (!prompt) throw new Error('文字生成提示词为空。');
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
+      const visiblePrompt = buildVisibleTextPrompt(payload, textPresetMode);
       let text;
       if (textPresetMode === 'tavern') {
         if (typeof apiWindow.generate !== 'function') {
@@ -605,7 +653,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         });
       }
       const fullText = typeof text === 'string' ? text : String(text?.content || '');
-      await appendFullTextResponseToChat(helper, fullText);
+      await appendTextExchangeToChat(helper, visiblePrompt, fullText, textPresetMode);
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
         raw: { fullText }
