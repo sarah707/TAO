@@ -356,6 +356,21 @@
     return contents;
   }
 
+  function extractInfoBlockContent(text) {
+    const source = String(text || '');
+    const tagged = extractNearestTagContent(source, 'info_block').trim();
+    if (tagged) return tagged;
+    const lowerSource = source.toLowerCase();
+    const contentCloseIndex = lowerSource.lastIndexOf('</content>');
+    const contentOpenIndex = lowerSource.lastIndexOf(
+      '<content>',
+      contentCloseIndex >= 0 ? contentCloseIndex : lowerSource.length
+    );
+    const prefix = source.slice(0, contentOpenIndex >= 0 ? contentOpenIndex : source.length);
+    const bareBlocks = [...prefix.matchAll(/^[\t ]*(『[^\r\n]+』)[\t ]*$/gm)];
+    return bareBlocks.at(-1)?.[1]?.trim() || '';
+  }
+
   const CHARACTER_FIELD_ALIASES = Object.freeze({
     姓名: ['姓名', '名字', '角色姓名', 'name', 'characterName', 'character_name'],
     年龄: ['年龄', 'age'],
@@ -497,6 +512,7 @@
     splitTopLevelJsonObjects,
     extractNearestTagContent,
     extractNearestTagContents,
+    extractInfoBlockContent,
     parseLooseCharacterRecords
   };
 })(typeof window !== 'undefined' ? window : globalThis);
