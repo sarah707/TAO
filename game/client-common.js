@@ -9,6 +9,9 @@
   }
 
   async function requestJson(url, options = {}) {
+    const startedAt = Date.now();
+    const requestPath = String(typeof url === 'string' ? url : url?.url || url?.href || '').split(/[?#]/)[0];
+    let status = 0;
     try {
       const response = await fetch(url, {
         credentials: 'same-origin',
@@ -18,7 +21,14 @@
           ...(options.headers || {})
         }
       });
-      const payload = await response.json().catch(() => ({}));
+      status = response.status;
+      const raw = await response.text();
+      let payload;
+      try {
+        payload = JSON.parse(raw);
+      } catch (error) {
+        throw new Error(`接口返回的内容不是有效 JSON，无法读取结果。\n响应类型：${response.headers.get('Content-Type') || '未知'}\n解析异常：${error.message}\n响应片段：${raw.slice(0, 500) || '[空响应]'}`);
+      }
       if (!response.ok) {
         const error = new Error(payload.error || `请求失败（HTTP ${response.status}）`);
         error.status = response.status;
@@ -26,11 +36,11 @@
       }
       return payload;
     } catch (error) {
-      const message = String(error?.message || '');
-      if (message === 'Load failed' || message === 'Failed to fetch' || message === 'NetworkError when attempting to fetch resource.') {
-        throw new Error('网络请求失败（Load failed）。请检查网页服务是否在线，或稍后重试。');
-      }
-      throw error;
+      const message = String(error?.message || error || '请求失败');
+      const failure = new Error(`${message}\n请求接口：${options.method || 'GET'} ${requestPath}\nHTTP 状态：${status || '未收到响应'}\n接口耗时：${((Date.now() - startedAt) / 1000).toFixed(1)} 秒`);
+      failure.status = error?.status || status;
+      failure.cause = error;
+      throw failure;
     }
   }
 

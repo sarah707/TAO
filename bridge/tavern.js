@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917225537';
-import { buildExportWorldbook } from './worldbook.js?build=20260917225537';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917230425';
+import { buildExportWorldbook } from './worldbook.js?build=20260917230425';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -80,8 +80,36 @@ function createGenerationErrorCapture(hostWindow, apiWindow) {
     if (typeof originalFetch !== 'function') continue;
     const wrappedFetch = async function (...args) {
       const [input, init] = args;
-      const response = await originalFetch.apply(this, args);
-      if (!response?.ok && isTextGenerationEndpoint(input, candidateWindow?.location?.href)) {
+      if (!isTextGenerationEndpoint(input, candidateWindow?.location?.href)) {
+        return originalFetch.apply(this, args);
+      }
+      const startedAt = Date.now();
+      const rawUrl = typeof input === 'string' ? input : input?.url || input?.href || '';
+      let endpoint;
+      try {
+        endpoint = new URL(rawUrl, candidateWindow?.location?.href || 'http://localhost/').pathname;
+      } catch {
+        endpoint = String(rawUrl).split(/[?#]/)[0];
+      }
+      const request = {
+        endpoint,
+        ...readGenerationRequestMetadata(input, init)
+      };
+      captured = request;
+      let response;
+      try {
+        response = await originalFetch.apply(this, args);
+      } catch (error) {
+        captured = { ...request, elapsedMs: Date.now() - startedAt, transportError: String(error?.message || error) };
+        throw error;
+      }
+      captured = {
+        ...request,
+        elapsedMs: Date.now() - startedAt,
+        httpStatus: Number(response?.status || 0),
+        httpStatusText: String(response?.statusText || '').trim()
+      };
+      if (!response?.ok) {
         let responseText = '';
         try {
           responseText = await response.clone().text();
@@ -89,11 +117,9 @@ function createGenerationErrorCapture(hostWindow, apiWindow) {
           // Preserve the original response even when this browser cannot clone it.
         }
         captured = {
-          httpStatus: Number(response.status || 0),
-          httpStatusText: String(response.statusText || '').trim(),
+          ...captured,
           responseText: redactDiagnosticText(responseText).slice(0, 6000),
-          responseBody: parseJsonObject(responseText),
-          ...readGenerationRequestMetadata(input, init)
+          responseBody: parseJsonObject(responseText)
         };
       }
       return response;
@@ -121,8 +147,8 @@ function createGenerationErrorCapture(hostWindow, apiWindow) {
   };
 }
 
-function enhanceGenerationError(error, captured, context = {}) {
-  if (!captured) return error;
+function enhanceGenerationError(error, captured = {}, context = {}) {
+  captured ||= {};
   const body = captured.responseBody;
   const upstream = body?.error && typeof body.error === 'object' ? body.error : body;
   const upstreamCode = upstream?.code ?? body?.code ?? '';
@@ -136,11 +162,15 @@ function enhanceGenerationError(error, captured, context = {}) {
   ).trim();
   const httpStatus = captured.httpStatus
     ? `HTTP ${captured.httpStatus}${captured.httpStatusText ? ` ${captured.httpStatusText}` : ''}`
-    : '未知';
+    : (captured.transportError ? '未收到 HTTP 响应' : '未捕获 HTTP 状态');
   const lines = [
     '文字生成请求失败。',
+    `失败阶段：${context.stage || '等待酒馆生成结果'}`,
     `酒馆接口：${httpStatus}`
   ];
+  if (captured.endpoint) lines.push(`请求路径：${captured.endpoint}`);
+  if (context.elapsedMs !== undefined) lines.push(`本次耗时：${(context.elapsedMs / 1000).toFixed(1)} 秒`);
+  if (captured.transportError) lines.push('连接在返回 HTTP 响应前失败，浏览器未提供服务端响应正文。');
   if (upstreamCode || upstreamStatus) {
     lines.push(`上游状态：${[upstreamCode, upstreamStatus].filter(Boolean).join(' / ')}`);
   }
@@ -155,6 +185,10 @@ function enhanceGenerationError(error, captured, context = {}) {
   const originalMessage = redactDiagnosticText(error?.message || error || '').trim();
   if (originalMessage) lines.push(`原始异常：${originalMessage}`);
   if (captured.responseText) lines.push(`上游原始响应：${captured.responseText}`);
+  if (context.rawText !== undefined) {
+    lines.push(`AI 已返回 ${context.rawText.length} 字符；当前错误发生在回复返回之后。`);
+    lines.push(`回复原文片段：${context.rawText.slice(0, 1500)}`);
+  }
   const enhanced = new Error(lines.join('\n'));
   enhanced.name = error?.name || 'GenerationError';
   enhanced.cause = error;
@@ -813,6 +847,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const prompt = String(payload?.prompt || '').trim();
       if (!prompt) throw new Error('文字生成提示词为空。');
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
+      const startedAt = Date.now();
+      let stage = '准备生成请求';
       let promptWrite = null;
       const writePrompt = (messages) => {
         if (!promptWrite) {
@@ -820,9 +856,10 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           const visiblePrompt = captured
             ? formatCapturedFinalPrompt(messages)
             : buildVisibleTextPrompt(payload, textPresetMode);
+          stage = '写入酒馆 user 楼层';
           promptWrite = appendTextMessageToChat(helper, 'user',
             wrapPromptForChat(visiblePrompt, textPresetMode, captured),
-            { nobleSchoolGamePrompt: true });
+            { nobleSchoolGamePrompt: true }).then(() => { stage = '等待 AI 回复'; });
         }
         return promptWrite;
       };
@@ -845,8 +882,10 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       let text;
       const generationId = makeGenerationId();
       const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow);
+      let fullText;
       try {
         if (!finalPromptCapture.available) await writePrompt();
+        stage = '等待酒馆生成结果';
         if (textPresetMode === 'tavern') {
           if (typeof apiWindow.generate !== 'function') {
             throw new Error('当前酒馆助手缺少 generate 接口，无法读取酒馆当前预设；请更新酒馆助手，或在“系统”页切换为“游戏内置预设”。');
@@ -904,27 +943,33 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             generation_id: generationId
           });
         }
+        await writePrompt(finalPromptCapture.getMessages());
+        fullText = typeof text === 'string' ? text : String(text?.content || '');
+        stage = '写入酒馆模型楼层（AI 已返回）';
+        // 先保存原文，再把副本交给游戏解析。
+        await appendTextMessageToChat(helper, 'assistant',
+          fullText || '【贵族学校的特招生｜AI 返回内容为空】',
+          fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true });
       } catch (error) {
         const diagnostic = enhanceGenerationError(error, generationErrorCapture.getError(), {
           generationId,
-          textPresetMode
+          textPresetMode,
+          stage,
+          elapsedMs: Date.now() - startedAt,
+          rawText: fullText
         });
-        await writePrompt(finalPromptCapture.getMessages());
-        await appendTextMessageToChat(helper, 'assistant',
-          `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic?.message || diagnostic)}`,
-          { nobleSchoolGameError: true });
+        // 网络断开时写聊天也可能失败或久等，不能让它遮住最初的诊断。
+        void writePrompt(finalPromptCapture.getMessages()).then(() => (
+          appendTextMessageToChat(helper, 'assistant',
+            `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic.message)}`,
+            { nobleSchoolGameError: true })
+        )).catch(() => {});
         throw diagnostic;
       } finally {
         generationErrorCapture.restore();
         presetPromptSuppression.restore();
         finalPromptCapture.stop();
       }
-      await writePrompt(finalPromptCapture.getMessages());
-      const fullText = typeof text === 'string' ? text : String(text?.content || '');
-      // 聊天楼层先保存原文；标签解析、文字清理只影响之后返回给游戏的副本。
-      await appendTextMessageToChat(helper, 'assistant',
-        fullText || '【贵族学校的特招生｜AI 返回内容为空】',
-        fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true });
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
         raw: { fullText }
