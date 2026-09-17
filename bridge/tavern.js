@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917162046';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917163626';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917162046';
+} from './worldbook.js?build=20260917163626';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -193,34 +193,7 @@ function buildPenultimateUserInstruction(payload) {
     .join('\n\n');
 }
 
-function buildVisiblePresetInstruction(surfaces, options = {}) {
-  const preset = callFirstAvailable(surfaces, 'getPreset', 'in_use');
-  if (!preset || !Array.isArray(preset.prompts)) {
-    return '当前酒馆助手没有提供可读取的预设快照；生成请求仍通过 preset_name: in_use 使用当前预设。';
-  }
-
-  const enabledPrompts = preset.prompts.filter((prompt) => prompt?.enabled !== false);
-  const trailingPrompt = enabledPrompts.at(-1);
-  const omitTrailingAssistant = Boolean(options.omitTrailingAssistant)
-    && trailingPrompt
-    && ['assistant', 'model'].includes(String(trailingPrompt.role || '').toLowerCase());
-  const sentPrompts = omitTrailingAssistant ? enabledPrompts.slice(0, -1) : enabledPrompts;
-  const entries = sentPrompts.map((prompt, index) => {
-    const id = String(prompt.id || `prompt-${index + 1}`);
-    const role = normalizePromptRole(prompt.role) || 'system';
-    const position = prompt?.position?.type === 'in_chat'
-      ? `in_chat depth=${Number(prompt.position?.depth || 0)} order=${Number(prompt.position?.order || 0)}`
-      : 'relative';
-    const placeholder = PRESET_PLACEHOLDER_IDS.get(id);
-    const content = placeholder
-      ? `[酒馆动态占位符：${placeholder}；实际内容由酒馆在生成时解析]`
-      : expandPresetPrompt(prompt.content, surfaces).trim();
-    return `--- PRESET ${index + 1}｜${role}｜${position}｜id=${id} ---\n${content || '[空内容]'}`;
-  });
-  return entries.join('\n\n') || '[当前预设没有启用的提示词条目]';
-}
-
-function buildVisibleTextPrompt(payload, textPresetMode, presetInstruction = '') {
+function buildVisibleTextPrompt(payload, textPresetMode) {
   const options = payload?.options || {};
   const prompt = String(payload?.prompt || '').trim();
   const sections = [];
@@ -230,7 +203,6 @@ function buildVisibleTextPrompt(payload, textPresetMode, presetInstruction = '')
   };
 
   if (textPresetMode === 'tavern') {
-    pushSection('酒馆当前预设｜启用条目', presetInstruction);
     pushSection('SYSTEM｜before_prompt｜游戏剧本设定', options.scriptSettingsInstruction);
     pushSection('SYSTEM｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
@@ -245,7 +217,69 @@ function buildVisibleTextPrompt(payload, textPresetMode, presetInstruction = '')
   return sections.join('\n\n');
 }
 
-function wrapPromptForChat(prompt, textPresetMode) {
+function formatFinalPromptContent(content) {
+  if (typeof content === 'string') return content.trim();
+  if (!Array.isArray(content)) return String(content || '').trim();
+  return content.map((part) => {
+    if (typeof part === 'string') return part;
+    if (part?.type === 'text' && typeof part.text === 'string') return part.text;
+    if (part?.type === 'image_url' || part?.image_url) return '[图片内容]';
+    try {
+      return JSON.stringify(part, null, 2);
+    } catch {
+      return String(part || '');
+    }
+  }).filter(Boolean).join('\n').trim();
+}
+
+function formatCapturedFinalPrompt(messages) {
+  return messages.map((message, index) => {
+    const role = String(message?.role || 'unknown').toUpperCase();
+    const content = formatFinalPromptContent(message?.content);
+    return `===== FINAL MESSAGE ${index + 1}｜${role} =====\n${content || '[空内容]'}`;
+  }).join('\n\n');
+}
+
+function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
+  for (const context of getHostContexts(hostWindow, apiWindow)) {
+    const eventSource = context?.eventSource;
+    const eventName = context?.eventTypes?.CHAT_COMPLETION_SETTINGS_READY || 'chat_completion_settings_ready';
+    if (!eventSource || (typeof eventSource.makeLast !== 'function' && typeof eventSource.on !== 'function')) continue;
+    let capturedMessages = null;
+    const listener = (completion) => {
+      if (!Array.isArray(completion?.messages)) return;
+      if (options.removeTrailingModelPrompt) {
+        const lastMessage = completion.messages.at(-1);
+        if (lastMessage && ['assistant', 'model'].includes(String(lastMessage.role || '').toLowerCase())) {
+          completion.messages.pop();
+        }
+      }
+      capturedMessages = completion.messages.map((message) => ({
+        role: message?.role,
+        content: message?.content
+      }));
+    };
+    if (typeof eventSource.makeLast === 'function') {
+      eventSource.makeLast(eventName, listener);
+    } else {
+      eventSource.on(eventName, listener);
+    }
+    return {
+      available: true,
+      getMessages: () => capturedMessages,
+      stop() {
+        eventSource.removeListener?.(eventName, listener);
+      }
+    };
+  }
+  return {
+    available: false,
+    getMessages: () => null,
+    stop() {}
+  };
+}
+
+function wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt) {
   const source = String(prompt || '').trim();
   let longestBacktickRun = 0;
   for (const match of source.matchAll(/`+/g)) {
@@ -253,9 +287,9 @@ function wrapPromptForChat(prompt, textPresetMode) {
   }
   const fence = '`'.repeat(Math.max(3, longestBacktickRun + 1));
   const modeLabel = textPresetMode === 'tavern' ? '酒馆当前预设' : '游戏内置预设';
-  const note = textPresetMode === 'tavern'
-    ? '以下展开当前预设的启用条目和游戏注入内容；世界书、Persona 等动态占位内容由酒馆在生成时解析。'
-    : '以下按实际消息角色和顺序展示本次提交的全部内容。';
+  const note = capturedFinalPrompt
+    ? '以下内容截取自酒馆提示词查看器使用的最终消息事件，已经过预设宏、变量、世界书、模板和游戏注入处理。'
+    : '当前酒馆助手没有暴露最终消息事件；以下仅展示游戏本次提交的提示词。';
   return `【贵族学校的特招生｜本次发送给 AI 的完整提示词】\n模式：${modeLabel}\n${note}\n\n${fence}text\n${source}\n${fence}`;
 }
 
@@ -273,21 +307,6 @@ function emptyPromptOverrides() {
   };
 }
 
-const PRESET_PLACEHOLDER_IDS = new Map([
-  ['worldInfoBefore', 'world_info_before'],
-  ['personaDescription', 'persona_description'],
-  ['charDescription', 'char_description'],
-  ['charPersonality', 'char_personality'],
-  ['scenario', 'scenario'],
-  ['worldInfoAfter', 'world_info_after'],
-  ['dialogueExamples', 'dialogue_examples'],
-  ['chatHistory', 'chat_history']
-]);
-
-function normalizePromptRole(value) {
-  return String(value || '').toLowerCase() === 'model' ? 'assistant' : String(value || '').toLowerCase();
-}
-
 function getChatCompletionSettings(hostWindow, apiWindow) {
   return getHostContexts(hostWindow, apiWindow)
     .map((context) => context?.chatCompletionSettings)
@@ -299,92 +318,13 @@ function isGeminiChatConnection(hostWindow, apiWindow) {
   return source === 'makersuite' || source === 'vertexai';
 }
 
-function expandPresetPrompt(content, surfaces) {
-  const source = String(content || '');
-  const expanded = callFirstAvailable(surfaces, 'substitudeMacros', source);
-  return expanded === null ? source : String(expanded);
-}
-
-function buildGeminiCompatiblePresetRequest(api, request) {
-  if (typeof api?.getPreset !== 'function' || typeof api?.generateRaw !== 'function') return null;
-
-  let preset;
-  try {
-    preset = api.getPreset('in_use');
-  } catch {
-    return null;
-  }
-  const enabledPrompts = Array.isArray(preset?.prompts)
-    ? preset.prompts.filter((prompt) => prompt?.enabled !== false)
-    : [];
-  const lastPrompt = enabledPrompts.at(-1);
-  if (!lastPrompt || !['assistant', 'model'].includes(String(lastPrompt.role || '').toLowerCase())) {
-    return null;
-  }
-
-  const keptPrompts = enabledPrompts.slice(0, -1);
-  const relativePrompts = keptPrompts.filter((prompt) => prompt?.position?.type !== 'in_chat');
-  const presetInjects = keptPrompts
-    .filter((prompt) => prompt?.position?.type === 'in_chat')
-    .sort((left, right) => {
-      const depthDiff = Number(left.position?.depth || 0) - Number(right.position?.depth || 0);
-      return depthDiff || Number(left.position?.order || 0) - Number(right.position?.order || 0);
-    })
-    .map((prompt) => ({
-      role: normalizePromptRole(prompt.role),
-      content: expandPresetPrompt(prompt.content, request.surfaces),
-      position: 'in_chat',
-      depth: Number(prompt.position?.depth || 0),
-      should_scan: false
-    }))
-    .filter((prompt) => prompt.content.trim());
-  const orderedPrompts = relativePrompts
-    .map((prompt) => {
-      const placeholder = PRESET_PLACEHOLDER_IDS.get(String(prompt.id || ''));
-      if (placeholder) return placeholder;
-      return {
-        role: normalizePromptRole(prompt.role),
-        content: expandPresetPrompt(prompt.content, request.surfaces)
-      };
-    })
-    .filter((prompt) => typeof prompt === 'string' || prompt.content.trim());
-  orderedPrompts.push('user_input');
-
-  const settings = preset?.settings || {};
-  const customApi = {};
-  const copyNumber = (target, source, min = null, max = null) => {
-    if (!Number.isFinite(Number(source))) return;
-    let value = Number(source);
-    if (min !== null) value = Math.max(min, value);
-    if (max !== null) value = Math.min(max, value);
-    customApi[target] = value;
-  };
-  copyNumber('max_tokens', settings.max_completion_tokens);
-  copyNumber('temperature', settings.temperature, 0, 2);
-  copyNumber('frequency_penalty', settings.frequency_penalty, -2, 2);
-  copyNumber('presence_penalty', settings.presence_penalty, -2, 2);
-  copyNumber('top_p', settings.top_p, 0, 1);
-  copyNumber('top_k', settings.top_k, 0, 100);
-
-  return {
-    user_input: request.prompt,
-    ordered_prompts: orderedPrompts,
-    should_silence: true,
-    max_chat_history: 0,
-    injects: [...request.injects, ...presetInjects],
-    overrides: request.overrides,
-    custom_api: customApi,
-    generation_id: makeGenerationId()
-  };
-}
-
 function isImagePayload(payload) {
   const modalities = String(payload?.options?.responseModalities || '').toUpperCase();
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
 }
 
-async function appendTextExchangeToChat(helper, prompt, response, textPresetMode) {
-  const promptMessage = wrapPromptForChat(prompt, textPresetMode);
+async function appendTextExchangeToChat(helper, prompt, response, textPresetMode, capturedFinalPrompt) {
+  const promptMessage = wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt);
   const responseMessage = String(response || '').trim();
   if (!responseMessage) return;
   if (typeof helper?.createChatMessages !== 'function') {
@@ -604,89 +544,82 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const prompt = String(payload?.prompt || '').trim();
       if (!prompt) throw new Error('文字生成提示词为空。');
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
-      let visiblePrompt = '';
+      const removeTrailingModelPrompt = textPresetMode === 'tavern' && isGeminiChatConnection(hostWindow, apiWindow);
+      const finalPromptCapture = createFinalPromptCapture(hostWindow, apiWindow, {
+        removeTrailingModelPrompt
+      });
+      if (removeTrailingModelPrompt && !finalPromptCapture.available) {
+        throw new Error('当前酒馆助手未开放最终提示词事件，无法在 Gemini 请求前安全删除末尾 model 提示词；请更新酒馆助手。');
+      }
       let text;
-      if (textPresetMode === 'tavern') {
-        if (typeof apiWindow.generate !== 'function') {
-          throw new Error('当前酒馆助手缺少 generate 接口，无法读取酒馆当前预设；请更新酒馆助手，或在“系统”页切换为“游戏内置预设”。');
-        }
-        const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
-        const supportingContextInstruction = buildSupportingContextInjection(payload);
-        const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
-        const injects = [];
-        if (scriptSettingsInstruction) {
-          injects.push({
-            role: 'system',
-            content: scriptSettingsInstruction,
-            position: 'before_prompt',
-            depth: 0,
-            should_scan: true
-          });
-        }
-        if (supportingContextInstruction) {
-          injects.push({
-            role: 'system',
-            content: supportingContextInstruction,
-            position: 'in_chat',
-            depth: 2,
-            should_scan: false
-          });
-        }
-        if (penultimateUserInstruction) {
-          injects.push({
-            role: 'user',
-            content: penultimateUserInstruction,
-            position: 'in_chat',
-            depth: 1,
-            should_scan: false
-          });
-        }
-        const overrides = emptyPromptOverrides();
-        const surfaces = collectApiSurfaces(hostWindow, apiWindow);
-        let geminiPresetRequest = null;
-        let geminiPresetApi = null;
-        if (isGeminiChatConnection(hostWindow, apiWindow)) {
-          for (const api of surfaces) {
-            geminiPresetRequest = buildGeminiCompatiblePresetRequest(api, { prompt, injects, overrides, surfaces });
-            if (geminiPresetRequest) {
-              geminiPresetApi = api;
-              break;
-            }
+      try {
+        if (textPresetMode === 'tavern') {
+          if (typeof apiWindow.generate !== 'function') {
+            throw new Error('当前酒馆助手缺少 generate 接口，无法读取酒馆当前预设；请更新酒馆助手，或在“系统”页切换为“游戏内置预设”。');
           }
-        }
-        const visiblePresetInstruction = buildVisiblePresetInstruction(surfaces, {
-          omitTrailingAssistant: Boolean(geminiPresetRequest)
-        });
-        visiblePrompt = buildVisibleTextPrompt(payload, textPresetMode, visiblePresetInstruction);
-        if (geminiPresetRequest) {
-          text = await geminiPresetApi.generateRaw(geminiPresetRequest);
-        } else {
+          const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
+          const supportingContextInstruction = buildSupportingContextInjection(payload);
+          const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
+          const injects = [];
+          if (scriptSettingsInstruction) {
+            injects.push({
+              role: 'system',
+              content: scriptSettingsInstruction,
+              position: 'before_prompt',
+              depth: 0,
+              should_scan: true
+            });
+          }
+          if (supportingContextInstruction) {
+            injects.push({
+              role: 'system',
+              content: supportingContextInstruction,
+              position: 'in_chat',
+              depth: 2,
+              should_scan: false
+            });
+          }
+          if (penultimateUserInstruction) {
+            injects.push({
+              role: 'user',
+              content: penultimateUserInstruction,
+              position: 'in_chat',
+              depth: 1,
+              should_scan: false
+            });
+          }
           text = await apiWindow.generate({
             preset_name: 'in_use',
             user_input: prompt,
             should_silence: true,
             max_chat_history: 0,
             injects,
-            overrides,
+            overrides: emptyPromptOverrides(),
+            generation_id: makeGenerationId()
+          });
+        } else {
+          if (typeof apiWindow.generateRaw !== 'function') {
+            throw new Error('未找到酒馆助手 generateRaw，请确认酒馆助手已启用。');
+          }
+          text = await apiWindow.generateRaw({
+            user_input: prompt,
+            ordered_prompts: buildOrderedPrompts(payload),
+            max_chat_history: 0,
+            injects: [],
+            overrides: emptyPromptOverrides(),
             generation_id: makeGenerationId()
           });
         }
-      } else {
-        if (typeof apiWindow.generateRaw !== 'function') {
-          throw new Error('未找到酒馆助手 generateRaw，请确认酒馆助手已启用。');
-        }
-        visiblePrompt = buildVisibleTextPrompt(payload, textPresetMode);
-        text = await apiWindow.generateRaw({
-          user_input: prompt,
-          ordered_prompts: buildOrderedPrompts(payload),
-          max_chat_history: 0,
-          injects: [],
-          overrides: emptyPromptOverrides(),
-          generation_id: makeGenerationId()
-        });
+      } finally {
+        finalPromptCapture.stop();
       }
+      const capturedMessages = finalPromptCapture.getMessages();
+      const capturedFinalPrompt = Array.isArray(capturedMessages) && capturedMessages.length > 0;
+      const visiblePrompt = capturedFinalPrompt
+        ? formatCapturedFinalPrompt(capturedMessages)
+        : buildVisibleTextPrompt(payload, textPresetMode);
       const fullText = typeof text === 'string' ? text : String(text?.content || '');
-      await appendTextExchangeToChat(helper, visiblePrompt, fullText, textPresetMode);
+      await appendTextExchangeToChat(helper, visiblePrompt, fullText, textPresetMode, capturedFinalPrompt);
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
         raw: { fullText }
