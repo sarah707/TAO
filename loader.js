@@ -1,9 +1,9 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917042607';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917043223';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917042607';
+} from './overlay-position.js?build=20260917043223';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';

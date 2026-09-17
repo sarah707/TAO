@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917042607';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917043223';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917042607';
+} from './worldbook.js?build=20260917043223';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -204,6 +204,111 @@ function emptyPromptOverrides() {
       with_depth_entries: true,
       author_note: ''
     }
+  };
+}
+
+const PRESET_PLACEHOLDER_IDS = new Map([
+  ['worldInfoBefore', 'world_info_before'],
+  ['personaDescription', 'persona_description'],
+  ['charDescription', 'char_description'],
+  ['charPersonality', 'char_personality'],
+  ['scenario', 'scenario'],
+  ['worldInfoAfter', 'world_info_after'],
+  ['dialogueExamples', 'dialogue_examples'],
+  ['chatHistory', 'chat_history']
+]);
+
+function normalizePromptRole(value) {
+  return String(value || '').toLowerCase() === 'model' ? 'assistant' : String(value || '').toLowerCase();
+}
+
+function getChatCompletionSettings(hostWindow, apiWindow) {
+  return getHostContexts(hostWindow, apiWindow)
+    .map((context) => context?.chatCompletionSettings)
+    .find((settings) => settings && typeof settings === 'object') || null;
+}
+
+function isGeminiChatConnection(hostWindow, apiWindow) {
+  const source = String(getChatCompletionSettings(hostWindow, apiWindow)?.chat_completion_source || '').toLowerCase();
+  return source === 'makersuite' || source === 'vertexai';
+}
+
+function expandPresetPrompt(content, surfaces) {
+  const source = String(content || '');
+  const expanded = callFirstAvailable(surfaces, 'substitudeMacros', source);
+  return expanded === null ? source : String(expanded);
+}
+
+function buildGeminiCompatiblePresetRequest(api, request) {
+  if (typeof api?.getPreset !== 'function' || typeof api?.generateRaw !== 'function') return null;
+
+  let preset;
+  try {
+    preset = api.getPreset('in_use');
+  } catch {
+    return null;
+  }
+  const enabledPrompts = Array.isArray(preset?.prompts)
+    ? preset.prompts.filter((prompt) => prompt?.enabled !== false)
+    : [];
+  const lastPrompt = enabledPrompts.at(-1);
+  if (!lastPrompt || !['assistant', 'model'].includes(String(lastPrompt.role || '').toLowerCase())) {
+    return null;
+  }
+
+  const keptPrompts = enabledPrompts.slice(0, -1);
+  const relativePrompts = keptPrompts.filter((prompt) => prompt?.position?.type !== 'in_chat');
+  const presetInjects = keptPrompts
+    .filter((prompt) => prompt?.position?.type === 'in_chat')
+    .sort((left, right) => {
+      const depthDiff = Number(left.position?.depth || 0) - Number(right.position?.depth || 0);
+      return depthDiff || Number(left.position?.order || 0) - Number(right.position?.order || 0);
+    })
+    .map((prompt) => ({
+      role: normalizePromptRole(prompt.role),
+      content: expandPresetPrompt(prompt.content, request.surfaces),
+      position: 'in_chat',
+      depth: Number(prompt.position?.depth || 0),
+      should_scan: false
+    }))
+    .filter((prompt) => prompt.content.trim());
+  const orderedPrompts = relativePrompts
+    .map((prompt) => {
+      const placeholder = PRESET_PLACEHOLDER_IDS.get(String(prompt.id || ''));
+      if (placeholder) return placeholder;
+      return {
+        role: normalizePromptRole(prompt.role),
+        content: expandPresetPrompt(prompt.content, request.surfaces)
+      };
+    })
+    .filter((prompt) => typeof prompt === 'string' || prompt.content.trim());
+  orderedPrompts.push('user_input');
+
+  const settings = preset?.settings || {};
+  const customApi = {};
+  const copyNumber = (target, source, min = null, max = null) => {
+    if (!Number.isFinite(Number(source))) return;
+    let value = Number(source);
+    if (min !== null) value = Math.max(min, value);
+    if (max !== null) value = Math.min(max, value);
+    customApi[target] = value;
+  };
+  copyNumber('max_tokens', settings.max_completion_tokens);
+  copyNumber('temperature', settings.temperature, 0, 2);
+  copyNumber('frequency_penalty', settings.frequency_penalty, -2, 2);
+  copyNumber('presence_penalty', settings.presence_penalty, -2, 2);
+  copyNumber('top_p', settings.top_p, 0, 1);
+  copyNumber('top_k', settings.top_k, 0, 100);
+
+  return {
+    user_input: request.prompt,
+    ordered_prompts: orderedPrompts,
+    should_silence: true,
+    max_chat_history: 0,
+    injects: [...request.injects, ...presetInjects],
+    overrides: request.overrides,
+    custom_api: customApi,
+    generation_id: makeGenerationId()
   };
 }
 
@@ -447,15 +552,32 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             should_scan: false
           });
         }
-        text = await apiWindow.generate({
-          preset_name: 'in_use',
-          user_input: prompt,
-          should_silence: true,
-          max_chat_history: 0,
-          injects,
-          overrides: emptyPromptOverrides(),
-          generation_id: makeGenerationId()
-        });
+        const overrides = emptyPromptOverrides();
+        const surfaces = collectApiSurfaces(hostWindow, apiWindow);
+        let geminiPresetRequest = null;
+        let geminiPresetApi = null;
+        if (isGeminiChatConnection(hostWindow, apiWindow)) {
+          for (const api of surfaces) {
+            geminiPresetRequest = buildGeminiCompatiblePresetRequest(api, { prompt, injects, overrides, surfaces });
+            if (geminiPresetRequest) {
+              geminiPresetApi = api;
+              break;
+            }
+          }
+        }
+        if (geminiPresetRequest) {
+          text = await geminiPresetApi.generateRaw(geminiPresetRequest);
+        } else {
+          text = await apiWindow.generate({
+            preset_name: 'in_use',
+            user_input: prompt,
+            should_silence: true,
+            max_chat_history: 0,
+            injects,
+            overrides,
+            generation_id: makeGenerationId()
+          });
+        }
       } else {
         if (typeof apiWindow.generateRaw !== 'function') {
           throw new Error('未找到酒馆助手 generateRaw，请确认酒馆助手已启用。');
