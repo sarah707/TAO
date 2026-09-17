@@ -138,6 +138,11 @@
     return termId === CAMPAIGN_CONFIG.upperTermId;
   }
 
+  function shouldResetHomeworkMergeBoard(previousTermId, nextTermId) {
+    return nextTermId === CAMPAIGN_CONFIG.graduationTermId
+      && previousTermId !== CAMPAIGN_CONFIG.graduationTermId;
+  }
+
   function findCharactersForCourse(characters = [], courseName, identityText) {
     const normalizedCourseName = String(courseName || '').trim();
     const normalizedIdentity = String(identityText || '').trim();
@@ -480,6 +485,7 @@
     selectFirstClassIntroduction,
     selectRandomAPlusCourseId,
     canReceiveGraduationInternshipOffer,
+    shouldResetHomeworkMergeBoard,
     findCharactersForCourse,
     isStudentCouncilPresident,
     normalizeGeneratedCharactersForEvent,
