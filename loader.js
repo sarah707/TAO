@@ -1,4 +1,4 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917000737';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917002410';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';

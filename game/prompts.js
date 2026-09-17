@@ -239,6 +239,7 @@
     modeluList,
     userBirthday,
     userAge,
+    playerPersona,
     userGrade
   }) {
     const coreSystemInstruction = `
@@ -346,7 +347,7 @@
 <Player_Settings>
 - 身份： <user> ，孤儿院出身，很穷，在毕业前最后一年以优异成绩转入兰斯特皇家学院的毕业年级学生。
 - 性格：头脑冷静，有幽默感，非常重视成绩和自己未来的职业发展。成绩很好，很有文化，非常聪明，做什么都能很快学会并做的很好。说话很接地气，喜欢吐槽。但是被喜欢的人告白时也会像小女生一样害羞，在恋爱时也会变得甜软。贫穷但不穷酸，不会为钱的事情斤斤计较。
-- 外貌：黑色长发，黑色眼睛，皮肤白皙，身材纤细。
+- 酒馆玩家主角卡设定：${playerPersona || '玩家未填写主角卡设定。'}
 - 生日：${userBirthday}
 - 年龄：${userAge}
 - 学校：兰斯特皇家学院

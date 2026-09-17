@@ -34,12 +34,13 @@
   }
 
   async function bootstrapResponse() {
-    const [courseMap, schedule, homework] = await Promise.all([
+    const [courseMap, schedule, homework, playerProfile] = await Promise.all([
       readJsonFile('editsch-course-map.json'),
       readJsonFile('.editsch-schedule.txt'),
-      readJsonFile('.editsch-homework.txt')
+      readJsonFile('.editsch-homework.txt'),
+      Promise.resolve(bridge().getPlayerProfile())
     ]);
-    return { courseMap, schedule, homework, aiModels: null };
+    return { courseMap, schedule, homework, playerProfile, aiModels: null };
   }
 
   function createJob(payload) {

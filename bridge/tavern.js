@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917000737';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917002410';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917000737';
+} from './worldbook.js?build=20260917002410';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -123,7 +123,6 @@ function emptyPromptOverrides() {
     char_description: '',
     char_personality: '',
     scenario: '',
-    persona_description: '',
     dialogue_examples: '',
     chat_history: {
       prompts: [],
@@ -166,6 +165,16 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
   );
   return {
     version: 1,
+    getPlayerProfile() {
+      const context = getHostContext(hostWindow, apiWindow);
+      const name = String(context?.name1 || '').trim();
+      let description = '';
+      if (typeof context?.substituteParams === 'function') {
+        description = String(context.substituteParams('{{persona}}') || '').trim();
+        if (description === '{{persona}}') description = '';
+      }
+      return { name, description };
+    },
     async loadGameStorage() {
       if (typeof helper?.getVariables !== 'function') {
         throw new Error('当前酒馆助手缺少对话变量读取接口，无法读取跨设备存档；请更新并启用酒馆助手。');
