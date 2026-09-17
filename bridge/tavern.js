@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917224133';
-import { buildExportWorldbook } from './worldbook.js?build=20260917224133';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917225537';
+import { buildExportWorldbook } from './worldbook.js?build=20260917225537';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -458,7 +458,7 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
     const eventName = context?.eventTypes?.CHAT_COMPLETION_SETTINGS_READY || 'chat_completion_settings_ready';
     if (!eventSource || (typeof eventSource.makeLast !== 'function' && typeof eventSource.on !== 'function')) continue;
     let capturedMessages = null;
-    const listener = (completion) => {
+    const listener = async (completion) => {
       options.onPromptReady?.();
       if (!Array.isArray(completion?.messages)) return;
       if (options.removeTrailingModelPrompt) {
@@ -476,6 +476,8 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
         role: message?.role,
         content: message?.content
       }));
+      // 酒馆会等待最终提示词事件结束，再发送模型请求。
+      await options.onCaptured?.(capturedMessages);
     };
     if (typeof eventSource.makeLast === 'function') {
       eventSource.makeLast(eventName, listener);
@@ -579,28 +581,16 @@ function isImagePayload(payload) {
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
 }
 
-async function appendTextExchangeToChat(helper, prompt, response, textPresetMode, capturedFinalPrompt, includePrompt) {
-  const responseMessage = String(response || '').trim();
-  if (!responseMessage) return;
+async function appendTextMessageToChat(helper, role, message, data) {
   if (typeof helper?.createChatMessages !== 'function') {
     throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整提示词和 AI 回复写入聊天楼层；请更新酒馆助手。');
   }
-  const messages = [];
-  if (includePrompt) {
-    messages.push({
-      role: 'user',
-      message: wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt),
-      data: { nobleSchoolGamePrompt: true },
-      extra: { source: 'noble-school-tavern-card' }
-    });
-  }
-  messages.push({
-    role: 'assistant',
-    message: responseMessage,
-    data: { nobleSchoolGameResponse: true },
+  await helper.createChatMessages([{
+    role,
+    message,
+    data,
     extra: { source: 'noble-school-tavern-card' }
-  });
-  await helper.createChatMessages(messages, {
+  }], {
     insert_before: 'end',
     refresh: 'all'
   });
@@ -619,9 +609,8 @@ async function saveChatMetadataDurably(hostWindow, apiWindow) {
   throw new Error('当前酒馆没有提供立即保存对话变量的接口；为避免刷新后回档，本次存档未标记为成功。请更新 SillyTavern。');
 }
 
-export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMode = 'github' }) {
+export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
   const helper = apiWindow.TavernHelper || apiWindow;
-  const isTestBuild = String(buildMode).toLowerCase() === 'github';
   const getCurrentChatId = () => String(
     hostWindow?.SillyTavern?.getCurrentChatId?.()
       || apiWindow?.SillyTavern?.getCurrentChatId?.()
@@ -824,6 +813,19 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMo
       const prompt = String(payload?.prompt || '').trim();
       if (!prompt) throw new Error('文字生成提示词为空。');
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
+      let promptWrite = null;
+      const writePrompt = (messages) => {
+        if (!promptWrite) {
+          const captured = Array.isArray(messages) && messages.length > 0;
+          const visiblePrompt = captured
+            ? formatCapturedFinalPrompt(messages)
+            : buildVisibleTextPrompt(payload, textPresetMode);
+          promptWrite = appendTextMessageToChat(helper, 'user',
+            wrapPromptForChat(visiblePrompt, textPresetMode, captured),
+            { nobleSchoolGamePrompt: true });
+        }
+        return promptWrite;
+      };
       const penultimateUserPrompt = buildPenultimateUserInstruction(payload);
       const removeTrailingModelPrompt = textPresetMode === 'tavern' && isGeminiChatConnection(hostWindow, apiWindow);
       const presetPromptSuppression = textPresetMode === 'tavern'
@@ -833,7 +835,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMo
         removeTrailingModelPrompt,
         penultimateUserPrompt,
         eventPrompt: prompt,
-        onPromptReady: () => presetPromptSuppression.restore()
+        onPromptReady: () => presetPromptSuppression.restore(),
+        onCaptured: writePrompt
       });
       if (textPresetMode === 'tavern' && !finalPromptCapture.available) {
         presetPromptSuppression.restore();
@@ -843,6 +846,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMo
       const generationId = makeGenerationId();
       const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow);
       try {
+        if (!finalPromptCapture.available) await writePrompt();
         if (textPresetMode === 'tavern') {
           if (typeof apiWindow.generate !== 'function') {
             throw new Error('当前酒馆助手缺少 generate 接口，无法读取酒馆当前预设；请更新酒馆助手，或在“系统”页切换为“游戏内置预设”。');
@@ -901,22 +905,26 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMo
           });
         }
       } catch (error) {
-        throw enhanceGenerationError(error, generationErrorCapture.getError(), {
+        const diagnostic = enhanceGenerationError(error, generationErrorCapture.getError(), {
           generationId,
           textPresetMode
         });
+        await writePrompt(finalPromptCapture.getMessages());
+        await appendTextMessageToChat(helper, 'assistant',
+          `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic?.message || diagnostic)}`,
+          { nobleSchoolGameError: true });
+        throw diagnostic;
       } finally {
         generationErrorCapture.restore();
         presetPromptSuppression.restore();
         finalPromptCapture.stop();
       }
-      const capturedMessages = finalPromptCapture.getMessages();
-      const capturedFinalPrompt = Array.isArray(capturedMessages) && capturedMessages.length > 0;
-      const visiblePrompt = capturedFinalPrompt
-        ? formatCapturedFinalPrompt(capturedMessages)
-        : buildVisibleTextPrompt(payload, textPresetMode);
+      await writePrompt(finalPromptCapture.getMessages());
       const fullText = typeof text === 'string' ? text : String(text?.content || '');
-      await appendTextExchangeToChat(helper, visiblePrompt, fullText, textPresetMode, capturedFinalPrompt, isTestBuild);
+      // 聊天楼层先保存原文；标签解析、文字清理只影响之后返回给游戏的副本。
+      await appendTextMessageToChat(helper, 'assistant',
+        fullText || '【贵族学校的特招生｜AI 返回内容为空】',
+        fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true });
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
         raw: { fullText }
