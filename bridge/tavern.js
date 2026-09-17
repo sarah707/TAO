@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917165032';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917165252';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917165032';
+} from './worldbook.js?build=20260917165252';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -345,8 +345,21 @@ async function appendTextExchangeToChat(helper, prompt, response, textPresetMode
     }
   ], {
     insert_before: 'end',
-    refresh: 'affected'
+    refresh: 'all'
   });
+}
+
+async function saveChatMetadataDurably(hostWindow, apiWindow) {
+  const candidates = [
+    ...getHostContexts(hostWindow, apiWindow),
+    ...collectApiSurfaces(hostWindow, apiWindow)
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate?.saveMetadata !== 'function') continue;
+    await candidate.saveMetadata();
+    return;
+  }
+  throw new Error('当前酒馆没有提供立即保存对话变量的接口；为避免刷新后回档，本次存档未标记为成功。请更新 SillyTavern。');
 }
 
 export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
@@ -430,6 +443,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         ? mapStoredImageUrls(data, (value) => normalizeServerImagePath(value, hostWindow))
         : null;
       await helper.insertOrAssignVariables({ [CHAT_STORAGE_VARIABLE]: stored }, { type: 'chat' });
+      await saveChatMetadataDurably(hostWindow, apiWindow);
       return { ok: true, chatId: currentChatId };
     },
     async uploadImage({ data, mimeType, fileName } = {}) {

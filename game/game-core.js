@@ -75,6 +75,28 @@
     return Math.max(min, Math.min(max, value));
   }
 
+  function getStoredSaveTimestamp(value) {
+    const candidates = [
+      value?.savedAt,
+      value?.meta?.updatedAt,
+      value?.runtime?.meta?.updatedAt,
+      value?.meta?.createdAt,
+      value?.runtime?.meta?.createdAt
+    ];
+    return candidates.reduce((latest, candidate) => {
+      const timestamp = Date.parse(String(candidate || ''));
+      return Number.isFinite(timestamp) ? Math.max(latest, timestamp) : latest;
+    }, 0);
+  }
+
+  function selectNewestStoredValue(localValue, remoteValue) {
+    if (localValue === undefined) return { source: 'remote', value: remoteValue };
+    if (remoteValue === undefined) return { source: 'local', value: localValue };
+    return getStoredSaveTimestamp(localValue) > getStoredSaveTimestamp(remoteValue)
+      ? { source: 'local', value: localValue }
+      : { source: 'remote', value: remoteValue };
+  }
+
   function evaluateGraduation({ regularGrades = [], specialProgress = [], businessScore = 0 } = {}) {
     const gradeOrder = ['F', 'D', 'C', 'B', 'A', 'A+'];
     const minimumRank = gradeOrder.indexOf(CAMPAIGN_CONFIG.minimumGraduationGrade);
@@ -548,6 +570,8 @@
     getWeekStart,
     getWeekDates,
     clamp,
+    getStoredSaveTimestamp,
+    selectNewestStoredValue,
     evaluateTermStanding,
     evaluateGraduation,
     selectFirstClassIntroduction,
