@@ -19,6 +19,7 @@
       --warning: #fff4d5;
       --error: #ffe1e1;
       --shadow: 0 22px 50px rgba(83, 58, 140, 0.14);
+      --title-safe-height: 66px;
     }
 
     * {
@@ -713,7 +714,10 @@
 
     .modal-backdrop {
       position: fixed;
-      inset: 0;
+      top: var(--title-safe-height);
+      right: 0;
+      bottom: 0;
+      left: 0;
       z-index: 19;
       background: rgba(36, 26, 65, 0.45);
       display: flex;
@@ -867,8 +871,11 @@
 
     .loading-backdrop {
       position: fixed;
-      inset: 0;
-      z-index: 80;
+      top: var(--title-safe-height);
+      right: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 19;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -1417,10 +1424,10 @@
     <button id="gameInfoButton" class="title-info-button" type="button" aria-label="查看游戏信息" title="游戏信息">i</button>
   </div>
   <div id="app"></div>
-  <script src="tavern-runtime.js?build=20260917213143"></script>
-  <script src="client-common.js?build=20260917213143"></script>
-  <script src="game-core.js?build=20260917213143"></script>
-  <script src="prompts.js?build=20260917213143"></script>
-  <script src="game.js?build=20260917213143"></script>
+  <script src="tavern-runtime.js?build=20260917215146"></script>
+  <script src="client-common.js?build=20260917215146"></script>
+  <script src="game-core.js?build=20260917215146"></script>
+  <script src="prompts.js?build=20260917215146"></script>
+  <script src="game.js?build=20260917215146"></script>
 </body>
 </html>
