@@ -17,7 +17,7 @@
     "酒馆助手",
     "贵族学校"
   ],
-  "create_date": "2026-09-17T17:27:29.793Z",
+  "create_date": "2026-09-17T17:35:26.318Z",
   "data": {
     "name": "贵族学校的特招生",
     "description": "大学毕业前的最后一年，你以特招生身份转入贵族学院。游戏规则、剧情和存档由浮窗管理。",
@@ -57,6 +57,23 @@
         "role": "system"
       },
       "regex_scripts": [
+        {
+          "id": "noble-school-hide-game-data-display",
+          "scriptName": "隐藏游戏数据标签",
+          "findRegex": "<(newHistory|newLocation|newCharacter|newCloth)>(?:(?!<\\1>)[\\s\\S])*?<\\/\\1>",
+          "replaceString": "",
+          "trimStrings": [],
+          "placement": [
+            2
+          ],
+          "disabled": false,
+          "markdownOnly": true,
+          "promptOnly": false,
+          "runOnEdit": true,
+          "substituteRegex": 0,
+          "minDepth": null,
+          "maxDepth": null
+        },
         {
           "id": "noble-school-hide-launcher-display",
           "scriptName": "隐藏游戏启动说明",
