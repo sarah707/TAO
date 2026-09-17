@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917182453';
-import { buildExportWorldbook } from './worldbook.js?build=20260917182453';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917185733';
+import { buildExportWorldbook } from './worldbook.js?build=20260917185733';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -555,8 +555,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       };
     },
     async saveGameStorage(data, expectedChatId = '') {
-      if (typeof helper?.insertOrAssignVariables !== 'function') {
-        throw new Error('当前酒馆助手缺少对话变量写入接口，无法保存跨设备存档；请更新并启用酒馆助手。');
+      if (typeof helper?.getVariables !== 'function' || typeof helper?.replaceVariables !== 'function') {
+        throw new Error('当前酒馆助手缺少对话变量完整覆盖接口，无法安全保存或回滚存档；请更新并启用酒馆助手。');
       }
       const currentChatId = getCurrentChatId();
       if (expectedChatId && currentChatId && String(expectedChatId) !== currentChatId) {
@@ -565,7 +565,11 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const stored = data && typeof data === 'object'
         ? mapStoredImageUrls(data, (value) => normalizeServerImagePath(value, hostWindow))
         : null;
-      await helper.insertOrAssignVariables({ [CHAT_STORAGE_VARIABLE]: stored }, { type: 'chat' });
+      const variables = await helper.getVariables({ type: 'chat' });
+      await helper.replaceVariables({
+        ...(variables && typeof variables === 'object' ? variables : {}),
+        [CHAT_STORAGE_VARIABLE]: stored
+      }, { type: 'chat' });
       await saveChatMetadataDurably(hostWindow, apiWindow);
       return { ok: true, chatId: currentChatId };
     },
