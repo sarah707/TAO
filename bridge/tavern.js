@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917170219';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917172012';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917170219';
+} from './worldbook.js?build=20260917172012';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -272,9 +272,49 @@ function removePromptContent(messages, targetContent) {
   }
 }
 
+function appendTextToMessage(message, text) {
+  const addition = String(text || '').trim();
+  if (!addition || !message) return false;
+  if (typeof message.content === 'string') {
+    message.content = `${message.content.trimEnd()}\n${addition}`;
+    return true;
+  }
+  if (!Array.isArray(message.content)) return false;
+  const lastTextPart = [...message.content].reverse().find((part) => part?.type === 'text' && typeof part.text === 'string');
+  if (lastTextPart) lastTextPart.text = `${lastTextPart.text.trimEnd()}\n${addition}`;
+  else message.content.push({ type: 'text', text: addition });
+  return true;
+}
+
+function removeEmptyReorderedPromptWrappers(messages) {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (typeof message?.content !== 'string') continue;
+    let remaining = message.content
+      .replace(/<latest_user_input\b[^>]*>\s*<\/latest_user_input>/gi, '')
+      .replace(/<previous_round\b[^>]*>\s*<\/previous_round>/gi, '')
+      .trim();
+    if (/^<\/previous_round>$/i.test(remaining)) {
+      const previousMessage = messages[index - 1];
+      const previousContent = formatFinalPromptContent(previousMessage?.content);
+      if (/<previous_round\b[^>]*>/i.test(previousContent) && !/<\/previous_round>/i.test(previousContent)) {
+        appendTextToMessage(previousMessage, '</previous_round>');
+      }
+      messages.splice(index, 1);
+      continue;
+    }
+    if (!remaining) {
+      messages.splice(index, 1);
+      continue;
+    }
+    message.content = remaining;
+  }
+}
+
 function moveRequiredUserPromptsToEnd(messages, penultimateUserPrompt, eventPrompt) {
   removePromptContent(messages, penultimateUserPrompt);
   removePromptContent(messages, eventPrompt);
+  removeEmptyReorderedPromptWrappers(messages);
   const penultimate = String(penultimateUserPrompt || '').trim();
   const event = String(eventPrompt || '').trim();
   if (penultimate) messages.push({ role: 'user', content: penultimate });
