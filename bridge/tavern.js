@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917165252';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917170219';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917165252';
+} from './worldbook.js?build=20260917170219';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -149,19 +149,18 @@ function sanitizeUploadName(value) {
 }
 
 function buildOrderedPrompts(payload) {
-  const options = payload?.options || {};
   const ordered = [];
-  if (options.systemInstruction) {
-    ordered.push({ role: 'system', content: String(options.systemInstruction) });
+  const systemInstruction = buildBuiltInSystemInstruction(payload);
+  const supportingContextInstruction = buildSupportingContextInjection(payload);
+  const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
+  if (systemInstruction) {
+    ordered.push({ role: 'system', content: systemInstruction });
   }
-  if (options.assistantInstruction) {
-    ordered.push({ role: 'assistant', content: String(options.assistantInstruction) });
+  if (supportingContextInstruction) {
+    ordered.push({ role: 'assistant', content: supportingContextInstruction });
   }
-  if (options.locationInstruction) {
-    ordered.push({
-      role: 'assistant',
-      content: `以下是此前已经确定的地点描述，后续章节可据此保持一致：\n\n${String(options.locationInstruction)}`
-    });
+  if (penultimateUserInstruction) {
+    ordered.push({ role: 'user', content: penultimateUserInstruction });
   }
   ordered.push('user_input');
   return ordered;
@@ -193,6 +192,15 @@ function buildPenultimateUserInstruction(payload) {
     .join('\n\n');
 }
 
+function buildBuiltInSystemInstruction(payload) {
+  const options = payload?.options || {};
+  const separated = [options.builtInStyleInstruction, options.scriptSettingsInstruction]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+    .join('\n\n');
+  return separated || String(options.systemInstruction || '').trim();
+}
+
 function buildVisibleTextPrompt(payload, textPresetMode) {
   const options = payload?.options || {};
   const prompt = String(payload?.prompt || '').trim();
@@ -208,9 +216,9 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   } else {
-    pushSection('SYSTEM｜游戏完整内置预设', options.systemInstruction);
-    pushSection('ASSISTANT｜旧章节正文', options.assistantInstruction);
-    pushSection('ASSISTANT｜地点资料', options.locationInstruction);
+    pushSection('SYSTEM｜游戏内置文风与剧本设定', buildBuiltInSystemInstruction(payload));
+    pushSection('ASSISTANT｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
+    pushSection('USER｜倒数第二条｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   }
 
@@ -240,6 +248,39 @@ function formatCapturedFinalPrompt(messages) {
   }).join('\n\n');
 }
 
+function removePromptContent(messages, targetContent) {
+  const target = String(targetContent || '').trim();
+  if (!target) return;
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (typeof message?.content === 'string') {
+      if (!message.content.includes(target)) continue;
+      const remaining = message.content.split(target).join('').trim();
+      if (remaining) message.content = remaining;
+      else messages.splice(index, 1);
+      continue;
+    }
+    if (!Array.isArray(message?.content)) continue;
+    message.content = message.content
+      .map((part) => {
+        if (part?.type !== 'text' || typeof part.text !== 'string' || !part.text.includes(target)) return part;
+        const remaining = part.text.split(target).join('').trim();
+        return remaining ? { ...part, text: remaining } : null;
+      })
+      .filter(Boolean);
+    if (message.content.length === 0) messages.splice(index, 1);
+  }
+}
+
+function moveRequiredUserPromptsToEnd(messages, penultimateUserPrompt, eventPrompt) {
+  removePromptContent(messages, penultimateUserPrompt);
+  removePromptContent(messages, eventPrompt);
+  const penultimate = String(penultimateUserPrompt || '').trim();
+  const event = String(eventPrompt || '').trim();
+  if (penultimate) messages.push({ role: 'user', content: penultimate });
+  if (event) messages.push({ role: 'user', content: event });
+}
+
 function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
   for (const context of getHostContexts(hostWindow, apiWindow)) {
     const eventSource = context?.eventSource;
@@ -247,6 +288,7 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
     if (!eventSource || (typeof eventSource.makeLast !== 'function' && typeof eventSource.on !== 'function')) continue;
     let capturedMessages = null;
     const listener = (completion) => {
+      options.onPromptReady?.();
       if (!Array.isArray(completion?.messages)) return;
       if (options.removeTrailingModelPrompt) {
         const lastMessage = completion.messages.at(-1);
@@ -254,6 +296,11 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
           completion.messages.pop();
         }
       }
+      moveRequiredUserPromptsToEnd(
+        completion.messages,
+        options.penultimateUserPrompt,
+        options.eventPrompt
+      );
       capturedMessages = completion.messages.map((message) => ({
         role: message?.role,
         content: message?.content
@@ -311,6 +358,44 @@ function getChatCompletionSettings(hostWindow, apiWindow) {
   return getHostContexts(hostWindow, apiWindow)
     .map((context) => context?.chatCompletionSettings)
     .find((settings) => settings && typeof settings === 'object') || null;
+}
+
+const LAST_USER_MESSAGE_MACRO_PATTERN = /\{\{\s*lastUserMessage\s*\}\}/i;
+
+function suppressLastUserMessagePresetPrompts(hostWindow, apiWindow) {
+  const settings = getChatCompletionSettings(hostWindow, apiWindow);
+  const rawPrompts = Array.isArray(settings?.prompts) ? settings.prompts : null;
+  const surfaces = collectApiSurfaces(hostWindow, apiWindow);
+  const preset = callFirstAvailable(surfaces, 'getPreset', 'in_use');
+  const presetPrompts = Array.isArray(preset?.prompts) ? preset.prompts : null;
+  const detected = (presetPrompts || rawPrompts || []).filter((prompt) => (
+    prompt?.enabled !== false
+      && LAST_USER_MESSAGE_MACRO_PATTERN.test(String(prompt?.content || ''))
+  ));
+  if (detected.length === 0) {
+    return { restore() {} };
+  }
+  if (!rawPrompts) {
+    throw new Error('检测到酒馆预设含有 {{lastUserMessage}}，但当前酒馆没有开放可在渲染前过滤的预设数据；请更新 SillyTavern。');
+  }
+  const detectedIds = new Set(detected.map((prompt) => String(prompt?.id || prompt?.identifier || '')).filter(Boolean));
+  const targets = rawPrompts.filter((prompt) => (
+    LAST_USER_MESSAGE_MACRO_PATTERN.test(String(prompt?.content || ''))
+      || detectedIds.has(String(prompt?.id || prompt?.identifier || ''))
+  ));
+  if (targets.length === 0) {
+    throw new Error('检测到酒馆预设含有 {{lastUserMessage}}，但无法定位对应的原始预设条目。');
+  }
+  const originals = targets.map((prompt) => ({ prompt, content: prompt.content }));
+  for (const { prompt } of originals) prompt.content = '';
+  let restored = false;
+  return {
+    restore() {
+      if (restored) return;
+      restored = true;
+      for (const original of originals) original.prompt.content = original.content;
+    }
+  };
 }
 
 function isGeminiChatConnection(hostWindow, apiWindow) {
@@ -558,12 +643,20 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const prompt = String(payload?.prompt || '').trim();
       if (!prompt) throw new Error('文字生成提示词为空。');
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
+      const penultimateUserPrompt = buildPenultimateUserInstruction(payload);
       const removeTrailingModelPrompt = textPresetMode === 'tavern' && isGeminiChatConnection(hostWindow, apiWindow);
+      const presetPromptSuppression = textPresetMode === 'tavern'
+        ? suppressLastUserMessagePresetPrompts(hostWindow, apiWindow)
+        : { restore() {} };
       const finalPromptCapture = createFinalPromptCapture(hostWindow, apiWindow, {
-        removeTrailingModelPrompt
+        removeTrailingModelPrompt,
+        penultimateUserPrompt,
+        eventPrompt: prompt,
+        onPromptReady: () => presetPromptSuppression.restore()
       });
-      if (removeTrailingModelPrompt && !finalPromptCapture.available) {
-        throw new Error('当前酒馆助手未开放最终提示词事件，无法在 Gemini 请求前安全删除末尾 model 提示词；请更新酒馆助手。');
+      if (textPresetMode === 'tavern' && !finalPromptCapture.available) {
+        presetPromptSuppression.restore();
+        throw new Error('当前酒馆助手未开放最终提示词事件，无法保证输出格式和事件提示词位于请求末尾；请更新酒馆助手。');
       }
       let text;
       try {
@@ -625,6 +718,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           });
         }
       } finally {
+        presetPromptSuppression.restore();
         finalPromptCapture.stop();
       }
       const capturedMessages = finalPromptCapture.getMessages();
