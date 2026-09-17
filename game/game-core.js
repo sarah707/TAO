@@ -25,7 +25,7 @@
     playerStartingAge: 21,
     assistantCourse: Object.freeze({ id: 'assistant-microeconomics', courseName: '微观经济学' }),
     businessEndingScore: 100,
-    graduationActionProgress: 10,
+    graduationActionProgress: 8,
     upperTermMinimumGrade: 'A',
     minimumGraduationGrade: 'B',
     minimumGraduationProgress: 80,
