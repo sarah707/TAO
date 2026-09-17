@@ -1,10 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917174417';
-import {
-  buildGraduationWorldbook,
-  buildLiveWorldbookName,
-  buildLiveWorldbookPromptContext,
-  mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917174417';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917175806';
+import { buildExportWorldbook } from './worldbook.js?build=20260917175806';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -796,80 +791,13 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         raw: { fullText }
       };
     },
-    async syncWorldbook(runtime, previousSync = {}, options = {}) {
-      if (typeof helper.getOrCreateChatWorldbook !== 'function'
-        || typeof helper.getWorldbook !== 'function'
-        || (typeof helper.updateWorldbookWith !== 'function' && typeof helper.replaceWorldbook !== 'function')) {
-        throw new Error('当前酒馆助手缺少对话世界书读取或更新 API，请更新酒馆助手。');
-      }
-      const boundWorldbook = typeof helper.getChatWorldbookName === 'function'
-        ? helper.getChatWorldbookName('current')
-        : null;
-      let chatId = getCurrentChatId();
-      if (!chatId && boundWorldbook && previousSync?.worldbookName === boundWorldbook) {
-        chatId = String(previousSync.chatId || `worldbook-${boundWorldbook}`);
-      }
-      if (!chatId && boundWorldbook) chatId = `worldbook-${boundWorldbook}`;
-      if (!chatId) chatId = `chat-${Date.now()}-${globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)}`;
-      const desiredName = buildLiveWorldbookName(runtime, chatId);
-      const worldbookName = await helper.getOrCreateChatWorldbook('current', desiredName);
-      const sameChat = previousSync?.chatId === chatId && previousSync?.worldbookName === worldbookName;
-      const baseSync = sameChat ? previousSync : {};
-      let merged;
-      let updatedEntries;
-      if (typeof helper.updateWorldbookWith === 'function') {
-        updatedEntries = await helper.updateWorldbookWith(worldbookName, (worldbook) => {
-          merged = mergeLiveWorldbookEntries(worldbook, runtime, baseSync);
-          return merged.entries;
-        }, { render: 'debounced' });
-      } else {
-        const currentEntries = await helper.getWorldbook(worldbookName);
-        merged = mergeLiveWorldbookEntries(currentEntries, runtime, baseSync);
-        await helper.replaceWorldbook(worldbookName, merged.entries, { render: 'debounced' });
-        updatedEntries = merged.entries;
-      }
-      if (!merged) merged = mergeLiveWorldbookEntries(updatedEntries, runtime, baseSync);
-      return {
-        worldbookName,
-        chatId,
-        sync: {
-          ...merged.sync,
-          status: 'success',
-          chatId,
-          worldbookName,
-          updatedAt: new Date().toISOString()
-        },
-        promptContext: buildLiveWorldbookPromptContext(updatedEntries || merged.entries, options.characterIds || [])
-      };
-    },
-    async exportGraduationWorldbook(runtime) {
-      if (typeof helper.getOrCreateChatWorldbook === 'function' && typeof helper.getWorldbook === 'function') {
-        const synced = await this.syncWorldbook(runtime, runtime?.meta?.worldbookSync || {}, {
-          characterIds: (runtime?.characters || []).map((character) => character.id)
-        });
-        return {
-          worldbookName: synced.worldbookName,
-          created: false,
-          boundToCurrentChat: true,
-          existingChatWorldbook: synced.worldbookName,
-          sync: synced.sync
-        };
-      }
-      if (typeof apiWindow.createOrReplaceWorldbook !== 'function') {
+    async exportWorldbook(runtime, promptSettings) {
+      if (typeof helper.createOrReplaceWorldbook !== 'function') {
         throw new Error('当前酒馆助手没有提供世界书写入 API，请更新酒馆助手。');
       }
-      const { worldbookName, entries } = buildGraduationWorldbook(runtime);
-      const created = await apiWindow.createOrReplaceWorldbook(worldbookName, entries, { render: 'immediate' });
-      let boundToCurrentChat = false;
-      let existingChatWorldbook = null;
-      if (typeof apiWindow.getChatWorldbookName === 'function') {
-        existingChatWorldbook = apiWindow.getChatWorldbookName('current');
-      }
-      if (!existingChatWorldbook && typeof apiWindow.rebindChatWorldbook === 'function') {
-        await apiWindow.rebindChatWorldbook('current', worldbookName);
-        boundToCurrentChat = true;
-      }
-      return { worldbookName, created, boundToCurrentChat, existingChatWorldbook };
+      const { worldbookName, entries } = buildExportWorldbook(runtime, promptSettings);
+      const created = await helper.createOrReplaceWorldbook(worldbookName, entries, { render: 'immediate' });
+      return { worldbookName, created };
     }
   };
 }

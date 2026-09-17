@@ -11,7 +11,7 @@ function safeWorldbookPart(value) {
 
 function formatCreatedAt(value) {
   const date = new Date(value || Date.now());
-  if (Number.isNaN(date.getTime())) return '毕业存档';
+  if (Number.isNaN(date.getTime())) return '存档';
   const pad = (part) => String(part).padStart(2, '0');
   return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}`;
 }
@@ -36,11 +36,9 @@ function entry(name, content, options = {}) {
     probability: 100,
     recursion: { prevent_incoming: false, prevent_outgoing: false, delay_until: null },
     effect: { sticky: null, cooldown: null, delay: null },
-    extra: { source: 'noble-school-tavern-card', schemaVersion: 2, ...(options.extra || {}) }
+    extra: { source: 'noble-school-tavern-card', schemaVersion: 3, ...(options.extra || {}) }
   };
 }
-
-export const LIVE_WORLDBOOK_SOURCE = 'noble-school-tavern-card';
 
 function buildCourseLines(runtime) {
   return Object.entries(runtime?.courses || {}).map(([courseId, course]) => {
@@ -51,28 +49,25 @@ function buildCourseLines(runtime) {
   });
 }
 
-function buildPlayerContent(runtime) {
+function buildPlayerProgressContent(runtime) {
   const player = runtime?.player || {};
-  const ending = runtime?.meta?.ending || {};
-  const lovers = (runtime?.characters || []).filter((character) => character?.isLover).map((character) => character.name);
+  const lovers = (runtime?.characters || [])
+    .filter((character) => character?.isLover)
+    .map((character) => character.name);
   const courseLines = buildCourseLines(runtime);
   return [
-    '<GraduationProfile>',
-    `姓名：${cleanLine(player.name)}`,
-    `年龄：${cleanLine(player.age)}`,
-    `性别：${cleanLine(player.gender)}`,
-    `生日：${cleanLine(player.birthdayMonth)}月${cleanLine(player.birthdayDay)}日`,
-    `毕业结局：${cleanLine(ending.title, '顺利毕业')}`,
+    '<Player_Progress>',
+    `当前日期：${cleanLine(player.currentDate)}`,
+    `当前资金：${Math.round(Number(player.money || 0))}`,
+    `疲劳度：${Math.round(Number(player.fatigue || 0))}`,
+    `灵感：${Math.round(Number(player.inspiration || 0))}`,
     `毕业实习：${cleanLine(player.graduationInternship)}`,
     `毕业论文进度：${Math.round(Number(player.graduationThesisProgress || 0))}%`,
     `创业企划进度：${Math.round(Number(player.bizProgress || 0))}%`,
-    `毕业时资金：${Math.round(Number(player.money || 0))}`,
     `恋人：${lovers.length ? lovers.join('、') : '无'}`,
-    '课程成绩：',
+    '课程状态：',
     ...(courseLines.length ? courseLines : ['- 无记录']),
-    '',
-    '续写约定：以上内容是小游戏通关后的既定事实。后续对话从毕业之后开始，保留人物已经建立的关系和共同经历，不把小游戏重新开局。',
-    '</GraduationProfile>'
+    '</Player_Progress>'
   ].join('\n');
 }
 
@@ -89,7 +84,6 @@ function buildHistoryContent(runtime) {
 function buildCharacterContent(character) {
   return [
     '<CharacterProfile>',
-    '【可自由编辑】游戏生成剧情时会重新读取本条目，并以玩家修改后的文字为准。',
     `姓名：${cleanLine(character?.name)}`,
     `年龄：${cleanLine(character?.age)}`,
     `性别：${cleanLine(character?.gender)}`,
@@ -110,134 +104,24 @@ function buildCharacterContent(character) {
   ].join('\n');
 }
 
-function liveExtra(recordType, recordId = '') {
-  return { recordType, recordId: String(recordId || '') };
-}
-
-function getRecord(entryValue, recordType, recordId = null) {
-  return entryValue?.extra?.source === LIVE_WORLDBOOK_SOURCE
-    && entryValue?.extra?.recordType === recordType
-    && (recordId === null || String(entryValue?.extra?.recordId || '') === String(recordId));
-}
-
-function formatHistoryLine(item) {
-  if (typeof item === 'string') return item.trim();
-  const date = cleanLine(item?.date || item?.dateText, '');
-  const text = cleanLine(item?.text || item?.content || item?.summary, '');
-  return [date, text].filter(Boolean).join(' ');
-}
-
-function appendHistoryContent(content, lines) {
-  if (!lines.length) return content;
-  const current = String(content || '').trim();
-  const addition = lines.join('\n');
-  if (!current) return `<SchoolHistory>\n${addition}\n</SchoolHistory>`;
-  const closingTag = '</SchoolHistory>';
-  const closingIndex = current.lastIndexOf(closingTag);
-  if (closingIndex >= 0) {
-    const before = current.slice(0, closingIndex).trimEnd();
-    const after = current.slice(closingIndex + closingTag.length);
-    return `${before}\n${addition}\n${closingTag}${after}`;
-  }
-  return `${current}\n${addition}`;
-}
-
-export function buildLiveWorldbookName(runtime, chatId = '') {
-  const playerName = safeWorldbookPart(runtime?.player?.name);
-  const chatPart = safeWorldbookPart(chatId || runtime?.meta?.runId || formatCreatedAt(runtime?.meta?.createdAt)).slice(-24);
-  return `贵族学校的特招生·${playerName}·${chatPart}`;
-}
-
-export function mergeLiveWorldbookEntries(currentEntries, runtime, previousSync = {}) {
-  const entries = Array.isArray(currentEntries)
-    ? currentEntries
-      .filter((item) => !getRecord(item, 'player-profile'))
-      .map((item) => ({ ...item }))
-    : [];
-
-  const history = Array.isArray(runtime?.history) ? runtime.history : [];
-  let historyEntry = entries.find((item) => getRecord(item, 'player-history'));
-  if (!historyEntry) {
-    historyEntry = entry('主角履历（可编辑）', buildHistoryContent(runtime), {
-      constant: true,
-      order: 120,
-      extra: { ...liveExtra('player-history'), syncedHistoryCount: history.length }
-    });
-    entries.push(historyEntry);
-  } else {
-    const priorCount = Math.max(0, Math.min(
-      history.length,
-      Number(previousSync?.historyCount ?? historyEntry?.extra?.syncedHistoryCount ?? 0) || 0
-    ));
-    const newLines = history.slice(priorCount).map(formatHistoryLine).filter(Boolean);
-    historyEntry.content = appendHistoryContent(historyEntry.content, newLines);
-    historyEntry.extra = {
-      ...(historyEntry.extra || {}),
-      source: LIVE_WORLDBOOK_SOURCE,
-      schemaVersion: 2,
-      ...liveExtra('player-history'),
-      syncedHistoryCount: history.length
-    };
-  }
-
-  const knownCharacterIds = new Set(
-    entries
-      .filter((item) => getRecord(item, 'character-profile'))
-      .map((item) => String(item.extra.recordId || ''))
-      .filter(Boolean)
-  );
-  for (const [index, character] of (runtime?.characters || []).entries()) {
-    if (!character?.name || knownCharacterIds.has(String(character.id))) continue;
-    entries.push(entry(`角色·${character.name}（可编辑）`, buildCharacterContent(character), {
-      keys: [String(character.name)],
-      order: 110 - index,
-      extra: liveExtra('character-profile', character.id)
-    }));
-    knownCharacterIds.add(String(character.id));
-  }
-
-  return {
-    entries,
-    sync: {
-      historyCount: history.length,
-      characterIds: [...knownCharacterIds]
-    }
-  };
-}
-
-export function buildLiveWorldbookPromptContext(entries, characterIds = []) {
-  const wanted = new Set((characterIds || []).map(String));
-  const selected = (entries || []).filter((item) => {
-    if (getRecord(item, 'player-history')) return true;
-    return getRecord(item, 'character-profile') && wanted.has(String(item.extra.recordId || ''));
-  });
-  if (!selected.length) return '';
-  return [
-    '<EditableWorldbookContext>',
-    '以下资料来自当前对话专属世界书，玩家可能已手动修改。与游戏内部旧描述冲突时，以这里的当前文字为准。',
-    ...selected.map((item) => `\n## ${cleanLine(item.name)}\n${String(item.content || '').trim()}`),
-    '</EditableWorldbookContext>'
-  ].join('\n');
-}
-
-export function buildGraduationWorldbook(runtime) {
-  if (runtime?.meta?.ending?.type !== 'graduation') {
-    throw new Error('只有成功毕业的存档可以导出世界书。');
-  }
+export function buildExportWorldbook(runtime, promptSettings = {}) {
   const playerName = safeWorldbookPart(runtime?.player?.name);
   const runId = safeWorldbookPart(runtime?.meta?.runId || formatCreatedAt(runtime?.meta?.createdAt)).slice(0, 12);
   const worldbookName = `贵族学校的特招生·${playerName}·${formatCreatedAt(runtime?.meta?.createdAt)}·${runId}`;
-  const playerKeys = [runtime?.player?.name, '兰斯特皇家学院', '毕业'].filter(Boolean).map(String);
+  const worldBuilding = String(promptSettings?.worldBuilding || '').trim();
+  const playerSettings = String(promptSettings?.playerSettings || '').trim();
+  if (!worldBuilding || !playerSettings) {
+    throw new Error('导出世界书缺少世界观或主角设定。');
+  }
   const entries = [
-    entry('毕业后的主角资料', buildPlayerContent(runtime), { constant: true, order: 120 }),
-    entry('学院事件履历', buildHistoryContent(runtime), {
-      keys: [...new Set([...playerKeys, '履历', '回忆', '学院经历'])],
-      order: 110
-    }),
+    entry('世界观设定', worldBuilding, { constant: true, order: 150 }),
+    entry('主角设定', playerSettings, { constant: true, order: 140 }),
+    entry('主角当前状态', buildPlayerProgressContent(runtime), { constant: true, order: 130 }),
+    entry('学院事件履历', buildHistoryContent(runtime), { constant: true, order: 120 }),
     ...(runtime?.characters || []).filter((character) => character?.name).map((character, index) => entry(
       `角色·${character.name}`,
       buildCharacterContent(character),
-      { keys: [String(character.name)], order: 100 - index }
+      { keys: [String(character.name)], order: 110 - index }
     ))
   ];
   return { worldbookName, entries };

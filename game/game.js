@@ -40,7 +40,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917174417';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917175806';
   const DAILY_COST = 25;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -177,51 +177,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917174417', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917175806', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260917174417', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260917174417', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260917174417', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260917174417', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260917174417', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260917174417', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260917174417', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260917175806', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260917175806', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260917175806', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260917175806', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260917175806', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260917175806', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260917175806', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917174417', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917175806', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260917174417', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260917174417', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260917174417', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260917174417', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260917174417', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260917174417', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260917174417', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260917175806', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260917175806', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260917175806', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260917175806', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260917175806', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260917175806', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260917175806', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917174417', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917175806', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260917174417', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260917174417', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260917174417', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260917174417', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260917174417', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260917174417', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260917174417', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260917175806', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260917175806', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260917175806', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260917175806', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260917175806', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260917175806', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260917175806', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917174417', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917175806', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260917174417', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260917174417', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260917174417', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260917174417', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260917174417', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260917174417', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260917174417', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260917175806', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260917175806', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260917175806', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260917175806', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260917175806', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260917175806', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260917175806', name: '讨论定稿' }
       ]
     }
   ];
@@ -230,51 +230,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917174417', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917175806', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260917174417', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260917174417', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260917174417', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260917174417', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260917174417', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260917174417', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260917174417', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260917175806', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260917175806', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260917175806', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260917175806', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260917175806', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260917175806', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260917175806', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917174417', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917175806', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260917174417', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260917174417', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260917174417', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260917174417', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260917174417', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260917174417', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260917174417', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260917175806', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260917175806', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260917175806', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260917175806', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260917175806', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260917175806', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260917175806', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917174417', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917175806', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260917174417', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260917174417', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260917174417', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260917174417', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260917174417', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260917174417', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260917174417', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260917175806', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260917175806', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260917175806', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260917175806', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260917175806', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260917175806', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260917175806', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917174417', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917175806', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260917174417', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260917174417', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260917174417', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260917174417', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260917174417', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260917174417', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260917174417', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260917175806', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260917175806', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260917175806', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260917175806', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260917175806', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260917175806', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260917175806', name: '落地路线图' }
       ]
     }
   ];
@@ -1348,9 +1348,6 @@
     runtime.meta.worldbookExport = runtime.meta.worldbookExport && typeof runtime.meta.worldbookExport === 'object'
       ? runtime.meta.worldbookExport
       : null;
-    runtime.meta.worldbookSync = runtime.meta.worldbookSync && typeof runtime.meta.worldbookSync === 'object'
-      ? runtime.meta.worldbookSync
-      : null;
     runtime.meta.textPresetMode = runtime.meta.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
     runtime.courses = reconcileCourseStates(runtime.courses);
     runtime.player.assistantRole = runtime.player.assistantRole && typeof runtime.player.assistantRole === 'object'
@@ -1821,51 +1818,24 @@
     }
   }
 
-  let liveWorldbookSyncChain = Promise.resolve();
+  function buildWorldbookPromptSettings(runtime) {
+    const playerName = String(runtime?.player?.name || '').trim();
+    return {
+      worldBuilding: GAME_PROMPTS.buildWorldBuilding({ playerName }),
+      playerSettings: GAME_PROMPTS.buildPlayerSettings({
+        playerName,
+        playerPersona: String(state.bootstrap?.playerProfile?.description || '').trim(),
+        userBirthday: `${runtime.player.birthdayMonth}月${runtime.player.birthdayDay}日`,
+        userAge: String(runtime.player.age || 18),
+        userGrade: String(getCurrentAcademicYear(runtime.player.currentDate)),
+        cloth: ''
+      })
+    };
+  }
 
-  async function performLiveWorldbookSync(runtime, characterIds = []) {
-    if (!runtime || !(runtime.characters || []).length) return null;
+  async function exportWorldbook(runtime) {
     const bridge = getTavernBridge();
-    if (!bridge || typeof bridge.syncWorldbook !== 'function') return null;
-    try {
-      const result = await bridge.syncWorldbook(runtime, runtime.meta.worldbookSync || {}, { characterIds });
-      runtime.meta.worldbookSync = result.sync;
-      return result;
-    } catch (error) {
-      runtime.meta.worldbookSync = {
-        ...(runtime.meta.worldbookSync || {}),
-        status: 'failed',
-        error: error?.message || '世界书同步失败。',
-        updatedAt: nowIso()
-      };
-      return null;
-    }
-  }
-
-  function synchronizeLiveWorldbook(runtime, characterIds = []) {
-    const task = liveWorldbookSyncChain
-      .catch(() => null)
-      .then(() => performLiveWorldbookSync(runtime, characterIds));
-    liveWorldbookSyncChain = task.then(() => null, () => null);
-    return task;
-  }
-
-  function queueLiveWorldbookSync(runtime) {
-    if (!runtime?.meta?.worldbookSync?.worldbookName || !(runtime.characters || []).length) return;
-    void synchronizeLiveWorldbook(runtime).then(() => {
-      if (state.runtime === runtime) saveCurrentRuntime();
-    });
-  }
-
-  async function ensureGraduationWorldbookExport(runtime, force) {
-    if (runtime?.meta?.ending?.type !== 'graduation') {
-      return null;
-    }
-    if (!force && runtime.meta.worldbookExport?.status === 'success') {
-      return runtime.meta.worldbookExport;
-    }
-    const bridge = getTavernBridge();
-    if (!bridge || typeof bridge.exportGraduationWorldbook !== 'function') {
+    if (!bridge || typeof bridge.exportWorldbook !== 'function') {
       runtime.meta.worldbookExport = {
         status: 'failed',
         error: '没有找到酒馆世界书桥接接口。请确认酒馆助手和本卡脚本已经启用。',
@@ -1875,15 +1845,12 @@
     }
     runtime.meta.worldbookExport = { status: 'pending', updatedAt: nowIso() };
     try {
-      const result = await bridge.exportGraduationWorldbook(runtime);
+      const result = await bridge.exportWorldbook(runtime, buildWorldbookPromptSettings(runtime));
       runtime.meta.worldbookExport = {
         status: 'success',
         worldbookName: result.worldbookName,
-        boundToCurrentChat: Boolean(result.boundToCurrentChat),
-        existingChatWorldbook: result.existingChatWorldbook || null,
         updatedAt: nowIso()
       };
-      if (result.sync) runtime.meta.worldbookSync = result.sync;
     } catch (error) {
       runtime.meta.worldbookExport = {
         status: 'failed',
@@ -2550,7 +2517,6 @@
         updatedAt: nowIso(),
         ending: null,
         worldbookExport: null,
-        worldbookSync: null,
         textPresetMode: 'tavern'
       }
     };
@@ -3075,7 +3041,6 @@
       text,
       chapterId: options.chapterId || null
     });
-    queueLiveWorldbookSync(runtime);
     return historyIndex;
   }
 
@@ -4606,9 +4571,6 @@ ${promptContextLines.join('\n')}`;
 
     const historyIndex = addHistory(runtime, dateText, parsed.newHistory);
     const chapterId = addChapter(runtime, dateText, parsed.infoBlock, parsed.content, historyIndex);
-    if ((parsed.newCharacters || []).length) {
-      await synchronizeLiveWorldbook(runtime, (parsed.newCharacters || []).map((character) => character.id));
-    }
     saveCurrentRuntime();
     await flushChatStorage();
     saveChapterDebug(chapterId, rawResponse, promptText);
@@ -4646,13 +4608,10 @@ ${promptContextLines.join('\n')}`;
           ? options.deferredChapterIds
           : (Array.isArray(state.ui.deferredChapterIds) ? state.ui.deferredChapterIds : null);
         const context = resolveEventContext(state.runtime, eventName, dateText, options);
-        const worldbookResult = await synchronizeLiveWorldbook(state.runtime, context.characterIds);
-        const editableWorldbookContext = worldbookResult?.promptContext || '';
         const eventPrompt = buildEventPrompt(state.runtime, dateText, eventName, {
           ...options,
           context,
-          characterIds: context.characterIds,
-          extraPrompt: [options.extraPrompt, editableWorldbookContext].filter(Boolean).join('\n')
+          characterIds: context.characterIds
         });
         const retryMarker = retryCount > 0 ? generateRetryMarker() : '';
         if (retryMarker) {
@@ -6273,9 +6232,6 @@ ${promptContextLines.join('\n')}`;
       if (runtime.phase !== 'ended' && executedDates[executedDates.length - 1] === weekDates[weekDates.length - 1]) {
         await finalizeWeek(runtime, executedDates); // 15~16. 周末结算并刷新到新一周
       }
-      if (runtime.phase === 'ended' && runtime.meta.ending?.type === 'graduation') {
-        await ensureGraduationWorldbookExport(runtime, false);
-      }
       const savedRuntime = saveCurrentRuntime();
       const savedAuto = saveAutoSlot();
       if (!savedRuntime || !savedAuto) {
@@ -6395,7 +6351,7 @@ ${promptContextLines.join('\n')}`;
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917174417', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917175806', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -7121,12 +7077,15 @@ ${promptContextLines.join('\n')}`;
   }
 
   function renderSystemPage() {
-    const worldbookSync = state.runtime?.meta?.worldbookSync;
-    const worldbookStatus = worldbookSync?.status === 'success'
-      ? `当前对话世界书：${worldbookSync.worldbookName}`
-      : (worldbookSync?.status === 'failed'
-          ? `世界书同步暂时失败：${worldbookSync.error}`
-          : '生成第一名角色后，会为当前酒馆对话建立专属世界书。');
+    const worldbookExport = state.runtime?.meta?.worldbookExport;
+    const worldbookStatus = worldbookExport?.status === 'success'
+      ? `已导出世界书：${worldbookExport.worldbookName}`
+      : (worldbookExport?.status === 'failed'
+          ? `上次导出失败：${worldbookExport.error}`
+          : '游戏不会自动创建、绑定或读取世界书。');
+    const worldbookButtonLabel = worldbookExport?.status === 'pending'
+      ? '正在导出…'
+      : (worldbookExport?.status === 'success' ? '重新导出世界书' : '导出世界书');
     const textPresetMode = state.runtime?.meta?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
     return `
       <div class="panel section">
@@ -7148,7 +7107,10 @@ ${promptContextLines.join('\n')}`;
         </div>
         <div class="muted-box" style="margin-top:18px;">
           ${escapeHtml(worldbookStatus)}<br />
-          其他角色资料与主角履历可在酒馆世界书编辑器中自由修改；下一次剧情生成会读取修改后的内容。主角资料以游戏内状态为准，不支持中途通过世界书修改。
+          导出的世界书是当前存档的独立剧情设定快照，不会绑定当前对话，也不会影响游戏。可将它手动绑定到其他对话继续剧情。
+          <div class="inline-actions" style="margin-top:10px;">
+            <button class="secondary" data-action="export-worldbook" ${worldbookExport?.status === 'pending' ? 'disabled' : ''}>${worldbookButtonLabel}</button>
+          </div>
         </div>
         <div class="muted-box" style="margin-top:12px;">
           <strong>文字生成预设</strong>
@@ -7193,35 +7155,9 @@ ${promptContextLines.join('\n')}`;
           <div class="panel section">
             <h2>${escapeHtml(runtime.meta.ending.title)}</h2>
             <p class="subtle">${escapeHtml(runtime.meta.ending.text)}</p>
-            ${runtime.meta.ending.type === 'graduation' ? renderGraduationWorldbookStatus(runtime) : ''}
           </div>
         ` : ''}
       </div>
-    `;
-  }
-
-  function renderGraduationWorldbookStatus(runtime) {
-    const exported = runtime?.meta?.worldbookExport;
-    if (exported?.status === 'success') {
-      const bindingText = exported.boundToCurrentChat
-        ? '已自动绑定到当前酒馆聊天。'
-        : (exported.existingChatWorldbook
-            ? `当前聊天已经绑定“${exported.existingChatWorldbook}”，因此没有替换；可在酒馆中手动切换。`
-            : '世界书已经创建，可在酒馆中手动绑定后继续游玩。');
-      return `
-        <div class="status success">
-          <strong>对话世界书已完成毕业同步：${escapeHtml(exported.worldbookName)}</strong><br />
-          <span>${escapeHtml(bindingText)} 通关后可将这本世界书绑定到其他对话继续自由剧情。</span>
-        </div>
-        <button class="secondary" data-action="export-graduation-worldbook">同步最新资料</button>
-      `;
-    }
-    const errorText = exported?.status === 'failed'
-      ? exported.error
-      : '对话世界书还没有完成毕业同步。';
-    return `
-      <div class="status warning">${escapeHtml(errorText)}</div>
-      <button class="primary" data-action="export-graduation-worldbook">同步毕业资料</button>
     `;
   }
 
@@ -7999,13 +7935,13 @@ ${promptContextLines.join('\n')}`;
         case 'open-all-history':
           openAllHistoryModal();
           return;
-        case 'export-graduation-worldbook': {
-          setStatus('正在同步当前对话世界书…', 'warning');
-          const exported = await ensureGraduationWorldbookExport(state.runtime, true);
+        case 'export-worldbook': {
+          setStatus('正在导出独立世界书…', 'warning');
+          const exported = await exportWorldbook(state.runtime);
           saveCurrentRuntime();
           render();
           if (exported?.status === 'success') {
-            setStatus(`世界书已同步：${exported.worldbookName}`, 'success');
+            setStatus(`世界书已导出：${exported.worldbookName}`, 'success');
           } else {
             setStatus(exported?.error || '世界书导出失败。', 'error');
           }

@@ -242,6 +242,31 @@
     return `用原神画风结合**水彩**上色风格生成一身裙子的服装展示，必须生成 1:1 的正方形画面，整张图本身就是正方形，不能是横图或竖图。请使用 Gemini 当前支持的最小输出分辨率 0.5K 生成。背景白色且没有文字或花纹，完整展示整身裙子，不要裁掉裙摆，展示服装的模特用白色，没有脸，人物居中并在正方形画面里留出足够空间。裙子的描述为：${description}`.trim();
   }
 
+  function buildWorldBuilding({ playerName }) {
+    return `<World_Building>
+- 帝国里东方人和西方人都有，姓名和文化是杂糅的。生成新角色时东西方名字应该都有。
+- 故事主要在兰斯特皇家学院展开。这是一所帝国名校，属于四年制大学，就读学生非富即贵。<user>在大学毕业前的最后一年以成绩优异的转学生身份进入这里，只在本校完成毕业学年，一年后毕业。
+- <user>可以在上半学期通过企业宣讲会或人脉获得多份下半学期毕业实习邀请。上半学期结束当晚，如果有 A+ 课程，其中一门课的教授也会发出邀请。下半学期第一天，<user>会从所有邀请和学校分配的岗位中选择最终实习去向；选择人物发出的邀请后，该人物就是她的实习上司。下半学期不会再获得新的实习机会。
+- 这个世界的物价和现代类似，帝国币的货币单位是元。
+</World_Building>`.replaceAll('<user>', playerName).trim();
+  }
+
+  function buildPlayerSettings({ playerName, playerPersona, userBirthday, userAge, userGrade, cloth }) {
+    const personaLine = String(playerPersona || '').trim()
+      ? `- 酒馆玩家主角卡设定：${String(playerPersona).trim()}`
+      : '';
+    return `<Player_Settings>
+- 身份：<user>，孤儿院出身，很穷，在毕业前最后一年以优异成绩转入兰斯特皇家学院的毕业年级学生。
+- 性格：头脑冷静，有幽默感，非常重视成绩和自己未来的职业发展。成绩很好，很有文化，非常聪明，做什么都能很快学会并做的很好。说话很接地气，喜欢吐槽。但是被喜欢的人告白时也会像小女生一样害羞，在恋爱时也会变得甜软。贫穷但不穷酸，不会为钱的事情斤斤计较。
+${personaLine}
+- 生日：${userBirthday}
+- 年龄：${userAge}
+- 学校：兰斯特皇家学院
+- 年级：${userGrade}
+${String(cloth || '').trim()}
+</Player_Settings>`.replaceAll('<user>', playerName).replace(/\n{3,}/g, '\n\n').trim();
+  }
+
   function buildEventPromptTexts({
     playerName,
     names,
@@ -259,6 +284,15 @@
     playerPersona,
     userGrade
   }) {
+    const worldBuilding = buildWorldBuilding({ playerName });
+    const playerSettings = buildPlayerSettings({
+      playerName,
+      playerPersona,
+      userBirthday,
+      userAge,
+      userGrade,
+      cloth
+    });
     const coreSystemInstruction = `
 <role>
         - 身份：你是神奇的沉浸式互动小说的主持人，简称GM，你将创造不同真实灵动的灵魂扮演NPC角色，以文字配合用户完成角色扮演
@@ -354,23 +388,9 @@
             - 基调：细腻，明快，角色情感真挚。
         </Theme_Core>
 
-     <World_Building>
-- 帝国里东方人和西方人都有，姓名和文化是杂糅的。生成新角色时东西方名字应该都有。
-- 故事主要在兰斯特皇家学院展开。这是一所帝国名校，属于四年制大学，就读学生非富即贵。<user>在大学毕业前的最后一年以成绩优异的转学生身份进入这里，只在本校完成毕业学年，一年后毕业。
-- <user>可以在上半学期通过企业宣讲会或人脉获得多份下半学期毕业实习邀请。上半学期结束当晚，如果有 A+ 课程，其中一门课的教授也会发出邀请。下半学期第一天，<user>会从所有邀请和学校分配的岗位中选择最终实习去向；选择人物发出的邀请后，该人物就是她的实习上司。下半学期不会再获得新的实习机会。
-- 这个世界的物价和现代类似，帝国币的货币单位是元。
-    </World_Building>
-    
-<Player_Settings>
-- 身份： <user> ，孤儿院出身，很穷，在毕业前最后一年以优异成绩转入兰斯特皇家学院的毕业年级学生。
-- 性格：头脑冷静，有幽默感，非常重视成绩和自己未来的职业发展。成绩很好，很有文化，非常聪明，做什么都能很快学会并做的很好。说话很接地气，喜欢吐槽。但是被喜欢的人告白时也会像小女生一样害羞，在恋爱时也会变得甜软。贫穷但不穷酸，不会为钱的事情斤斤计较。
-- 酒馆玩家主角卡设定：${playerPersona || '玩家未填写主角卡设定。'}
-- 生日：${userBirthday}
-- 年龄：${userAge}
-- 学校：兰斯特皇家学院
-- 年级：${userGrade}
-${cloth}
-</Player_Settings>
+${worldBuilding}
+
+${playerSettings}
 
         <NPC_Design_Rules>
 - **性格基底**：所有NPC必须具备个人魅力，复杂度和角色深度，**绝对禁止**赋予NPC卑劣、下流、好色等降低角色魅力的性格特质。
@@ -567,6 +587,8 @@ ${modeluList}`.replaceAll('<user>', playerName).replaceAll('${names}', names || 
     buildPromptModules,
     buildBackgroundAvatarPrompt,
     buildOutfitImagePrompt,
+    buildWorldBuilding,
+    buildPlayerSettings,
     buildEventPromptTexts
   };
 })(typeof window !== 'undefined' ? window : globalThis);
