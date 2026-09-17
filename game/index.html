@@ -1189,11 +1189,16 @@
       min-height: 0;
     }
 
+    .merge-cell[data-action="merge-piece-click"] {
+      cursor: pointer;
+      touch-action: none;
+    }
+
     .merge-piece-img {
       width: 90%;
       height: 90%;
       cursor: pointer;
-      pointer-events: auto;
+      pointer-events: none;
       touch-action: none;
       -webkit-user-drag: none;
       will-change: transform;
@@ -1413,10 +1418,10 @@
     <button id="gameInfoButton" class="title-info-button" type="button" aria-label="查看游戏信息" title="游戏信息">i</button>
   </div>
   <div id="app"></div>
-  <script src="tavern-runtime.js?build=20260917204455"></script>
-  <script src="client-common.js?build=20260917204455"></script>
-  <script src="game-core.js?build=20260917204455"></script>
-  <script src="prompts.js?build=20260917204455"></script>
-  <script src="game.js?build=20260917204455"></script>
+  <script src="tavern-runtime.js?build=20260917204752"></script>
+  <script src="client-common.js?build=20260917204752"></script>
+  <script src="game-core.js?build=20260917204752"></script>
+  <script src="prompts.js?build=20260917204752"></script>
+  <script src="game.js?build=20260917204752"></script>
 </body>
 </html>

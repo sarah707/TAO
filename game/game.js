@@ -42,7 +42,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917204455';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917204752';
   const DAILY_COST = 25;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -179,51 +179,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917204455', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917204752', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260917204455', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260917204455', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260917204455', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260917204455', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260917204455', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260917204455', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260917204455', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260917204752', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260917204752', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260917204752', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260917204752', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260917204752', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260917204752', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260917204752', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917204455', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917204752', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260917204455', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260917204455', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260917204455', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260917204455', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260917204455', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260917204455', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260917204455', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260917204752', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260917204752', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260917204752', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260917204752', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260917204752', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260917204752', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260917204752', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917204455', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917204752', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260917204455', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260917204455', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260917204455', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260917204455', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260917204455', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260917204455', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260917204455', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260917204752', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260917204752', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260917204752', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260917204752', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260917204752', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260917204752', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260917204752', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917204455', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917204752', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260917204455', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260917204455', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260917204455', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260917204455', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260917204455', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260917204455', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260917204455', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260917204752', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260917204752', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260917204752', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260917204752', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260917204752', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260917204752', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260917204752', name: '讨论定稿' }
       ]
     }
   ];
@@ -232,51 +232,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917204455', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917204752', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260917204455', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260917204455', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260917204455', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260917204455', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260917204455', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260917204455', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260917204455', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260917204752', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260917204752', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260917204752', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260917204752', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260917204752', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260917204752', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260917204752', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917204455', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917204752', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260917204455', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260917204455', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260917204455', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260917204455', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260917204455', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260917204455', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260917204455', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260917204752', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260917204752', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260917204752', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260917204752', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260917204752', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260917204752', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260917204752', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917204455', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917204752', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260917204455', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260917204455', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260917204455', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260917204455', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260917204455', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260917204455', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260917204455', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260917204752', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260917204752', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260917204752', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260917204752', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260917204752', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260917204752', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260917204752', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917204455', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917204752', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260917204455', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260917204455', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260917204455', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260917204455', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260917204455', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260917204455', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260917204455', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260917204752', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260917204752', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260917204752', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260917204752', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260917204752', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260917204752', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260917204752', name: '落地路线图' }
       ]
     }
   ];
@@ -6382,7 +6382,7 @@ ${promptContextLines.join('\n')}`;
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917204455', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917204752', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -6620,6 +6620,7 @@ ${promptContextLines.join('\n')}`;
       }
     }
     mg.selectedPieceCell = cellIndex;
+    if (piece.level !== 0) mg.generationMotherId = null;
     if (piece.level === 0) {
       const now = Date.now();
       if (mg.generationMotherId === piece.id && (now - mg.generationLastClick) < MERGE_GENERATION_INTERVAL_MS) {
@@ -6832,7 +6833,7 @@ ${promptContextLines.join('\n')}`;
         }
         cellContent = `<img src="${svg}" class="${pieceClass}${animClass}"${imgStyle} draggable="false" data-action="merge-piece-click" data-cell="${i}" alt="${pInfo ? pInfo.name : ''}" title="${pInfo ? pInfo.name : ''}">`;
       }
-      boardHtml += `<div class="${cellClasses}" data-cell="${i}" style="${cellStyle}">${cellContent}</div>`;
+      boardHtml += `<div class="${cellClasses}"${piece ? ' data-action="merge-piece-click"' : ''} data-cell="${i}" style="${cellStyle}">${cellContent}</div>`;
     }
 
     let descHtml = '';
@@ -8248,6 +8249,9 @@ ${promptContextLines.join('\n')}`;
           await runFirstOpeningCeremony();
           return;
         case 'merge-piece-click': {
+          // Pointer gestures are handled on pointerup, before a render can
+          // replace the image or the browser can retarget its follow-up click.
+          if (event.detail !== 0) return;
           const cellIndex = Number(button.dataset.cell);
           state.mergeGame.taskInfoDisplay = null;
           handleMergePieceClick(cellIndex);
@@ -8383,31 +8387,28 @@ ${promptContextLines.join('\n')}`;
   }
 
   app.addEventListener('pointerdown', (event) => {
-    if (!state.mergeGame || mergeDrag) return;
+    if (!state.mergeGame || mergeDrag || event.button !== 0 || event.isPrimary === false) return;
     const cellEl = event.target.closest?.('.merge-cell');
     if (!cellEl) return;
     const cell = Number(cellEl.dataset.cell);
     const piece = state.mergeGame.board[cell];
-    if (!piece || piece.petrified) return;
-    // Mother pieces are generators, not draggable pieces. Tracking a drag for
-    // them can swallow the first click of a double-click when the pointer
-    // shifts slightly, making generation feel as if it needs a focus click.
-    if (piece.level === 0) return;
-    // Tutorial: only allow dragging during merge step or free play
-    if (state.mergeGame.tutorial && state.mergeGame.tutorial.step !== 3 && state.mergeGame.tutorial.step < 5) return;
-    // Tutorial step 3: only allow dragging the tutorial pieces (chain 1, level 1)
-    if (state.mergeGame.tutorial && state.mergeGame.tutorial.step === 3 && (piece.chainId !== 1 || piece.level !== 1)) return;
-    // Do not capture on pointerdown: doing so retargets a normal click from the
-    // piece image to the cell, so the delegated double-click generator never
-    // receives its data-action after the tutorial enables free dragging.
-    mergeDrag = { cell, startX: event.clientX, startY: event.clientY, moved: false, captured: false, pointerId: event.pointerId, target: cellEl };
+    if (!piece) return;
+    const tutorial = state.mergeGame.tutorial;
+    const canDrag = !piece.petrified && (!tutorial || tutorial.step >= 5 ||
+      (tutorial.step === 3 && piece.chainId === 1 && piece.level === 1));
+    // Track taps in tutorial generation steps too. Both mother and child
+    // pieces remain draggable in free play; capture only after real movement.
+    mergeDrag = { cell, startX: event.clientX, startY: event.clientY, moved: false, captured: false, pointerId: event.pointerId, target: cellEl, canDrag, pieceId: piece.id, game: state.mergeGame };
   });
 
   app.addEventListener('pointermove', (event) => {
-    if (!mergeDrag) return;
-    if (!mergeDrag.moved && Math.abs(event.clientX - mergeDrag.startX) + Math.abs(event.clientY - mergeDrag.startY) < 8) return;
+    if (!mergeDrag || event.pointerId !== mergeDrag.pointerId) return;
+    // Use radial distance so small diagonal jitter is still a tap.
+    if (!mergeDrag.moved && Math.hypot(event.clientX - mergeDrag.startX, event.clientY - mergeDrag.startY) < 10) return;
     if (!mergeDrag.moved) {
       mergeDrag.moved = true;
+      state.mergeGame.generationMotherId = null;
+      if (!mergeDrag.canDrag) return;
       mergeDrag.target?.setPointerCapture?.(mergeDrag.pointerId);
       mergeDrag.captured = true;
       const cellEl = document.querySelector(`.merge-cell[data-cell="${mergeDrag.cell}"]`);
@@ -8418,6 +8419,7 @@ ${promptContextLines.join('\n')}`;
   });
 
   app.addEventListener('pointerup', (event) => {
+    if (mergeDrag && event.pointerId !== mergeDrag.pointerId) return;
     if (!mergeDrag || !state.mergeGame) { mergeDrag = null; removeMergeClone(); return; }
     const completedDrag = mergeDrag;
     mergeDrag = null;
@@ -8425,7 +8427,9 @@ ${promptContextLines.join('\n')}`;
       completedDrag.target.releasePointerCapture?.(completedDrag.pointerId);
     }
     removeMergeClone();
+    if (state.mergeGame !== completedDrag.game || state.mergeGame.board[completedDrag.cell]?.id !== completedDrag.pieceId) return;
     if (completedDrag.moved) {
+      if (!completedDrag.canDrag) return;
       const boardEl = document.querySelector('.merge-board');
       if (boardEl) {
         const targetCell = getMergeCellFromBoard(boardEl, event.clientX, event.clientY);
@@ -8435,10 +8439,19 @@ ${promptContextLines.join('\n')}`;
       }
       render();
       setTimeout(function () { saveCurrentRuntime(); }, 0);
+    } else {
+      const boardEl = document.querySelector('.merge-board');
+      if (!boardEl || getMergeCellFromBoard(boardEl, event.clientX, event.clientY) !== completedDrag.cell) return;
+      state.mergeGame.taskInfoDisplay = null;
+      handleMergePieceClick(completedDrag.cell);
+      render();
+      setTimeout(function () { saveCurrentRuntime(); }, 0);
     }
   });
 
-  app.addEventListener('pointercancel', () => {
+  app.addEventListener('pointercancel', (event) => {
+    if (!mergeDrag || event.pointerId !== mergeDrag.pointerId) return;
+    if (state.mergeGame) state.mergeGame.generationMotherId = null;
     if (mergeDrag?.captured && mergeDrag.target && mergeDrag.pointerId != null) {
       mergeDrag.target.releasePointerCapture?.(mergeDrag.pointerId);
     }
