@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917161408';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917161852';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917161408';
+} from './worldbook.js?build=20260917161852';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -193,7 +193,37 @@ function buildPenultimateUserInstruction(payload) {
     .join('\n\n');
 }
 
-function buildVisibleTextPrompt(payload, textPresetMode) {
+function buildVisiblePresetInstruction(surfaces, options = {}) {
+  const preset = callFirstAvailable(surfaces, 'getPreset', 'in_use');
+  if (!preset || !Array.isArray(preset.prompts)) {
+    return '当前酒馆助手没有提供可读取的预设快照；生成请求仍通过 preset_name: in_use 使用当前预设。';
+  }
+
+  const enabledPrompts = preset.prompts.filter((prompt) => prompt?.enabled !== false);
+  const trailingPrompt = enabledPrompts.at(-1);
+  const omitTrailingAssistant = Boolean(options.omitTrailingAssistant)
+    && trailingPrompt
+    && ['assistant', 'model'].includes(String(trailingPrompt.role || '').toLowerCase());
+  const sentPrompts = omitTrailingAssistant ? enabledPrompts.slice(0, -1) : enabledPrompts;
+  const entries = sentPrompts.map((prompt, index) => {
+    const id = String(prompt.id || `prompt-${index + 1}`);
+    const role = normalizePromptRole(prompt.role) || 'system';
+    const position = prompt?.position?.type === 'in_chat'
+      ? `in_chat depth=${Number(prompt.position?.depth || 0)} order=${Number(prompt.position?.order || 0)}`
+      : 'relative';
+    const placeholder = PRESET_PLACEHOLDER_IDS.get(id);
+    const content = placeholder
+      ? `[酒馆动态占位符：${placeholder}；实际内容由酒馆在生成时解析]`
+      : expandPresetPrompt(prompt.content, surfaces).trim();
+    return `--- PRESET ${index + 1}｜${role}｜${position}｜id=${id} ---\n${content || '[空内容]'}`;
+  });
+  if (omitTrailingAssistant) {
+    entries.push(`--- GEMINI 兼容说明｜未发送的末尾预填充｜id=${String(trailingPrompt.id || '')} ---\n${expandPresetPrompt(trailingPrompt.content, surfaces).trim() || '[空内容]'}`);
+  }
+  return entries.join('\n\n') || '[当前预设没有启用的提示词条目]';
+}
+
+function buildVisibleTextPrompt(payload, textPresetMode, presetInstruction = '') {
   const options = payload?.options || {};
   const prompt = String(payload?.prompt || '').trim();
   const sections = [];
@@ -203,6 +233,7 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
   };
 
   if (textPresetMode === 'tavern') {
+    pushSection('酒馆当前预设｜启用条目', presetInstruction);
     pushSection('SYSTEM｜before_prompt｜游戏剧本设定', options.scriptSettingsInstruction);
     pushSection('SYSTEM｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
@@ -226,7 +257,7 @@ function wrapPromptForChat(prompt, textPresetMode) {
   const fence = '`'.repeat(Math.max(3, longestBacktickRun + 1));
   const modeLabel = textPresetMode === 'tavern' ? '酒馆当前预设' : '游戏内置预设';
   const note = textPresetMode === 'tavern'
-    ? '以下按实际角色和注入顺序展示游戏提交的全部内容；酒馆当前预设和已启用世界书由酒馆在生成时继续装配。'
+    ? '以下展开当前预设的启用条目和游戏注入内容；世界书、Persona 等动态占位内容由酒馆在生成时解析。'
     : '以下按实际消息角色和顺序展示本次提交的全部内容。';
   return `【贵族学校的特招生｜本次发送给 AI 的完整提示词】\n模式：${modeLabel}\n${note}\n\n${fence}text\n${source}\n${fence}`;
 }
@@ -576,7 +607,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const prompt = String(payload?.prompt || '').trim();
       if (!prompt) throw new Error('文字生成提示词为空。');
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
-      const visiblePrompt = buildVisibleTextPrompt(payload, textPresetMode);
+      let visiblePrompt = '';
       let text;
       if (textPresetMode === 'tavern') {
         if (typeof apiWindow.generate !== 'function') {
@@ -626,6 +657,10 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             }
           }
         }
+        const visiblePresetInstruction = buildVisiblePresetInstruction(surfaces, {
+          omitTrailingAssistant: Boolean(geminiPresetRequest)
+        });
+        visiblePrompt = buildVisibleTextPrompt(payload, textPresetMode, visiblePresetInstruction);
         if (geminiPresetRequest) {
           text = await geminiPresetApi.generateRaw(geminiPresetRequest);
         } else {
@@ -643,6 +678,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         if (typeof apiWindow.generateRaw !== 'function') {
           throw new Error('未找到酒馆助手 generateRaw，请确认酒馆助手已启用。');
         }
+        visiblePrompt = buildVisibleTextPrompt(payload, textPresetMode);
         text = await apiWindow.generateRaw({
           user_input: prompt,
           ordered_prompts: buildOrderedPrompts(payload),
