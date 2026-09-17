@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917175806';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917181135';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917175806';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917175806';
+} from './overlay-position.js?build=20260917181135';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917181135';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -125,8 +125,11 @@ function setupDrag(handle, target, getPosition, setPosition, excludedSelector, d
 
 function makePluginNoticeMarkup(status) {
   const installed = Boolean(status?.installed);
-  const title = installed ? '生图插件尚未配置' : '可选生图插件未安装';
-  const message = installed
+  const ready = Boolean(status?.ready);
+  const title = ready ? '生图插件已就绪' : installed ? '生图插件尚未配置' : '可选生图插件未安装';
+  const message = ready
+    ? '已经检测到“小游戏轻度生图插件”，当前生图服务配置完整。你可以生成一张测试图再次确认模型、权限、地区和额度，也可以直接返回游戏。'
+    : installed
     ? '已经检测到“小游戏轻度生图插件”，但当前选中的生图服务尚未配置完整。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。'
     : '没有检测到“小游戏轻度生图插件”。你仍然可以正常开始游戏，暂时只不会自动生成角色头像和服装图片。';
   return `
@@ -268,16 +271,34 @@ async function mount() {
     }
   };
 
-  const showPluginNotice = async (providedStatus = null, epoch = contentEpoch) => {
+  const showPluginNotice = async (providedStatus = null, epoch = contentEpoch, preservedFrame = null) => {
     const status = providedStatus || await bridge.getImageGeneratorStatus();
     if (destroyed || epoch !== contentEpoch) return;
-    body.innerHTML = makePluginNoticeMarkup(status);
-    body.querySelector('[data-plugin-action="continue"]')?.addEventListener('click', () => showGame(epoch));
-    body.querySelector('[data-plugin-action="install"]')?.addEventListener('click', () => {
+    const retainedFrame = preservedFrame?.isConnected ? preservedFrame : null;
+    if (retainedFrame) {
+      for (const child of [...body.children]) {
+        if (child !== retainedFrame) child.remove();
+      }
+      retainedFrame.hidden = true;
+      body.insertAdjacentHTML('beforeend', makePluginNoticeMarkup(status));
+    } else {
+      body.innerHTML = makePluginNoticeMarkup(status);
+    }
+    const notice = body.querySelector('.noble-school-plugin-notice');
+    const returnToGame = async () => {
+      if (retainedFrame?.isConnected && !destroyed && epoch === contentEpoch) {
+        notice?.remove();
+        retainedFrame.hidden = false;
+        return;
+      }
+      await showGame(epoch);
+    };
+    notice?.querySelector('[data-plugin-action="continue"]')?.addEventListener('click', returnToGame);
+    notice?.querySelector('[data-plugin-action="install"]')?.addEventListener('click', () => {
       hostWindow.open(IMAGE_EXTENSION_URL, '_blank', 'noopener,noreferrer');
     });
-    body.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', async () => {
-      const message = body.querySelector('.noble-school-status');
+    notice?.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', async () => {
+      const message = notice.querySelector('.noble-school-status');
       try {
         const opened = await bridge.openImageSettings();
         if (!opened && message) {
@@ -287,27 +308,26 @@ async function mount() {
         if (message) message.textContent = `打开生图插件设置失败：${error.message || error}`;
       }
     });
-    body.querySelector('[data-plugin-action="test"]')?.addEventListener('click', async () => {
-      const message = body.querySelector('.noble-school-status');
-      const buttons = [...body.querySelectorAll('[data-plugin-action]')];
+    notice?.querySelector('[data-plugin-action="test"]')?.addEventListener('click', async () => {
+      const message = notice.querySelector('.noble-school-status');
+      const buttons = [...notice.querySelectorAll('[data-plugin-action]')];
       buttons.forEach((button) => { button.disabled = true; });
       if (message) message.textContent = '正在生成测试图，请稍候……';
       try {
         const result = await bridge.testImageGenerator();
         if (message) message.textContent = result.message || '测试生图成功，正在进入游戏……';
-        await showGame(epoch);
+        await returnToGame();
       } catch (error) {
         if (message) message.textContent = `测试失败：${error.message || error}`;
         buttons.forEach((button) => { button.disabled = false; });
       }
     });
-    body.querySelector('[data-plugin-action="retry"]')?.addEventListener('click', async () => {
-      const message = body.querySelector('.noble-school-status');
+    notice?.querySelector('[data-plugin-action="retry"]')?.addEventListener('click', async () => {
+      const message = notice.querySelector('.noble-school-status');
       if (message) message.textContent = '正在重新检测插件……';
       const nextStatus = await bridge.getImageGeneratorStatus();
       if (destroyed || epoch !== contentEpoch) return;
-      if (nextStatus.ready) await showGame(epoch);
-      else await showPluginNotice(nextStatus, epoch);
+      await showPluginNotice(nextStatus, epoch, retainedFrame);
     });
   };
 
@@ -330,6 +350,13 @@ async function mount() {
   const restore = () => {
     minimized.hidden = true;
     card.hidden = false;
+  };
+  const showImageSetup = async () => {
+    const epoch = ++contentEpoch;
+    overlay.hidden = false;
+    restore();
+    await showPluginNotice(null, epoch, frame);
+    return !destroyed && epoch === contentEpoch;
   };
   overlay.querySelector('[data-overlay-action="restore"]').addEventListener('click', restore);
   overlay.addEventListener('click', (event) => {
@@ -434,7 +461,7 @@ async function mount() {
   };
 
   window.addEventListener('pagehide', destroy, { once: true });
-  hostWindow.nobleSchoolOverlay = { minimize, restore, showSettings: () => bridge.openImageSettings(), destroy };
+  hostWindow.nobleSchoolOverlay = { minimize, restore, showImageSetup, showSettings: showImageSetup, destroy };
   await openCurrentChat();
 }
 

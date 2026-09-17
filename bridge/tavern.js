@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917175806';
-import { buildExportWorldbook } from './worldbook.js?build=20260917175806';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917181135';
+import { buildExportWorldbook } from './worldbook.js?build=20260917181135';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -628,6 +628,11 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         }
       }
       return false;
+    },
+    async openImageSetup() {
+      const showImageSetup = hostWindow.nobleSchoolOverlay?.showImageSetup;
+      if (typeof showImageSetup !== 'function') return false;
+      return Boolean(await showImageSetup());
     },
     async getImageGeneratorStatus() {
       const api = getMiniGameImageApi(hostWindow, apiWindow);
