@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917191245';
-import { buildExportWorldbook } from './worldbook.js?build=20260917191245';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917191807';
+import { buildExportWorldbook } from './worldbook.js?build=20260917191807';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -174,7 +174,7 @@ function buildSupportingContextInjection(payload) {
     parts.push(String(options.historySystemInstruction));
   }
   if (options.assistantInstruction) {
-    parts.push(`以下是游戏保存的前几章剧情：\n${String(options.assistantInstruction)}`);
+    parts.push(String(options.assistantInstruction));
   }
   if (options.locationInstruction) {
     parts.push(`以下是此前已经确定的地点描述，后续章节可据此保持一致：\n${String(options.locationInstruction)}`);
