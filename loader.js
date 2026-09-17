@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917172401';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917172536';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917172401';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917172401';
+} from './overlay-position.js?build=20260917172536';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917172536';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -276,8 +276,16 @@ async function mount() {
     body.querySelector('[data-plugin-action="install"]')?.addEventListener('click', () => {
       hostWindow.open(IMAGE_EXTENSION_URL, '_blank', 'noopener,noreferrer');
     });
-    body.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', () => {
-      bridge.openImageSettings();
+    body.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', async () => {
+      const message = body.querySelector('.noble-school-status');
+      try {
+        const opened = await bridge.openImageSettings();
+        if (!opened && message) {
+          message.textContent = '生图插件设置面板尚未加载完成，请稍后重试或刷新酒馆。';
+        }
+      } catch (error) {
+        if (message) message.textContent = `打开生图插件设置失败：${error.message || error}`;
+      }
     });
     body.querySelector('[data-plugin-action="test"]')?.addEventListener('click', async () => {
       const message = body.querySelector('.noble-school-status');

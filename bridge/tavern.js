@@ -1,16 +1,30 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917172401';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917172536';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917172401';
+} from './worldbook.js?build=20260917172536';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
 
 function getMiniGameImageApi(hostWindow, apiWindow) {
-  return hostWindow?.STMiniGameImage || apiWindow?.STMiniGameImage || null;
+  for (const candidateWindow of collectAccessibleWindows(hostWindow, apiWindow)) {
+    if (candidateWindow?.STMiniGameImage) return candidateWindow.STMiniGameImage;
+  }
+  return null;
+}
+
+const IMAGE_SETTINGS_RETRY_DELAYS = [0, 50, 100, 200, 350, 500, 800];
+
+function waitForImageSettingsRetry(hostWindow, milliseconds) {
+  return new Promise((resolve) => {
+    const schedule = typeof hostWindow?.setTimeout === 'function'
+      ? hostWindow.setTimeout.bind(hostWindow)
+      : globalThis.setTimeout;
+    schedule(resolve, milliseconds);
+  });
 }
 
 function collectAccessibleWindows(...seeds) {
@@ -602,14 +616,23 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const path = normalizeServerImagePath(result.path, hostWindow);
       return { path, url: resolveServerImageUrl(path, hostWindow) };
     },
-    openImageSettings() {
+    async openImageSettings() {
       const api = getMiniGameImageApi(hostWindow, apiWindow);
       if (typeof api?.openSettings !== 'function') {
         hostWindow.open?.('https://github.com/sarah707/SillyTavern-MiniGame-Image-API', '_blank', 'noopener,noreferrer');
         return false;
       }
-      hostWindow.nobleSchoolOverlay?.minimize?.();
-      return api.openSettings();
+      for (let attempt = 0; attempt <= IMAGE_SETTINGS_RETRY_DELAYS.length; attempt += 1) {
+        const opened = await api.openSettings();
+        if (opened !== false) {
+          hostWindow.nobleSchoolOverlay?.minimize?.();
+          return true;
+        }
+        if (attempt < IMAGE_SETTINGS_RETRY_DELAYS.length) {
+          await waitForImageSettingsRetry(hostWindow, IMAGE_SETTINGS_RETRY_DELAYS[attempt]);
+        }
+      }
+      return false;
     },
     async getImageGeneratorStatus() {
       const api = getMiniGameImageApi(hostWindow, apiWindow);
