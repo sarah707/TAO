@@ -1,9 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917043223';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917140307';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917043223';
+} from './overlay-position.js?build=20260917140307';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917140307';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -164,6 +165,7 @@ async function loadGameDocument(iframe) {
 }
 
 async function mount() {
+  hostWindow.nobleSchoolOverlay?.destroy?.();
   hostDocument.getElementById(OVERLAY_ID)?.remove();
   installStyle();
 
@@ -188,6 +190,11 @@ async function mount() {
   const body = overlay.querySelector('.noble-school-body');
   const minimized = overlay.querySelector('.noble-school-minimized');
   let frame = null;
+  let destroyed = false;
+  let contentEpoch = 0;
+  let removeChatChangeListener = () => {};
+  const ownerCharacterKey = getActiveChatSnapshot(hostWindow, window).characterKey;
+  let activeChatId = getActiveChatSnapshot(hostWindow, window).chatId;
   let cardPosition = { x: 0, y: 0 };
   let minimizedPosition = null;
   const isCompactViewport = () => Boolean(hostWindow.matchMedia?.('(max-width: 576px), (max-height: 560px)').matches);
@@ -200,7 +207,7 @@ async function mount() {
   const bridge = createTavernBridge({ hostWindow, apiWindow: window });
   hostWindow[BRIDGE_KEY] = bridge;
 
-  const showGame = async () => {
+  const showGame = async (epoch = contentEpoch) => {
     body.replaceChildren();
     frame = hostDocument.createElement('iframe');
     frame.className = 'noble-school-frame';
@@ -208,6 +215,7 @@ async function mount() {
     body.append(frame);
     try {
       await loadGameDocument(frame);
+      if (destroyed || epoch !== contentEpoch || !frame.isConnected) return;
       const frameDocument = frame.contentDocument;
       const title = frameDocument?.querySelector('.title-safe');
       if (title) {
@@ -254,15 +262,17 @@ async function mount() {
         });
       }
     } catch (error) {
+      if (destroyed || epoch !== contentEpoch) return;
       body.innerHTML = `<div class="noble-school-config"><h2>游戏加载失败</h2><p>${escapeHtml(error.message)}</p><button class="noble-school-button" type="button" data-config-action="retry">重新加载</button></div>`;
-      body.querySelector('[data-config-action="retry"]')?.addEventListener('click', showGame);
+      body.querySelector('[data-config-action="retry"]')?.addEventListener('click', () => showGame(epoch));
     }
   };
 
-  const showPluginNotice = async (providedStatus = null) => {
+  const showPluginNotice = async (providedStatus = null, epoch = contentEpoch) => {
     const status = providedStatus || await bridge.getImageGeneratorStatus();
+    if (destroyed || epoch !== contentEpoch) return;
     body.innerHTML = makePluginNoticeMarkup(status);
-    body.querySelector('[data-plugin-action="continue"]')?.addEventListener('click', showGame);
+    body.querySelector('[data-plugin-action="continue"]')?.addEventListener('click', () => showGame(epoch));
     body.querySelector('[data-plugin-action="install"]')?.addEventListener('click', () => {
       hostWindow.open(IMAGE_EXTENSION_URL, '_blank', 'noopener,noreferrer');
     });
@@ -277,7 +287,7 @@ async function mount() {
       try {
         const result = await bridge.testImageGenerator();
         if (message) message.textContent = result.message || '测试生图成功，正在进入游戏……';
-        await showGame();
+        await showGame(epoch);
       } catch (error) {
         if (message) message.textContent = `测试失败：${error.message || error}`;
         buttons.forEach((button) => { button.disabled = false; });
@@ -287,8 +297,9 @@ async function mount() {
       const message = body.querySelector('.noble-school-status');
       if (message) message.textContent = '正在重新检测插件……';
       const nextStatus = await bridge.getImageGeneratorStatus();
-      if (nextStatus.ready) await showGame();
-      else await showPluginNotice(nextStatus);
+      if (destroyed || epoch !== contentEpoch) return;
+      if (nextStatus.ready) await showGame(epoch);
+      else await showPluginNotice(nextStatus, epoch);
     });
   };
 
@@ -369,7 +380,40 @@ async function mount() {
   hostWindow.visualViewport?.addEventListener('scroll', fitToViewport);
   hostWindow.addEventListener('orientationchange', fitToViewport);
 
+  const openCurrentChat = async () => {
+    const epoch = ++contentEpoch;
+    frame?.remove();
+    frame = null;
+    body.replaceChildren();
+    overlay.hidden = false;
+    restore();
+    const imageStatus = await bridge.getImageGeneratorStatus();
+    if (destroyed || epoch !== contentEpoch) return;
+    if (imageStatus.ready) await showGame(epoch);
+    else await showPluginNotice(imageStatus, epoch);
+  };
+
+  const handleChatChanged = (eventChatId) => {
+    const snapshot = getActiveChatSnapshot(hostWindow, window);
+    const nextChatId = snapshot.chatId || String(eventChatId || '');
+    if (ownerCharacterKey && snapshot.characterKey !== ownerCharacterKey) {
+      contentEpoch += 1;
+      frame?.remove();
+      frame = null;
+      overlay.hidden = true;
+      return;
+    }
+    if (nextChatId === activeChatId && frame?.isConnected) return;
+    activeChatId = nextChatId;
+    void openCurrentChat();
+  };
+  removeChatChangeListener = subscribeToChatChanges(hostWindow, window, handleChatChanged);
+
   const destroy = () => {
+    if (destroyed) return;
+    destroyed = true;
+    contentEpoch += 1;
+    removeChatChangeListener();
     removeCardDrag();
     removeMinimizedDrag();
     hostWindow.removeEventListener('resize', fitToViewport);
@@ -383,9 +427,7 @@ async function mount() {
 
   window.addEventListener('pagehide', destroy, { once: true });
   hostWindow.nobleSchoolOverlay = { minimize, restore, showSettings: () => bridge.openImageSettings(), destroy };
-  const imageStatus = await bridge.getImageGeneratorStatus();
-  if (imageStatus.ready) showGame();
-  else showPluginNotice(imageStatus);
+  await openCurrentChat();
 }
 
 void mount();
