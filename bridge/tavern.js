@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917140347';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917141553';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917140347';
+} from './worldbook.js?build=20260917141553';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -376,6 +376,19 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         || ''
       ).trim();
       return { name, description };
+    },
+    formatStoryTextForDisplay(text) {
+      const source = String(text || '');
+      for (const surface of collectApiSurfaces(hostWindow, apiWindow)) {
+        if (typeof surface?.formatAsTavernRegexedString !== 'function') continue;
+        try {
+          const formatted = surface.formatAsTavernRegexedString(source, 'ai_output', 'display', { depth: 0 });
+          return typeof formatted === 'string' ? formatted : source;
+        } catch {
+          // Keep the extracted story readable if a user regex or helper API fails.
+        }
+      }
+      return source;
     },
     async loadGameStorage() {
       if (typeof helper?.getVariables !== 'function') {

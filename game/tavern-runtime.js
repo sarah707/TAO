@@ -88,6 +88,10 @@
       const payload = await getRequestBody(input, init);
       return jsonResponse(await bridge().uploadImage(payload));
     }
+    if (path.endsWith('/api/tavern-display-regex') && method === 'POST') {
+      const payload = await getRequestBody(input, init);
+      return jsonResponse({ text: bridge().formatStoryTextForDisplay(payload.text) });
+    }
     if (path.endsWith('/api/generate') && method === 'POST') {
       const payload = await getRequestBody(input, init);
       const job = createJob(payload);

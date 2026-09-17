@@ -73,6 +73,23 @@
     ["主角生日事件", {"name":"主角生日事件","characters":"所有好感度高于50的角色","modeluList":"无","userPrompt":"请编写<user>今日进行（传入今日行程），从早上起轮流收到所有有资料的角色送的生日礼物的互动剧情，如果提供的角色多于一人可以发生修罗场剧情，但不是必须发生。注意角色出场的合理性，如果主角日程里很难遇到某个角色就让他晚上等主角回宿舍再见。正文1500字以上，结尾要连接本日结束，要结的很干净。","cloth":"","after":"无"}],
   ]);
 
+  const REQUIRED_NEW_CHARACTER_COUNTS = new Map([
+    ['第一次开学典礼事件', 1],
+    ['第一次做家教事件', 2],
+    ['第一次担任助教事件', 1],
+    ['当助教认识学弟事件', 1],
+    ['第一天实习事件', 1],
+    ['第一次实习-教授邀请事件', 1],
+    ['企业宣讲会实习邀请事件', 1]
+  ]);
+
+  for (const [eventName, requiredCount] of REQUIRED_NEW_CHARACTER_COUNTS.entries()) {
+    const eventSpec = EVENT_SPECS.get(eventName);
+    if (eventSpec) {
+      eventSpec.requiredNewCharacterCount = requiredCount;
+    }
+  }
+
   function getEffectRandomRange(afterText, eventName) {
     const match = String(afterText || '').match(/随机(\d+)到(\d+)/);
     if (match) {

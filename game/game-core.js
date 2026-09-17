@@ -150,6 +150,76 @@
     ));
   }
 
+  function isStudentCouncilPresident(character) {
+    return String(character?.identity || '').includes('学生会长');
+  }
+
+  function appendIdentityLabel(character, label) {
+    const identity = String(character?.identity || '').trim();
+    if (!identity.includes(label)) {
+      character.identity = [identity, label].filter(Boolean).join('、');
+    }
+  }
+
+  function normalizeGeneratedCharactersForEvent(eventName, characters = [], options = {}) {
+    const generated = characters.filter(Boolean);
+    const first = generated[0] || null;
+    const courseName = String(options.courseName || CAMPAIGN_CONFIG.assistantCourse.courseName).trim();
+
+    if (eventName === '第一次开学典礼事件' && first) {
+      appendIdentityLabel(first, '学生会长');
+      first.school = '兰斯特皇家学院';
+      first.grade = 4;
+      first.gender = '男';
+      first.affiliation = '本校学生';
+    }
+
+    if (eventName === '第一次做家教事件' && generated.length) {
+      const student = generated.find((character) => (
+        String(character.identity || '').includes('家教学生')
+        && !String(character.identity || '').includes('家教学生的家长')
+      )) || generated.find((character) => Number(character.age) === 18) || first;
+      const parent = generated.find((character) => String(character.identity || '').includes('家教学生的家长'))
+        || generated.find((character) => character !== student)
+        || null;
+      if (student) {
+        appendIdentityLabel(student, '家教学生');
+        student.age = 18;
+      }
+      if (parent) {
+        appendIdentityLabel(parent, '家教学生的家长');
+      }
+    }
+
+    if (eventName === '第一次担任助教事件' && first) {
+      appendIdentityLabel(first, `${courseName}课教授`);
+      first.affiliation = '本校老师';
+    }
+
+    if (eventName === '当助教认识学弟事件' && first) {
+      appendIdentityLabel(first, `${courseName}课学生`);
+      first.school = '兰斯特皇家学院';
+      first.grade = 3;
+      first.affiliation = '本校学生';
+    }
+
+    if (eventName === '第一天实习事件' && first) {
+      appendIdentityLabel(first, '实习上司');
+    }
+
+    if (eventName === '第一次实习-教授邀请事件' && first) {
+      appendIdentityLabel(first, `${courseName}课教授`);
+      appendIdentityLabel(first, '企业高管');
+    }
+
+    if (eventName === '企业宣讲会实习邀请事件' && first) {
+      appendIdentityLabel(first, '企业高管');
+      first.gender = '男';
+    }
+
+    return generated;
+  }
+
   function resolveInternshipSelection(offers = [], selectionId, schoolLocation = '兰斯特皇家学院合作实习基地') {
     if (selectionId === 'school') {
       return {
@@ -253,6 +323,20 @@
     return blocks;
   }
 
+  function extractNearestTagContent(text, tag) {
+    const source = String(text || '');
+    const normalizedTag = String(tag || '').trim().toLowerCase();
+    if (!normalizedTag) return '';
+    const lowerSource = source.toLowerCase();
+    const openTag = `<${normalizedTag}>`;
+    const closeTag = `</${normalizedTag}>`;
+    const closeIndex = lowerSource.lastIndexOf(closeTag);
+    if (closeIndex < 0) return '';
+    const openIndex = lowerSource.lastIndexOf(openTag, closeIndex);
+    if (openIndex < 0) return '';
+    return source.slice(openIndex + openTag.length, closeIndex);
+  }
+
   global.Games0Core = {
     CAMPAIGN_CONFIG,
     TERM_DEFINITIONS,
@@ -269,12 +353,15 @@
     selectRandomAPlusCourseId,
     canReceiveGraduationInternshipOffer,
     findCharactersForCourse,
+    isStudentCouncilPresident,
+    normalizeGeneratedCharactersForEvent,
     resolveInternshipSelection,
     findMatchingPetrifiedPieceIndex,
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
-    splitTopLevelJsonObjects
+    splitTopLevelJsonObjects,
+    extractNearestTagContent
   };
 })(typeof window !== 'undefined' ? window : globalThis);
 
