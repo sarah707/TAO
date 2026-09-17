@@ -469,6 +469,58 @@
     return Object.values(value).flatMap((item) => collectNamedCharacterRecords(item));
   }
 
+  function parseChineseGrade(value) {
+    const source = String(value || '').trim();
+    if (/^\d+$/.test(source)) return Number(source);
+    const digits = { 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9, 十: 10 };
+    return digits[source] || 0;
+  }
+
+  function parseNaturalLanguageCharacterRecords(text) {
+    const source = String(text || '').trim();
+    if (!source) return [];
+    const lines = source.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const knownFieldNames = new Set(Object.values(CHARACTER_FIELD_ALIASES).flat().map((key) => key.toLowerCase()));
+    const allowUnbulletedLine = lines.length === 1;
+    const records = [];
+    for (const rawLine of lines) {
+      const bulletMatch = rawLine.match(/^\\?[-*•]\s+([\s\S]+)$/);
+      if (!bulletMatch && !allowUnbulletedLine) continue;
+      const line = String(bulletMatch?.[1] || rawLine).trim();
+      const match = line.match(/^(.{1,100}?)[：:]\s*([\s\S]+)$/);
+      if (!match) continue;
+      const name = match[1].replace(/^\*\*|\*\*$/g, '').trim();
+      const description = match[2].trim();
+      if (!name || !description || knownFieldNames.has(name.toLowerCase())) continue;
+      const gradeMatch = description.match(/([一二三四五六七八九十]|\d+)\s*年级/);
+      const gender = /(?:^|[，,、\s])女性?(?:[，,、\s]|$)/.test(description)
+        ? '女'
+        : /(?:^|[，,、\s])男性?(?:[，,、\s]|$)/.test(description)
+          ? '男'
+          : '';
+      const school = description.includes('兰斯特皇家学院')
+        ? '兰斯特皇家学院'
+        : (description.match(/([\p{Script=Han}A-Za-z·]+(?:大学|学院|学校))/u)?.[1] || '无');
+      const identity = description.split(/[。！？!?]/)[0].trim();
+      const isTeacher = /教授|老师|教师|讲师/.test(description);
+      const isStudent = /学生|年级/.test(description);
+      records.push({
+        姓名: name,
+        性别: gender,
+        年级: parseChineseGrade(gradeMatch?.[1]),
+        学校: school,
+        身份: identity,
+        所属: school === '兰斯特皇家学院'
+          ? (isTeacher ? '本校老师' : (isStudent ? '本校学生' : ''))
+          : '',
+        外貌服饰氛围气味: description,
+        核心特质: description,
+        人物小传: description
+      });
+    }
+    return records;
+  }
+
   function parseLooseCharacterRecords(text) {
     const source = sanitizeLooseJsonBlock(text);
     if (!source) return [];
@@ -482,7 +534,8 @@
         ? objectBlocks.map((item) => parseLooseCharacterObject(item))
         : [parseLooseCharacterObject(source)];
     }
-    return parsedValues.flatMap((item) => collectNamedCharacterRecords(item));
+    const structuredRecords = parsedValues.flatMap((item) => collectNamedCharacterRecords(item));
+    return structuredRecords.length ? structuredRecords : parseNaturalLanguageCharacterRecords(source);
   }
 
   global.Games0Core = {

@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917154615';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917155137';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917154615';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917154615';
+} from './overlay-position.js?build=20260917155137';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917155137';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
