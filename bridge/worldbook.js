@@ -76,24 +76,6 @@ function buildPlayerContent(runtime) {
   ].join('\n');
 }
 
-function buildLivePlayerContent(runtime) {
-  const player = runtime?.player || {};
-  return [
-    '<PlayerProfile>',
-    '【可自由编辑】游戏生成剧情时会重新读取本条目，并以玩家修改后的文字为准。',
-    `姓名：${cleanLine(player.name)}`,
-    `年龄：${cleanLine(player.age)}`,
-    `性别：${cleanLine(player.gender)}`,
-    `生日：${cleanLine(player.birthdayMonth)}月${cleanLine(player.birthdayDay)}日`,
-    `当前日期：${cleanLine(player.currentDate)}`,
-    `当前资金：${Math.round(Number(player.money || 0))}`,
-    `疲劳度：${Math.round(Number(player.fatigue || 0))}`,
-    `灵感：${Math.round(Number(player.inspiration || 0))}`,
-    '背景：贫穷的毕业年级女学生，作为特招生转入兰斯特皇家学院，用最后一个学年完成课程、工作、社交、实习与毕业目标。',
-    '</PlayerProfile>'
-  ].join('\n');
-}
-
 function buildHistoryContent(runtime) {
   const lines = (runtime?.history || []).map((item) => {
     if (typeof item === 'string') return item.trim();
@@ -167,16 +149,11 @@ export function buildLiveWorldbookName(runtime, chatId = '') {
 }
 
 export function mergeLiveWorldbookEntries(currentEntries, runtime, previousSync = {}) {
-  const entries = Array.isArray(currentEntries) ? currentEntries.map((item) => ({ ...item })) : [];
-  let playerEntry = entries.find((item) => getRecord(item, 'player-profile'));
-  if (!playerEntry) {
-    playerEntry = entry('主角资料（可编辑）', buildLivePlayerContent(runtime), {
-      constant: true,
-      order: 130,
-      extra: liveExtra('player-profile')
-    });
-    entries.push(playerEntry);
-  }
+  const entries = Array.isArray(currentEntries)
+    ? currentEntries
+      .filter((item) => !getRecord(item, 'player-profile'))
+      .map((item) => ({ ...item }))
+    : [];
 
   const history = Array.isArray(runtime?.history) ? runtime.history : [];
   let historyEntry = entries.find((item) => getRecord(item, 'player-history'));
@@ -231,7 +208,7 @@ export function mergeLiveWorldbookEntries(currentEntries, runtime, previousSync 
 export function buildLiveWorldbookPromptContext(entries, characterIds = []) {
   const wanted = new Set((characterIds || []).map(String));
   const selected = (entries || []).filter((item) => {
-    if (getRecord(item, 'player-profile') || getRecord(item, 'player-history')) return true;
+    if (getRecord(item, 'player-history')) return true;
     return getRecord(item, 'character-profile') && wanted.has(String(item.extra.recordId || ''));
   });
   if (!selected.length) return '';
