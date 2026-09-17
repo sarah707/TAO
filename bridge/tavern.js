@@ -1,27 +1,88 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917031926';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917034440';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917031926';
+} from './worldbook.js?build=20260917034440';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
-
-function getHelper(apiWindow = globalThis) {
-  return apiWindow?.TavernHelper || apiWindow;
-}
-
 
 function getMiniGameImageApi(hostWindow, apiWindow) {
   return hostWindow?.STMiniGameImage || apiWindow?.STMiniGameImage || null;
 }
 
+function collectAccessibleWindows(...seeds) {
+  const windows = [];
+  for (const seed of seeds) {
+    let current = seed;
+    for (let depth = 0; current && depth < 6; depth += 1) {
+      if (!windows.includes(current)) windows.push(current);
+      try {
+        if (!current.parent || current.parent === current) break;
+        current = current.parent;
+      } catch {
+        break;
+      }
+    }
+  }
+  return windows;
+}
+
+function collectApiSurfaces(hostWindow, apiWindow) {
+  const surfaces = [];
+  for (const candidateWindow of collectAccessibleWindows(apiWindow, hostWindow)) {
+    for (const surface of [candidateWindow?.TavernHelper, candidateWindow?.SillyTavern, candidateWindow]) {
+      if (surface && !surfaces.includes(surface)) surfaces.push(surface);
+    }
+  }
+  return surfaces;
+}
+
+function callFirstAvailable(surfaces, methodName, ...args) {
+  for (const surface of surfaces) {
+    if (typeof surface?.[methodName] !== 'function') continue;
+    try {
+      const value = surface[methodName](...args);
+      if (value && typeof value.then === 'function') continue;
+      if (value !== undefined && value !== null && value !== '') return value;
+    } catch {
+      // Try the same API exposed on the next accessible window/surface.
+    }
+  }
+  return null;
+}
+
+function getHostContexts(hostWindow, apiWindow) {
+  const contexts = [];
+  for (const surface of collectApiSurfaces(hostWindow, apiWindow)) {
+    if (typeof surface?.getContext !== 'function') continue;
+    try {
+      const context = surface.getContext();
+      if (context && !contexts.includes(context)) contexts.push(context);
+    } catch {
+      // Continue searching parent windows.
+    }
+  }
+  return contexts;
+}
+
 function getHostContext(hostWindow, apiWindow) {
-  return hostWindow?.SillyTavern?.getContext?.()
-    || apiWindow?.SillyTavern?.getContext?.()
-    || null;
+  return getHostContexts(hostWindow, apiWindow)[0] || null;
+}
+
+function readPersonaDomValue(hostWindow, apiWindow, selector) {
+  for (const candidateWindow of collectAccessibleWindows(hostWindow, apiWindow)) {
+    try {
+      const element = candidateWindow?.document?.querySelector?.(selector);
+      const value = String(element?.value || element?.textContent || '').trim();
+      if (value) return value;
+    } catch {
+      // Ignore inaccessible or cross-origin parent documents.
+    }
+  }
+  return '';
 }
 
 function expandMacro(value, expanders) {
@@ -180,30 +241,31 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
   return {
     version: 1,
     getPlayerProfile() {
-      const context = getHostContext(hostWindow, apiWindow);
-      let persona = null;
-      if (typeof helper?.getPersona === 'function') {
-        try {
-          persona = helper.getPersona('current');
-        } catch {
-          persona = null;
-        }
-      }
+      const surfaces = collectApiSurfaces(hostWindow, apiWindow);
+      const contexts = getHostContexts(hostWindow, apiWindow);
+      const persona = callFirstAvailable(surfaces, 'getPersona', 'current');
       const expanders = [
-        context?.substituteParams?.bind(context),
-        helper?.substitudeMacros?.bind(helper),
-        apiWindow?.substitudeMacros?.bind(apiWindow)
+        ...contexts.map((context) => context?.substituteParams?.bind(context)),
+        ...surfaces.map((surface) => surface?.substitudeMacros?.bind(surface))
       ];
+      const recentUserName = contexts
+        .flatMap((context) => Array.isArray(context?.chat) ? context.chat : [])
+        .reverse()
+        .find((message) => message?.is_user === true || message?.role === 'user')?.name;
       const name = String(
         persona?.name
-        || helper?.getCurrentPersonaName?.()
-        || context?.name1
+        || callFirstAvailable(surfaces, 'getCurrentPersonaName')
+        || contexts.map((context) => context?.name1).find(Boolean)
         || expandMacro('{{user}}', expanders)
+        || recentUserName
+        || readPersonaDomValue(hostWindow, apiWindow, '#your_name')
         || ''
       ).trim();
       const description = String(
         persona?.description
+        || contexts.map((context) => context?.powerUserSettings?.persona_description).find(Boolean)
         || expandMacro('{{persona}}', expanders)
+        || readPersonaDomValue(hostWindow, apiWindow, '#persona_description')
         || ''
       ).trim();
       return { name, description };
