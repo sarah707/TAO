@@ -19,11 +19,13 @@
   }
 
   function normalizePath(input) {
-    const raw = typeof input === 'string' ? input : input?.url;
+    const raw = typeof input === 'string' ? input : input?.url || input?.href;
     try {
-      return new URL(raw, window.location.href).pathname.replace(/\/{2,}/g, '/');
+      // The game runs in srcdoc: location.href is about:srcdoc, while <base>
+      // supplies the actual game URL used by the browser for relative fetches.
+      return new URL(raw, window.document?.baseURI || window.location.href).pathname.replace(/\/{2,}/g, '/');
     } catch {
-      return String(raw || '');
+      return `/${String(raw || '').split(/[?#]/)[0]}`.replace(/\/{2,}/g, '/');
     }
   }
 
