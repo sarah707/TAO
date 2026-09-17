@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917161852';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917162046';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917161852';
+} from './worldbook.js?build=20260917162046';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -217,9 +217,6 @@ function buildVisiblePresetInstruction(surfaces, options = {}) {
       : expandPresetPrompt(prompt.content, surfaces).trim();
     return `--- PRESET ${index + 1}｜${role}｜${position}｜id=${id} ---\n${content || '[空内容]'}`;
   });
-  if (omitTrailingAssistant) {
-    entries.push(`--- GEMINI 兼容说明｜未发送的末尾预填充｜id=${String(trailingPrompt.id || '')} ---\n${expandPresetPrompt(trailingPrompt.content, surfaces).trim() || '[空内容]'}`);
-  }
   return entries.join('\n\n') || '[当前预设没有启用的提示词条目]';
 }
 
