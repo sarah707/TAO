@@ -1,15 +1,16 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917200030';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917200458';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917200030';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917200030';
+} from './overlay-position.js?build=20260917200458';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917200458';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
 const ROOT_ID = 'noble-school-root';
 const IMAGE_EXTENSION_URL = 'https://github.com/sarah707/SillyTavern-MiniGame-Image-API';
+const BUILD_MODE = 'github';
 
 const hostWindow = (() => {
   try {
@@ -162,7 +163,8 @@ async function loadGameDocument(iframe) {
   if (!response.ok) throw new Error(`游戏页面加载失败（HTTP ${response.status}）。`);
   let html = await response.text();
   const baseTag = `<base href="${escapeHtml(new URL('./game/', import.meta.url).href)}">`;
-  html = html.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
+  const buildModeTag = `<script>globalThis.__NOBLE_SCHOOL_BUILD_MODE__=${JSON.stringify(BUILD_MODE)};<\/script>`;
+  html = html.replace(/<head([^>]*)>/i, `<head$1>${baseTag}${buildModeTag}`);
   const loaded = new Promise((resolve) => iframe.addEventListener('load', resolve, { once: true }));
   iframe.srcdoc = html;
   await loaded;
@@ -208,7 +210,7 @@ async function mount() {
     root.style.transform = `translate(calc(-50% + ${cardPosition.x}px),calc(-50% + ${cardPosition.y}px))`;
   };
 
-  const bridge = createTavernBridge({ hostWindow, apiWindow: window });
+  const bridge = createTavernBridge({ hostWindow, apiWindow: window, buildMode: BUILD_MODE });
   hostWindow[BRIDGE_KEY] = bridge;
 
   const showGame = async (epoch = contentEpoch) => {

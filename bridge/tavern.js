@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917200030';
-import { buildExportWorldbook } from './worldbook.js?build=20260917200030';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917200458';
+import { buildExportWorldbook } from './worldbook.js?build=20260917200458';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -579,27 +579,28 @@ function isImagePayload(payload) {
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
 }
 
-async function appendTextExchangeToChat(helper, prompt, response, textPresetMode, capturedFinalPrompt) {
-  const promptMessage = wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt);
+async function appendTextExchangeToChat(helper, prompt, response, textPresetMode, capturedFinalPrompt, includePrompt) {
   const responseMessage = String(response || '').trim();
   if (!responseMessage) return;
   if (typeof helper?.createChatMessages !== 'function') {
     throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整提示词和 AI 回复写入聊天楼层；请更新酒馆助手。');
   }
-  await helper.createChatMessages([
-    {
+  const messages = [];
+  if (includePrompt) {
+    messages.push({
       role: 'user',
-      message: promptMessage,
+      message: wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt),
       data: { nobleSchoolGamePrompt: true },
       extra: { source: 'noble-school-tavern-card' }
-    },
-    {
-      role: 'assistant',
-      message: responseMessage,
-      data: { nobleSchoolGameResponse: true },
-      extra: { source: 'noble-school-tavern-card' }
-    }
-  ], {
+    });
+  }
+  messages.push({
+    role: 'assistant',
+    message: responseMessage,
+    data: { nobleSchoolGameResponse: true },
+    extra: { source: 'noble-school-tavern-card' }
+  });
+  await helper.createChatMessages(messages, {
     insert_before: 'end',
     refresh: 'all'
   });
@@ -618,8 +619,9 @@ async function saveChatMetadataDurably(hostWindow, apiWindow) {
   throw new Error('当前酒馆没有提供立即保存对话变量的接口；为避免刷新后回档，本次存档未标记为成功。请更新 SillyTavern。');
 }
 
-export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
+export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMode = 'github' }) {
   const helper = apiWindow.TavernHelper || apiWindow;
+  const isTestBuild = String(buildMode).toLowerCase() === 'github';
   const getCurrentChatId = () => String(
     hostWindow?.SillyTavern?.getCurrentChatId?.()
       || apiWindow?.SillyTavern?.getCurrentChatId?.()
@@ -906,7 +908,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         ? formatCapturedFinalPrompt(capturedMessages)
         : buildVisibleTextPrompt(payload, textPresetMode);
       const fullText = typeof text === 'string' ? text : String(text?.content || '');
-      await appendTextExchangeToChat(helper, visiblePrompt, fullText, textPresetMode, capturedFinalPrompt);
+      await appendTextExchangeToChat(helper, visiblePrompt, fullText, textPresetMode, capturedFinalPrompt, isTestBuild);
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
         raw: { fullText }
