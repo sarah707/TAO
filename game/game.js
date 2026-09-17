@@ -34,7 +34,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917140307';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917140347';
   const DAILY_COST = 25;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -170,51 +170,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917140307', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917140347', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260917140307', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260917140307', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260917140307', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260917140307', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260917140307', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260917140307', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260917140307', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260917140347', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260917140347', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260917140347', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260917140347', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260917140347', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260917140347', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260917140347', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917140307', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917140347', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260917140307', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260917140307', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260917140307', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260917140307', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260917140307', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260917140307', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260917140307', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260917140347', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260917140347', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260917140347', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260917140347', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260917140347', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260917140347', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260917140347', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917140307', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917140347', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260917140307', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260917140307', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260917140307', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260917140307', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260917140307', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260917140307', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260917140307', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260917140347', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260917140347', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260917140347', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260917140347', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260917140347', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260917140347', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260917140347', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917140307', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917140347', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260917140307', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260917140307', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260917140307', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260917140307', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260917140307', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260917140307', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260917140307', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260917140347', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260917140347', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260917140347', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260917140347', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260917140347', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260917140347', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260917140347', name: '讨论定稿' }
       ]
     }
   ];
@@ -223,51 +223,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917140307', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917140347', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260917140307', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260917140307', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260917140307', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260917140307', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260917140307', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260917140307', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260917140307', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260917140347', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260917140347', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260917140347', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260917140347', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260917140347', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260917140347', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260917140347', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917140307', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917140347', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260917140307', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260917140307', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260917140307', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260917140307', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260917140307', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260917140307', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260917140307', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260917140347', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260917140347', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260917140347', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260917140347', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260917140347', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260917140347', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260917140347', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917140307', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917140347', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260917140307', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260917140307', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260917140307', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260917140307', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260917140307', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260917140307', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260917140307', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260917140347', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260917140347', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260917140347', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260917140347', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260917140347', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260917140347', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260917140347', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917140307', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917140347', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260917140307', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260917140307', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260917140307', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260917140307', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260917140307', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260917140307', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260917140307', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260917140347', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260917140347', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260917140347', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260917140347', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260917140347', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260917140347', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260917140347', name: '落地路线图' }
       ]
     }
   ];
@@ -6413,12 +6413,12 @@ ${promptContextLines.join('\n')}`;
       // 第一次进入或旧存档没有教程状态时，从完整引导开始。
       state.mergeGame = createMergeGameState(mode);
       state.mergeGame.initialized = true;
-      state.mergeGame.tutorial = { step: 0, genCount: 0, generatedPieceIds: [], sourcePieceId: '', targetPieceId: '', usePetrifiedTarget: false };
+      state.mergeGame.tutorial = { step: 0, introDetailShown: false, genCount: 0, generatedPieceIds: [], sourcePieceId: '', targetPieceId: '', usePetrifiedTarget: false };
       state.mergeGame.tasks = [{
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917140307', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917140347', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -6772,10 +6772,12 @@ ${promptContextLines.join('\n')}`;
 
     const isBiz = mg.mode === 'biz';
     const tutorial = mg.tutorial;
+    const isTutorialTaskIconStep = !!(tutorial && tutorial.step === 0 && !tutorial.introDetailShown);
+    const isTutorialChainStep = !!(tutorial && tutorial.step === 0 && tutorial.introDetailShown);
 
     let tasksHtml = '';
     if (mg.tasks.length) {
-      var tasksTutorialClass = (tutorial && (tutorial.step === 0 || tutorial.step === 4)) ? ' merge-tasks-tutorial-spotlight' : '';
+      var tasksTutorialClass = (tutorial && tutorial.step === 4) ? ' merge-tasks-tutorial-spotlight' : '';
       tasksHtml = `<div class="merge-tasks${tasksTutorialClass}">${mg.tasks.map((task, ti) => {
         const canSubmit = canSubmitTask(task);
         let progressHtml = '';
@@ -6786,14 +6788,15 @@ ${promptContextLines.join('\n')}`;
           const progress = course ? (task.isThesis ? (course.studyProgress || 0) : (course.currentHomeworkProgress || 0)) : 0;
           progressHtml = `<div class="merge-task-progress">完成度 ${Math.round(progress)}%</div>`;
         }
-        var taskHighlight = (tutorial && (tutorial.step === 0 || tutorial.step === 4)) ? ' merge-task-highlight' : '';
+        var taskHighlight = (tutorial && tutorial.step === 4) ? ' merge-task-highlight' : '';
         return `<div class="merge-task-card${taskHighlight}">
           <div class="merge-task-course">${escapeHtml(task.courseName)}${isBiz ? '' : '作业'}</div>
           ${progressHtml}
           <div class="merge-task-pieces-wrapper">
             <div class="merge-task-pieces">${task.requiredPieces.map((rp) => {
               const tapAnim = mg.lastTaskPieceClick && mg.lastTaskPieceClick.chainId === rp.chainId && mg.lastTaskPieceClick.level === rp.level && (now - mg.lastTaskPieceClick.time) < 400 ? ' merge-tap-bounce' : '';
-              return `<img src="${rp.svg}" class="merge-task-req-piece${tapAnim}" data-action="merge-task-piece-info" data-chain-id="${rp.chainId}" data-level="${rp.level}" alt="${rp.name}" title="${rp.name}">`;
+              const tutorialIconClass = isTutorialTaskIconStep ? ' merge-task-icon-tutorial-highlight' : '';
+              return `<img src="${rp.svg}" class="merge-task-req-piece${tapAnim}${tutorialIconClass}" data-action="merge-task-piece-info" data-chain-id="${rp.chainId}" data-level="${rp.level}" alt="${rp.name}" title="${rp.name}">`;
             }).join('')}</div>
             ${canSubmit ? `<button class="primary merge-submit-btn" data-action="merge-submit" data-task-index="${ti}">提交</button>` : ''}
           </div>
@@ -6864,7 +6867,9 @@ ${promptContextLines.join('\n')}`;
           chainPieces += `<img src="${p.svg}" class="merge-chain-piece-img" alt="${p.name}" title="Lv${p.level} ${p.name}" style="width:24px;height:24px;opacity:${p.level === displayInfo.level || showFull ? '1' : '0.4'};">`;
         }
       }
-      descHtml = `<div class="merge-desc">
+      const tutorialChainClass = isTutorialChainStep ? ' merge-desc-tutorial-highlight' : '';
+      const tutorialChainAction = isTutorialChainStep ? ' data-action="merge-tutorial-advance"' : '';
+      descHtml = `<div class="merge-desc${tutorialChainClass}"${tutorialChainAction}>
         <img src="${displayInfo.svg}" class="merge-desc-icon" alt="${displayInfo.name}">
         <div class="merge-desc-info">
           <span class="merge-desc-name">${escapeHtml(displayInfo.name)}</span>
@@ -6899,7 +6904,8 @@ ${promptContextLines.join('\n')}`;
 
   function _renderTutorialHtmlContent(tut) {
     var msg = '';
-    if (tut.step === 0) msg = '完成任务要求即可获得企划书完成度，点要求图标可以在下边信息栏看到合成路径';
+    if (tut.step === 0 && !tut.introDetailShown) msg = '完成任务要求即可获得企划书完成度，请点击要求框里的小图标';
+    else if (tut.step === 0) msg = '这里会显示该图标的合成链，点击屏幕任意位置继续';
     else if (tut.step === 1) msg = '双击母棋可以消耗灵感生成新的棋子';
     else if (tut.step === 2) msg = '请再生成一个棋子';
     else if (tut.step === 3) msg = tut.usePetrifiedTarget
@@ -6909,7 +6915,8 @@ ${promptContextLines.join('\n')}`;
     if (!msg) return '';
     var overlayClass = 'merge-tutorial-overlay';
     if (tut.step !== 0) overlayClass += ' merge-tutorial-nonblock';
-    var actionAttr = tut.step === 0 ? ' data-action="merge-tutorial-advance"' : '';
+    if (tut.step === 0 && !tut.introDetailShown) overlayClass += ' merge-tutorial-wait-for-icon';
+    var actionAttr = (tut.step === 0 && tut.introDetailShown) ? ' data-action="merge-tutorial-advance"' : '';
     return '<div class="' + overlayClass + '"' + actionAttr + '></div><div class="merge-tutorial-bubble">' + msg + '</div>';
   }
 
@@ -8249,7 +8256,7 @@ ${promptContextLines.join('\n')}`;
           return;
         }
         case 'merge-task-piece-info': {
-          // Block task piece info during guided tutorial steps (1-4)
+          // The first tutorial screen only accepts the highlighted requirement icon.
           if (state.mergeGame.tutorial && state.mergeGame.tutorial.step >= 1 && state.mergeGame.tutorial.step <= 4) return;
           const chainId = Number(button.dataset.chainId);
           const level = Number(button.dataset.level);
@@ -8257,7 +8264,11 @@ ${promptContextLines.join('\n')}`;
           state.mergeGame.generationMotherId = null;
           state.mergeGame.taskInfoDisplay = { chainId, level };
           state.mergeGame.lastTaskPieceClick = { chainId, level, time: Date.now() };
+          if (state.mergeGame.tutorial && state.mergeGame.tutorial.step === 0) {
+            state.mergeGame.tutorial.introDetailShown = true;
+          }
           render();
+          setTimeout(function () { saveCurrentRuntime(); }, 0);
           return;
         }
         case 'merge-discard': {
@@ -8295,8 +8306,9 @@ ${promptContextLines.join('\n')}`;
         case 'merge-tutorial-advance':
           if (state.mergeGame && state.mergeGame.tutorial) {
             var tut = state.mergeGame.tutorial;
-            if (tut.step === 0) {
+            if (tut.step === 0 && tut.introDetailShown) {
               tut.step = 1;
+              state.mergeGame.taskInfoDisplay = null;
             }
             // step 1 and 2 advance via generateTutorialChildPiece
             // step 3 advances via handleMergeDrop
