@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260916234853';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917000737';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260916234853';
+} from './worldbook.js?build=20260917000737';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -253,6 +253,35 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           message: error.message || '生图插件状态检测失败。'
         };
       }
+    },
+    async testImageGenerator() {
+      const api = getMiniGameImageApi(hostWindow, apiWindow);
+      if (!api || typeof api.generate !== 'function') {
+        throw new Error('未安装“小游戏轻度生图插件”。');
+      }
+      const generated = await api.generate({
+        prompt: 'A single small pale purple circle centered on a plain white background, no text',
+        negativePrompt: 'letters, words, watermark, complex background',
+        aspectRatio: '1:1',
+        imageSize: '1K',
+        width: 256,
+        height: 256,
+        steps: 4,
+        saveToSillyTavern: false
+      });
+      const image = generated?.images?.[0];
+      if (!image?.data && !image?.dataUrl) {
+        throw new Error('接口没有返回可用的测试图片。');
+      }
+      return {
+        installed: true,
+        configured: true,
+        ready: true,
+        verified: true,
+        provider: generated.provider || '',
+        model: generated.model || '',
+        message: '测试生图成功，当前配置可以使用。'
+      };
     },
     async request(payload) {
       if (isImagePayload(payload)) {

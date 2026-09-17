@@ -1,4 +1,4 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260916234853';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917000737';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -132,10 +132,12 @@ function makePluginNoticeMarkup(status) {
       <div class="noble-school-plugin-notice-main">
         <h2>${title}</h2>
         <p>${message}</p>
+        ${installed ? '<p>也可以实际生成一张最小尺寸测试图来验证模型、权限、地区和额度；测试图只用于验证，不会保存到游戏或酒馆图片目录。</p>' : ''}
         <p>安装后刷新一次酒馆；游玩途中安装也没关系，刷新后点击角色头像下方的“重新生成头像”即可使用。</p>
         <p><a class="noble-school-plugin-link" href="${IMAGE_EXTENSION_URL}" target="_blank" rel="noopener noreferrer">小游戏轻度生图插件安装地址</a></p>
         <div class="noble-school-actions">
           ${installed ? '<button class="noble-school-button" type="button" data-plugin-action="settings">打开插件设置</button>' : '<button class="noble-school-button" type="button" data-plugin-action="install">查看安装页面</button>'}
+          ${installed ? '<button class="noble-school-button" type="button" data-plugin-action="test">生成测试图并验证</button>' : ''}
           <button class="noble-school-button secondary" type="button" data-plugin-action="retry">重新检测</button>
           <button class="noble-school-button secondary" type="button" data-plugin-action="continue">暂不使用生图，继续游戏</button>
         </div>
@@ -261,6 +263,20 @@ async function mount() {
     });
     body.querySelector('[data-plugin-action="settings"]')?.addEventListener('click', () => {
       bridge.openImageSettings();
+    });
+    body.querySelector('[data-plugin-action="test"]')?.addEventListener('click', async () => {
+      const message = body.querySelector('.noble-school-status');
+      const buttons = [...body.querySelectorAll('[data-plugin-action]')];
+      buttons.forEach((button) => { button.disabled = true; });
+      if (message) message.textContent = '正在生成测试图，请稍候……';
+      try {
+        const result = await bridge.testImageGenerator();
+        if (message) message.textContent = result.message || '测试生图成功，正在进入游戏……';
+        await showGame();
+      } catch (error) {
+        if (message) message.textContent = `测试失败：${error.message || error}`;
+        buttons.forEach((button) => { button.disabled = false; });
+      }
     });
     body.querySelector('[data-plugin-action="retry"]')?.addEventListener('click', async () => {
       const message = body.querySelector('.noble-school-status');
