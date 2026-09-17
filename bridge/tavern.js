@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917191807';
-import { buildExportWorldbook } from './worldbook.js?build=20260917191807';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917194020';
+import { buildExportWorldbook } from './worldbook.js?build=20260917194020';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -26,6 +26,139 @@ function collectAccessibleWindows(...seeds) {
     }
   }
   return windows;
+}
+
+function isTextGenerationEndpoint(input, baseUrl = '') {
+  const raw = typeof input === 'string' ? input : input?.url || input?.href || '';
+  try {
+    const path = new URL(raw, baseUrl || 'http://localhost/').pathname.replace(/\/{2,}/g, '/');
+    return path === '/api/backends/chat-completions/generate'
+      || path === '/api/backends/text-completions/generate'
+      || path === '/api/backends/kobold/generate'
+      || path === '/api/novelai/generate';
+  } catch {
+    return /\/api\/(?:backends\/[^/]+\/|novelai\/)generate(?:[?#]|$)/.test(String(raw));
+  }
+}
+
+function parseJsonObject(value) {
+  try {
+    const parsed = JSON.parse(String(value || ''));
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function redactDiagnosticText(value) {
+  return String(value || '')
+    .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [已隐藏]')
+    .replace(/(["']?(?:api[_-]?key|access[_-]?token|authorization|password|secret)["']?\s*[:=]\s*["']?)([^"',}\s]+)/gi, '$1[已隐藏]');
+}
+
+function readGenerationRequestMetadata(input, init) {
+  const rawBody = init?.body ?? (typeof input === 'object' ? input?.body : null);
+  if (typeof rawBody !== 'string') return {};
+  const body = parseJsonObject(rawBody);
+  if (!body) return {};
+  return {
+    source: String(body.chat_completion_source || body.api_type || '').trim(),
+    model: String(body.model || '').trim()
+  };
+}
+
+function createGenerationErrorCapture(hostWindow, apiWindow) {
+  const patches = [];
+  let captured = null;
+  for (const candidateWindow of collectAccessibleWindows(hostWindow, apiWindow)) {
+    let originalFetch;
+    try {
+      originalFetch = candidateWindow?.fetch;
+    } catch {
+      continue;
+    }
+    if (typeof originalFetch !== 'function') continue;
+    const wrappedFetch = async function (...args) {
+      const [input, init] = args;
+      const response = await originalFetch.apply(this, args);
+      if (!response?.ok && isTextGenerationEndpoint(input, candidateWindow?.location?.href)) {
+        let responseText = '';
+        try {
+          responseText = await response.clone().text();
+        } catch {
+          // Preserve the original response even when this browser cannot clone it.
+        }
+        captured = {
+          httpStatus: Number(response.status || 0),
+          httpStatusText: String(response.statusText || '').trim(),
+          responseText: redactDiagnosticText(responseText).slice(0, 6000),
+          responseBody: parseJsonObject(responseText),
+          ...readGenerationRequestMetadata(input, init)
+        };
+      }
+      return response;
+    };
+    try {
+      candidateWindow.fetch = wrappedFetch;
+      if (candidateWindow.fetch === wrappedFetch) {
+        patches.push({ candidateWindow, originalFetch, wrappedFetch });
+      }
+    } catch {
+      // Some embedded browser surfaces expose a read-only fetch property.
+    }
+  }
+  return {
+    getError: () => captured,
+    restore() {
+      for (const { candidateWindow, originalFetch, wrappedFetch } of patches.reverse()) {
+        try {
+          if (candidateWindow.fetch === wrappedFetch) candidateWindow.fetch = originalFetch;
+        } catch {
+          // Leave a fetch replaced by another extension untouched.
+        }
+      }
+    }
+  };
+}
+
+function enhanceGenerationError(error, captured, context = {}) {
+  if (!captured) return error;
+  const body = captured.responseBody;
+  const upstream = body?.error && typeof body.error === 'object' ? body.error : body;
+  const upstreamCode = upstream?.code ?? body?.code ?? '';
+  const upstreamStatus = upstream?.status ?? body?.status ?? '';
+  const upstreamMessage = redactDiagnosticText(
+    upstream?.message
+      || (typeof body?.error === 'string' ? body.error : '')
+      || body?.message
+      || body?.response
+      || ''
+  ).trim();
+  const httpStatus = captured.httpStatus
+    ? `HTTP ${captured.httpStatus}${captured.httpStatusText ? ` ${captured.httpStatusText}` : ''}`
+    : '未知';
+  const lines = [
+    '文字生成请求失败。',
+    `酒馆接口：${httpStatus}`
+  ];
+  if (upstreamCode || upstreamStatus) {
+    lines.push(`上游状态：${[upstreamCode, upstreamStatus].filter(Boolean).join(' / ')}`);
+  }
+  if (upstreamMessage) lines.push(`上游信息：${upstreamMessage}`);
+  if (captured.source || captured.model) {
+    lines.push(`生成配置：${[captured.source, captured.model].filter(Boolean).join(' / ')}`);
+  }
+  if (context.textPresetMode) {
+    lines.push(`提示词模式：${context.textPresetMode === 'builtin' ? '游戏内置预设' : '酒馆当前预设'}`);
+  }
+  if (context.generationId) lines.push(`诊断编号：${context.generationId}`);
+  const originalMessage = redactDiagnosticText(error?.message || error || '').trim();
+  if (originalMessage) lines.push(`原始异常：${originalMessage}`);
+  if (captured.responseText) lines.push(`上游原始响应：${captured.responseText}`);
+  const enhanced = new Error(lines.join('\n'));
+  enhanced.name = error?.name || 'GenerationError';
+  enhanced.cause = error;
+  return enhanced;
 }
 
 function collectApiSurfaces(hostWindow, apiWindow) {
@@ -697,6 +830,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         throw new Error('当前酒馆助手未开放最终提示词事件，无法保证输出格式和事件提示词位于请求末尾；请更新酒馆助手。');
       }
       let text;
+      const generationId = makeGenerationId();
+      const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow);
       try {
         if (textPresetMode === 'tavern') {
           if (typeof apiWindow.generate !== 'function') {
@@ -740,7 +875,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             max_chat_history: 0,
             injects,
             overrides: emptyPromptOverrides(),
-            generation_id: makeGenerationId()
+            generation_id: generationId
           });
         } else {
           if (typeof apiWindow.generateRaw !== 'function') {
@@ -752,10 +887,16 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             max_chat_history: 0,
             injects: [],
             overrides: emptyPromptOverrides(),
-            generation_id: makeGenerationId()
+            generation_id: generationId
           });
         }
+      } catch (error) {
+        throw enhanceGenerationError(error, generationErrorCapture.getError(), {
+          generationId,
+          textPresetMode
+        });
       } finally {
+        generationErrorCapture.restore();
         presetPromptSuppression.restore();
         finalPromptCapture.stop();
       }
