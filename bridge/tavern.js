@@ -1,10 +1,10 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917024613';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917031926';
 import {
   buildGraduationWorldbook,
   buildLiveWorldbookName,
   buildLiveWorldbookPromptContext,
   mergeLiveWorldbookEntries
-} from './worldbook.js?build=20260917024613';
+} from './worldbook.js?build=20260917031926';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -22,6 +22,20 @@ function getHostContext(hostWindow, apiWindow) {
   return hostWindow?.SillyTavern?.getContext?.()
     || apiWindow?.SillyTavern?.getContext?.()
     || null;
+}
+
+function expandMacro(value, expanders) {
+  const source = String(value || '').trim();
+  for (const expand of expanders) {
+    if (typeof expand !== 'function') continue;
+    try {
+      const expanded = String(expand(source) || '').trim();
+      if (expanded && expanded !== source) return expanded;
+    } catch {
+      // Try the next supported SillyTavern/TavernHelper macro API.
+    }
+  }
+  return '';
 }
 
 function normalizeServerImagePath(value, hostWindow) {
@@ -167,12 +181,31 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
     version: 1,
     getPlayerProfile() {
       const context = getHostContext(hostWindow, apiWindow);
-      const name = String(context?.name1 || '').trim();
-      let description = '';
-      if (typeof context?.substituteParams === 'function') {
-        description = String(context.substituteParams('{{persona}}') || '').trim();
-        if (description === '{{persona}}') description = '';
+      let persona = null;
+      if (typeof helper?.getPersona === 'function') {
+        try {
+          persona = helper.getPersona('current');
+        } catch {
+          persona = null;
+        }
       }
+      const expanders = [
+        context?.substituteParams?.bind(context),
+        helper?.substitudeMacros?.bind(helper),
+        apiWindow?.substitudeMacros?.bind(apiWindow)
+      ];
+      const name = String(
+        persona?.name
+        || helper?.getCurrentPersonaName?.()
+        || context?.name1
+        || expandMacro('{{user}}', expanders)
+        || ''
+      ).trim();
+      const description = String(
+        persona?.description
+        || expandMacro('{{persona}}', expanders)
+        || ''
+      ).trim();
       return { name, description };
     },
     async loadGameStorage() {
