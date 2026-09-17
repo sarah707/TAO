@@ -97,6 +97,10 @@
       : { source: 'remote', value: remoteValue };
   }
 
+  function resolveStoredPlanFixed(plan, fallbackFixed = false) {
+    return typeof plan?.fixed === 'boolean' ? plan.fixed : Boolean(fallbackFixed);
+  }
+
   function evaluateGraduation({ regularGrades = [], specialProgress = [], businessScore = 0 } = {}) {
     const gradeOrder = ['F', 'D', 'C', 'B', 'A', 'A+'];
     const minimumRank = gradeOrder.indexOf(CAMPAIGN_CONFIG.minimumGraduationGrade);
@@ -572,6 +576,7 @@
     clamp,
     getStoredSaveTimestamp,
     selectNewestStoredValue,
+    resolveStoredPlanFixed,
     evaluateTermStanding,
     evaluateGraduation,
     selectFirstClassIntroduction,
