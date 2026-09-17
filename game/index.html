@@ -983,6 +983,8 @@
     }
 
     .merge-game-container {
+      position: relative;
+      isolation: isolate;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -1330,11 +1332,8 @@
     }
 
     .merge-tutorial-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      position: absolute;
+      inset: 0;
       background: rgba(0, 0, 0, 0.5);
       z-index: 99;
       cursor: pointer;
@@ -1348,7 +1347,7 @@
       cursor: default;
     }
 
-    .merge-tasks-tutorial-spotlight {
+    .merge-tutorial-surface {
       position: relative;
       z-index: 100;
       isolation: isolate;
@@ -1383,10 +1382,10 @@
 <body>
   <div class="title-safe">贵族学院的特招生</div>
   <div id="app"></div>
-  <script src="tavern-runtime.js?build=20260917200841"></script>
-  <script src="client-common.js?build=20260917200841"></script>
-  <script src="game-core.js?build=20260917200841"></script>
-  <script src="prompts.js?build=20260917200841"></script>
-  <script src="game.js?build=20260917200841"></script>
+  <script src="tavern-runtime.js?build=20260917203002"></script>
+  <script src="client-common.js?build=20260917203002"></script>
+  <script src="game-core.js?build=20260917203002"></script>
+  <script src="prompts.js?build=20260917203002"></script>
+  <script src="game.js?build=20260917203002"></script>
 </body>
 </html>
