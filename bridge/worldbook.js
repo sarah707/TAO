@@ -40,33 +40,17 @@ function entry(name, content, options = {}) {
   };
 }
 
-function buildCourseLines(runtime) {
-  return Object.entries(runtime?.courses || {}).map(([courseId, course]) => {
-    const label = cleanLine(course?.name || course?.label || courseId);
-    const grade = cleanLine(course?.finalGrade || course?.grade || '未记录');
-    const progress = Number(course?.studyProgress ?? course?.progress);
-    return `- ${label}：${grade}${Number.isFinite(progress) ? `（进度 ${Math.round(progress)}%）` : ''}`;
-  });
-}
-
 function buildPlayerProgressContent(runtime) {
   const player = runtime?.player || {};
   const lovers = (runtime?.characters || [])
     .filter((character) => character?.isLover)
     .map((character) => character.name);
-  const courseLines = buildCourseLines(runtime);
   return [
     '<Player_Progress>',
     `当前日期：${cleanLine(player.currentDate)}`,
     `当前资金：${Math.round(Number(player.money || 0))}`,
     `疲劳度：${Math.round(Number(player.fatigue || 0))}`,
-    `灵感：${Math.round(Number(player.inspiration || 0))}`,
-    `毕业实习：${cleanLine(player.graduationInternship)}`,
-    `毕业论文进度：${Math.round(Number(player.graduationThesisProgress || 0))}%`,
-    `创业企划进度：${Math.round(Number(player.bizProgress || 0))}%`,
     `恋人：${lovers.length ? lovers.join('、') : '无'}`,
-    '课程状态：',
-    ...(courseLines.length ? courseLines : ['- 无记录']),
     '</Player_Progress>'
   ].join('\n');
 }
