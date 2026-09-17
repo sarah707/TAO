@@ -17,6 +17,7 @@
     canReceiveGraduationInternshipOffer,
     findCharactersForCourse,
     resolveInternshipSelection,
+    findMatchingPetrifiedPieceIndex,
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
@@ -26,14 +27,14 @@
   if (typeof requestJson !== 'function' || typeof postJson !== 'function' || typeof escapeHtml !== 'function' || typeof parseDurationMs !== 'function') {
     throw new Error('公共客户端工具加载失败。');
   }
-  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof findCharactersForCourse !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function') {
+  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof findCharactersForCourse !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof findMatchingPetrifiedPieceIndex !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function') {
     throw new Error('游戏核心规则加载失败。');
   }
   if (!GAME_PROMPTS?.eventSpecs || typeof GAME_PROMPTS.buildPromptModules !== 'function' || typeof GAME_PROMPTS.buildEventPromptTexts !== 'function') {
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917041903';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260917042607';
   const DAILY_COST = 25;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -169,51 +170,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917041903', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260917042607', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260917041903', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260917041903', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260917041903', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260917041903', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260917041903', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260917041903', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260917041903', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260917042607', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260917042607', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260917042607', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260917042607', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260917042607', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260917042607', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260917042607', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917041903', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260917042607', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260917041903', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260917041903', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260917041903', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260917041903', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260917041903', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260917041903', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260917041903', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260917042607', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260917042607', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260917042607', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260917042607', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260917042607', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260917042607', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260917042607', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917041903', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260917042607', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260917041903', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260917041903', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260917041903', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260917041903', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260917041903', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260917041903', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260917041903', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260917042607', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260917042607', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260917042607', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260917042607', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260917042607', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260917042607', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260917042607', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917041903', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260917042607', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260917041903', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260917041903', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260917041903', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260917041903', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260917041903', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260917041903', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260917041903', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260917042607', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260917042607', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260917042607', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260917042607', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260917042607', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260917042607', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260917042607', name: '讨论定稿' }
       ]
     }
   ];
@@ -222,51 +223,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917041903', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260917042607', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260917041903', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260917041903', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260917041903', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260917041903', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260917041903', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260917041903', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260917041903', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260917042607', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260917042607', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260917042607', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260917042607', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260917042607', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260917042607', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260917042607', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917041903', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260917042607', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260917041903', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260917041903', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260917041903', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260917041903', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260917041903', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260917041903', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260917041903', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260917042607', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260917042607', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260917042607', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260917042607', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260917042607', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260917042607', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260917042607', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917041903', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260917042607', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260917041903', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260917041903', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260917041903', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260917041903', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260917041903', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260917041903', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260917041903', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260917042607', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260917042607', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260917042607', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260917042607', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260917042607', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260917042607', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260917042607', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917041903', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260917042607', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260917041903', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260917041903', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260917041903', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260917041903', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260917041903', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260917041903', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260917041903', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260917042607', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260917042607', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260917042607', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260917042607', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260917042607', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260917042607', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260917042607', name: '落地路线图' }
       ]
     }
   ];
@@ -1391,6 +1392,7 @@
       : [];
     runtime.flags.internships.selectionResolved = Boolean(runtime.flags.internships.selectionResolved);
     runtime.flags.weeklyMergePromptShown = typeof runtime.flags.weeklyMergePromptShown === 'boolean' ? runtime.flags.weeklyMergePromptShown : false;
+    runtime.flags.bizMergeTutorialCompleted = runtime.flags.bizMergeTutorialCompleted === true;
     runtime.mergeGame = runtime.mergeGame && typeof runtime.mergeGame === 'object' ? runtime.mergeGame : null;
     runtime.bizMergeGame = runtime.bizMergeGame && typeof runtime.bizMergeGame === 'object' ? runtime.bizMergeGame : null;
     syncTutorCharacterIds(runtime);
@@ -1518,7 +1520,10 @@
       var data = {
         mode: state.mergeGame.mode,
         board: cleanBoard,
-        tasks: state.mergeGame.tasks.slice()
+        tasks: state.mergeGame.tasks.slice(),
+        tutorial: state.mergeGame.tutorial
+          ? JSON.parse(JSON.stringify(state.mergeGame.tutorial))
+          : null
       };
       if (state.mergeGame.mode === 'biz') {
         state.runtime.bizMergeGame = data;
@@ -2067,6 +2072,14 @@
 
   var ENDING_EVENT_NAMES = new Set(['退学事件', '普通毕业事件', '全A毕业事件', '毕业创业事件']);
 
+  function resolveMergeGameMode(hasHomework) {
+    // 首次教程固定使用创业棋盘；即使刷新后已经出现作业，也继续恢复同一套引导。
+    if (state.runtime && state.runtime.flags.bizMergeTutorialCompleted !== true) {
+      return 'biz';
+    }
+    return hasHomework ? 'homework' : 'biz';
+  }
+
   function setAiLoading(message) {
     var aiLoadingMsg = message || '正在等待 AI 回复…';
     var canMerge = state.runtime && state.runtime.phase !== 'ended';
@@ -2076,7 +2089,7 @@
 
     // 结局事件不弹框
     if (canMerge && !isEndingEvent && !(!hasHomework && bizDone)) {
-      var mode = hasHomework ? 'homework' : 'biz';
+      var mode = resolveMergeGameMode(hasHomework);
       if (!state.mergeGame || !state.mergeGame.initialized || state.mergeGame.mode !== mode) {
         initMergeGame(mode);
       } else {
@@ -2091,7 +2104,7 @@
         state.runtime.flags.weeklyMergePromptShown = true;
       }
 
-      var dialogMsg = hasHomework ? '写点作业吧' : '闲着也是闲着，搞搞我的创业企划书吧';
+      var dialogMsg = mode === 'homework' ? '写点作业吧' : '闲着也是闲着，搞搞我的创业企划书吧';
       openModal({
         type: 'confirm',
         title: '',
@@ -2450,6 +2463,7 @@
         academicWarnings: {},
         scholarshipPaid: {},
         firstOpeningCeremonyTriggered: false,
+        bizMergeTutorialCompleted: false,
         triggeredEvents: {},
         historyPanelWeekStart: getWeekStart(START_DATE),
         weeklyInvite: {
@@ -6199,7 +6213,7 @@ ${promptContextLines.join('\n')}`;
       var hasHomework = getActiveHomeworkCourses().length > 0;
       var bizDone = (runtime.player.bizProgress || 0) >= BUSINESS_ENDING_SCORE;
       if (!(!hasHomework && bizDone)) {
-        var mode = hasHomework ? 'homework' : 'biz';
+        var mode = resolveMergeGameMode(hasHomework);
         if (!state.mergeGame || !state.mergeGame.initialized || state.mergeGame.mode !== mode) {
           initMergeGame(mode);
         } else {
@@ -6209,7 +6223,7 @@ ${promptContextLines.join('\n')}`;
           }
         }
         state.mergeGame.aiReady = false;
-        var dialogMsg = hasHomework ? '写点作业吧' : '闲着也是闲着，搞搞我的创业企划书吧';
+        var dialogMsg = mode === 'homework' ? '写点作业吧' : '闲着也是闲着，搞搞我的创业企划书吧';
         openModal({
           type: 'confirm',
           title: '',
@@ -6386,7 +6400,27 @@ ${promptContextLines.join('\n')}`;
     if (mode === 'biz') {
       saved = state.runtime?.bizMergeGame;
     }
-    if (saved && Array.isArray(saved.board) && saved.board.length === MERGE_BOARD_SIZE && (saved.mode === mode || (!saved.mode && mode === 'homework'))) {
+    const shouldStartTutorial = mode === 'biz' && state.runtime && !state.runtime.flags.bizMergeTutorialCompleted;
+    const hasSavedBoard = saved && Array.isArray(saved.board) && saved.board.length === MERGE_BOARD_SIZE && (saved.mode === mode || (!saved.mode && mode === 'homework'));
+    if (shouldStartTutorial && hasSavedBoard && saved.tutorial && typeof saved.tutorial === 'object') {
+      // 未完成的教程连同当前步骤一起恢复，刷新不会跳过引导或重复消耗灵感。
+      state.mergeGame = createMergeGameState(mode);
+      state.mergeGame.board = saved.board.slice();
+      state.mergeGame.tasks = Array.isArray(saved.tasks) ? saved.tasks.slice() : [];
+      state.mergeGame.tutorial = JSON.parse(JSON.stringify(saved.tutorial));
+      state.mergeGame.initialized = true;
+    } else if (shouldStartTutorial) {
+      // 第一次进入或旧存档没有教程状态时，从完整引导开始。
+      state.mergeGame = createMergeGameState(mode);
+      state.mergeGame.initialized = true;
+      state.mergeGame.tutorial = { step: 0, genCount: 0, generatedPieceIds: [], sourcePieceId: '', targetPieceId: '', usePetrifiedTarget: false };
+      state.mergeGame.tasks = [{
+        courseId: null,
+        courseName: '创业企划书',
+        isThesis: false,
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917042607', name: '用户抱怨' }]
+      }];
+    } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
       state.mergeGame.board = saved.board.slice();
       state.mergeGame.initialized = true;
@@ -6400,19 +6434,7 @@ ${promptContextLines.join('\n')}`;
     } else {
       state.mergeGame = createMergeGameState(mode);
       state.mergeGame.initialized = true;
-      // Start tutorial for biz mode when first opening ceremony hasn't triggered yet
-      if (mode === 'biz' && state.runtime && !state.runtime.flags.firstOpeningCeremonyTriggered) {
-        state.mergeGame.tutorial = { step: 0, genCount: 0 };
-        // Tutorial task: require 用户抱怨 (g1-2) which the player creates by merging two 市场杂闻 (g1-1)
-        state.mergeGame.tasks = [{
-          courseId: null,
-          courseName: '创业企划书',
-          isThesis: false,
-          requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260917041903', name: '用户抱怨' }]
-        }];
-      } else {
-        refreshMergeTasks();
-      }
+      refreshMergeTasks();
     }
   }
 
@@ -6451,7 +6473,18 @@ ${promptContextLines.join('\n')}`;
     scheduleSpawnAnimCleanup(tutPiece);
 
     mg.tutorial.genCount = (mg.tutorial.genCount || 0) + 1;
-    if (mg.tutorial.genCount >= 2) {
+    mg.tutorial.generatedPieceIds = Array.isArray(mg.tutorial.generatedPieceIds) ? mg.tutorial.generatedPieceIds : [];
+    mg.tutorial.generatedPieceIds.push(tutPiece.id);
+    const petrifiedTargetIndex = findMatchingPetrifiedPieceIndex(mg.board, targetIdx);
+    if (petrifiedTargetIndex >= 0) {
+      mg.tutorial.sourcePieceId = tutPiece.id;
+      mg.tutorial.targetPieceId = mg.board[petrifiedTargetIndex].id;
+      mg.tutorial.usePetrifiedTarget = true;
+      mg.tutorial.step = 3;
+    } else if (mg.tutorial.genCount >= 2) {
+      mg.tutorial.sourcePieceId = mg.tutorial.generatedPieceIds[0] || '';
+      mg.tutorial.targetPieceId = tutPiece.id;
+      mg.tutorial.usePetrifiedTarget = false;
       mg.tutorial.step = 3;
     } else {
       mg.tutorial.step = 2;
@@ -6514,6 +6547,7 @@ ${promptContextLines.join('\n')}`;
 
     // Tutorial: mark as submitted
     if (mg.tutorial) {
+      runtime.flags.bizMergeTutorialCompleted = true;
       mg.tutorial.step = 5;
       mg.tutorial = null;
     }
@@ -6806,7 +6840,7 @@ ${promptContextLines.join('\n')}`;
           cellClasses += ' merge-cell-tutorial-highlight';
         }
         // Tutorial highlight on the two identical level 1 pieces (chain 1) during step 3
-        if (tutorial && tutorial.step === 3 && piece.chainId === 1 && piece.level === 1) {
+        if (tutorial && tutorial.step === 3 && (piece.id === tutorial.sourcePieceId || piece.id === tutorial.targetPieceId)) {
           cellClasses += ' merge-cell-tutorial-highlight';
         }
         cellContent = `<img src="${svg}" class="${pieceClass}${animClass}"${imgStyle} draggable="false" data-action="merge-piece-click" data-cell="${i}" alt="${pInfo ? pInfo.name : ''}" title="${pInfo ? pInfo.name : ''}">`;
@@ -6868,7 +6902,9 @@ ${promptContextLines.join('\n')}`;
     if (tut.step === 0) msg = '完成任务要求即可获得企划书完成度，点要求图标可以在下边信息栏看到合成路径';
     else if (tut.step === 1) msg = '双击母棋可以消耗灵感生成新的棋子';
     else if (tut.step === 2) msg = '请再生成一个棋子';
-    else if (tut.step === 3) msg = '拖动一个棋子到另一个相同的棋子上可以生成新的棋子';
+    else if (tut.step === 3) msg = tut.usePetrifiedTarget
+      ? '拖动新生成的普通棋子到相同的石化棋子上，即可解除石化并合成新棋子'
+      : '拖动一个棋子到另一个相同的棋子上可以生成新的棋子';
     else if (tut.step === 4) msg = '点提交就能将合成的棋子提交到任务';
     if (!msg) return '';
     var overlayClass = 'merge-tutorial-overlay';
@@ -7704,7 +7740,7 @@ ${promptContextLines.join('\n')}`;
     var hasHomework = canEnterMerge && getActiveHomeworkCourses().length > 0;
     var bizDone = (state.runtime?.player?.bizProgress || 0) >= BUSINESS_ENDING_SCORE;
     var showButton = canEnterMerge && !isEndingEvent && !(!hasHomework && bizDone);
-    var label = hasHomework ? '去写作业' : '去写创业企划书';
+    var label = resolveMergeGameMode(hasHomework) === 'homework' ? '去写作业' : '去写创业企划书';
     return `
       <div class="loading-backdrop" aria-live="polite" aria-busy="true">
         <div class="loading-panel">
@@ -8242,7 +8278,7 @@ ${promptContextLines.join('\n')}`;
         }
         case 'merge-enter': {
           var hasHomework = getActiveHomeworkCourses().length > 0;
-          var mode = hasHomework ? 'homework' : 'biz';
+          var mode = resolveMergeGameMode(hasHomework);
           if (!state.mergeGame || !state.mergeGame.initialized || state.mergeGame.mode !== mode) {
             initMergeGame(mode);
           } else {
@@ -8266,6 +8302,7 @@ ${promptContextLines.join('\n')}`;
             // step 3 advances via handleMergeDrop
             // step 4 advances via submitMergeTask
             render();
+            setTimeout(function () { saveCurrentRuntime(); }, 0);
           }
           return;
         case 'merge-leave':

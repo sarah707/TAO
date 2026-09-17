@@ -169,6 +169,19 @@
     };
   }
 
+  function findMatchingPetrifiedPieceIndex(board = [], sourceIndex = -1) {
+    const source = board[sourceIndex];
+    if (!source || source.petrified || Number(source.level) <= 0) {
+      return -1;
+    }
+    return board.findIndex((piece, index) => (
+      index !== sourceIndex
+      && piece?.petrified
+      && Number(piece.chainId) === Number(source.chainId)
+      && Number(piece.level) === Number(source.level)
+    ));
+  }
+
   function makeImageScopePrefix(scope, namespace = 'tavern-card') {
     return `${IMAGE_KEY_VERSION}|${encodeURIComponent(namespace)}|${scope}|`;
   }
@@ -257,6 +270,7 @@
     canReceiveGraduationInternshipOffer,
     findCharactersForCourse,
     resolveInternshipSelection,
+    findMatchingPetrifiedPieceIndex,
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
