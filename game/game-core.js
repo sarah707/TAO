@@ -327,17 +327,142 @@
   }
 
   function extractNearestTagContent(text, tag) {
+    return extractNearestTagContents(text, tag).at(-1) || '';
+  }
+
+  function extractNearestTagContents(text, tag) {
     const source = String(text || '');
     const normalizedTag = String(tag || '').trim().toLowerCase();
-    if (!normalizedTag) return '';
+    if (!normalizedTag) return [];
     const lowerSource = source.toLowerCase();
     const openTag = `<${normalizedTag}>`;
     const closeTag = `</${normalizedTag}>`;
-    const closeIndex = lowerSource.lastIndexOf(closeTag);
-    if (closeIndex < 0) return '';
-    const openIndex = lowerSource.lastIndexOf(openTag, closeIndex);
-    if (openIndex < 0) return '';
-    return source.slice(openIndex + openTag.length, closeIndex);
+    const contents = [];
+    let searchIndex = 0;
+    while (searchIndex < lowerSource.length) {
+      const closeIndex = lowerSource.indexOf(closeTag, searchIndex);
+      if (closeIndex < 0) break;
+      const openIndex = lowerSource.lastIndexOf(openTag, closeIndex);
+      if (openIndex >= 0) {
+        contents.push(source.slice(openIndex + openTag.length, closeIndex));
+      }
+      searchIndex = closeIndex + closeTag.length;
+    }
+    return contents;
+  }
+
+  const CHARACTER_FIELD_ALIASES = Object.freeze({
+    姓名: ['姓名', '名字', '角色姓名', 'name', 'characterName', 'character_name'],
+    年龄: ['年龄', 'age'],
+    性别: ['性别', 'gender', 'sex'],
+    生日月份: ['生日月份', '出生月份', 'birthMonth', 'birth_month'],
+    生日日期: ['生日日期', '出生日期', 'birthDay', 'birth_day'],
+    身份: ['身份', '职业', 'identity', 'occupation'],
+    学校: ['学校', 'school'],
+    年级: ['年级', 'grade'],
+    家业: ['家业', '家族企业', 'familyBusiness', 'family_business'],
+    所属: ['所属', '阵营', 'affiliation'],
+    外貌服饰氛围气味: ['外貌服饰氛围气味', '外貌、服饰、氛围、气味', '外貌', 'appearance'],
+    核心特质: ['核心特质', '性格', 'traits', 'personality'],
+    人物小传: ['人物小传', '背景', 'bio', 'biography'],
+    爱好: ['爱好', 'hobbies'],
+    住所: ['住所', 'home', 'residence'],
+    性爱偏好: ['性爱偏好', 'sexualPreference', 'sexual_preference'],
+    阴茎描述: ['阴茎描述', 'penisDescription', 'penis_description']
+  });
+
+  function normalizeLooseCharacterJsonText(text) {
+    return String(text || '')
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[，]/g, ',')
+      .replace(/[：]/g, ':')
+      .replace(/[【】]/g, '"')
+      .replace(/[（]/g, '(')
+      .replace(/[）]/g, ')')
+      .trim();
+  }
+
+  function sanitizeLooseJsonBlock(text) {
+    return String(text || '')
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/i, '')
+      .trim();
+  }
+
+  function parseLooseCharacterObject(text) {
+    const sanitized = sanitizeLooseJsonBlock(text);
+    const start = sanitized.indexOf('{');
+    const end = sanitized.lastIndexOf('}');
+    const objectText = start !== -1 && end !== -1 && end > start
+      ? sanitized.slice(start, end + 1)
+      : sanitized;
+    const normalized = normalizeLooseCharacterJsonText(objectText)
+      .replace(/,\s*([}\]])/g, '$1');
+    try {
+      return JSON.parse(normalized);
+    } catch {
+      const result = {};
+      for (const rawLine of normalized.split('\n')) {
+        const line = rawLine.trim().replace(/,$/, '');
+        if (!line || line === '{' || line === '}') continue;
+        const match = line.match(/^(?:[-*]\s*)?(?:"([^"]+)"|\*\*([^*]+)\*\*|([^:=]+?))\s*[:=]\s*(.+)$/);
+        if (!match) continue;
+        const key = String(match[1] || match[2] || match[3] || '').trim();
+        let value = match[4].trim();
+        value = value.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1').trim();
+        if (/^-?\d+(?:\.\d+)?$/.test(value)) {
+          result[key] = Number(value);
+        } else if (value === 'true' || value === 'false') {
+          result[key] = value === 'true';
+        } else if (value === 'null') {
+          result[key] = null;
+        } else {
+          result[key] = value;
+        }
+      }
+      return result;
+    }
+  }
+
+  function canonicalizeCharacterRecord(record) {
+    if (!record || typeof record !== 'object' || Array.isArray(record)) return null;
+    const normalized = { ...record };
+    const caseInsensitiveKeys = new Map(Object.keys(record).map((key) => [key.toLowerCase(), key]));
+    for (const [canonicalKey, aliases] of Object.entries(CHARACTER_FIELD_ALIASES)) {
+      if (normalized[canonicalKey] !== undefined && normalized[canonicalKey] !== null && normalized[canonicalKey] !== '') continue;
+      const alias = aliases
+        .map((key) => Object.hasOwn(record, key) ? key : caseInsensitiveKeys.get(key.toLowerCase()))
+        .find((key) => key && record[key] !== undefined && record[key] !== null && record[key] !== '');
+      if (alias) normalized[canonicalKey] = record[alias];
+    }
+    return normalized;
+  }
+
+  function collectNamedCharacterRecords(value) {
+    if (Array.isArray(value)) {
+      return value.flatMap((item) => collectNamedCharacterRecords(item));
+    }
+    if (!value || typeof value !== 'object') return [];
+    const normalized = canonicalizeCharacterRecord(value);
+    if (String(normalized?.姓名 || '').trim()) return [normalized];
+    return Object.values(value).flatMap((item) => collectNamedCharacterRecords(item));
+  }
+
+  function parseLooseCharacterRecords(text) {
+    const source = sanitizeLooseJsonBlock(text);
+    if (!source) return [];
+    const normalized = normalizeLooseCharacterJsonText(source);
+    let parsedValues;
+    try {
+      parsedValues = [JSON.parse(normalized.replace(/,\s*([}\]])/g, '$1'))];
+    } catch {
+      const objectBlocks = splitTopLevelJsonObjects(source);
+      parsedValues = objectBlocks.length
+        ? objectBlocks.map((item) => parseLooseCharacterObject(item))
+        : [parseLooseCharacterObject(source)];
+    }
+    return parsedValues.flatMap((item) => collectNamedCharacterRecords(item));
   }
 
   global.Games0Core = {
@@ -364,7 +489,9 @@
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
     splitTopLevelJsonObjects,
-    extractNearestTagContent
+    extractNearestTagContent,
+    extractNearestTagContents,
+    parseLooseCharacterRecords
   };
 })(typeof window !== 'undefined' ? window : globalThis);
 
