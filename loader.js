@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917203002';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260917203911';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260917203002';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917203002';
+} from './overlay-position.js?build=20260917203911';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260917203911';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -153,6 +153,7 @@ function makePluginNoticeMarkup(status, { openedFromGame = false } = {}) {
           <button class="noble-school-button secondary" type="button" data-plugin-action="continue">${continueLabel}</button>
         </div>
         <div class="noble-school-status" aria-live="polite">${escapeHtml(status?.message || '')}</div>
+        <img class="noble-school-test-image" alt="生图测试结果" />
       </div>
     </div>`;
 }
@@ -302,13 +303,21 @@ async function mount() {
     });
     notice?.querySelector('[data-plugin-action="test"]')?.addEventListener('click', async () => {
       const message = notice.querySelector('.noble-school-status');
+      const preview = notice.querySelector('.noble-school-test-image');
       const buttons = [...notice.querySelectorAll('[data-plugin-action]')];
       buttons.forEach((button) => { button.disabled = true; });
+      preview?.classList.remove('visible');
+      preview?.removeAttribute('src');
       if (message) message.textContent = '正在生成测试图，请稍候……';
       try {
         const result = await bridge.testImageGenerator();
-        if (message) message.textContent = result.message || '测试生图成功，正在进入游戏……';
-        await returnToGame();
+        if (message) message.textContent = result.message || '测试生图成功，当前配置可以使用。';
+        if (preview && result.imageDataUrl) {
+          preview.src = result.imageDataUrl;
+          preview.classList.add('visible');
+          preview.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+        }
+        buttons.forEach((button) => { button.disabled = false; });
       } catch (error) {
         if (message) message.textContent = `测试失败：${error.message || error}`;
         buttons.forEach((button) => { button.disabled = false; });

@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917203002';
-import { buildExportWorldbook } from './worldbook.js?build=20260917203002';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260917203911';
+import { buildExportWorldbook } from './worldbook.js?build=20260917203911';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -784,6 +784,13 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMo
       if (!image?.data && !image?.dataUrl) {
         throw new Error('接口没有返回可用的测试图片。');
       }
+      const rawImageData = String(image.data || '');
+      const imageDataUrl = String(
+        image.dataUrl
+        || (rawImageData.startsWith('data:')
+          ? rawImageData
+          : `data:${image.mimeType || 'image/png'};base64,${rawImageData}`)
+      );
       return {
         installed: true,
         configured: true,
@@ -791,6 +798,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, buildMo
         verified: true,
         provider: generated.provider || '',
         model: generated.model || '',
+        imageDataUrl,
         message: '测试生图成功，当前配置可以使用。'
       };
     },
