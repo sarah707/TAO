@@ -104,6 +104,12 @@ function buildCharacterContent(character) {
   ].join('\n');
 }
 
+function replacePlayerNameWithUserToken(content, runtime) {
+  const playerName = String(runtime?.player?.name || '').trim();
+  const text = String(content || '');
+  return playerName ? text.split(playerName).join('<user>') : text;
+}
+
 export function buildExportWorldbook(runtime, promptSettings = {}) {
   const playerName = safeWorldbookPart(runtime?.player?.name);
   const runId = safeWorldbookPart(runtime?.meta?.runId || formatCreatedAt(runtime?.meta?.createdAt)).slice(0, 12);
@@ -123,6 +129,9 @@ export function buildExportWorldbook(runtime, promptSettings = {}) {
       buildCharacterContent(character),
       { keys: [String(character.name)], order: 110 - index }
     ))
-  ];
+  ].map((item) => ({
+    ...item,
+    content: replacePlayerNameWithUserToken(item.content, runtime)
+  }));
   return { worldbookName, entries };
 }
