@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918063058';
-import { buildExportWorldbook } from './worldbook.js?build=20260918063058';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918065117';
+import { buildExportWorldbook } from './worldbook.js?build=20260918065117';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -357,7 +357,7 @@ function buildOrderedPrompts(payload) {
     ordered.push({ role: 'system', content: systemInstruction });
   }
   if (supportingContextInstruction) {
-    ordered.push({ role: 'assistant', content: supportingContextInstruction });
+    ordered.push({ role: 'user', content: supportingContextInstruction });
   }
   if (penultimateUserInstruction) {
     ordered.push({ role: 'user', content: penultimateUserInstruction });
@@ -412,12 +412,12 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
 
   if (textPresetMode === 'tavern') {
     pushSection('SYSTEM｜before_prompt｜游戏剧本设定', options.scriptSettingsInstruction);
-    pushSection('ASSISTANT｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
+    pushSection('USER｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   } else {
     pushSection('SYSTEM｜游戏内置文风与剧本设定', buildBuiltInSystemInstruction(payload));
-    pushSection('ASSISTANT｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
+    pushSection('USER｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
     pushSection('USER｜倒数第二条｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   }
@@ -1014,7 +1014,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           }
           if (supportingContextInstruction) {
             injects.push({
-              role: 'assistant',
+              role: 'user',
               content: supportingContextInstruction,
               position: 'in_chat',
               depth: 2,
