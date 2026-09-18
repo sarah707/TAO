@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918162549';
-import { buildExportWorldbook } from './worldbook.js?build=20260918162549';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918164923';
+import { buildExportWorldbook } from './worldbook.js?build=20260918164923';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -421,7 +421,7 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
   };
 
   if (textPresetMode === 'tavern') {
-    pushSection('SYSTEM｜before_prompt｜游戏剧本设定', options.scriptSettingsInstruction);
+    pushSection('SYSTEM｜当前预设首个启用的世界书槽位之前｜游戏剧本设定', options.scriptSettingsInstruction);
     pushSection('USER｜in_chat depth=3｜履历与重试标记', buildHistoryUserInstruction(payload));
     pushSection('ASSISTANT｜in_chat depth=2｜最近几章与地点资料', buildRecentContextAssistantInstruction(payload));
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
@@ -616,6 +616,88 @@ function getChatCompletionSettings(hostWindow, apiWindow) {
   return getHostContexts(hostWindow, apiWindow)
     .map((context) => context?.chatCompletionSettings)
     .find((settings) => settings && typeof settings === 'object') || null;
+}
+
+function insertScriptSettingsBeforeWorldbook(hostWindow, apiWindow, content, generationId) {
+  if (!content) return { restore() {} };
+  const settings = getChatCompletionSettings(hostWindow, apiWindow);
+  const prompts = settings?.prompts;
+  // SillyTavern's chat-completion PromptManager uses the global dummy character
+  // 100001 (openai.js setupChatCompletionPromptManager), not the current card ID.
+  const order = settings?.prompt_order?.find((item) => String(item?.character_id) === '100001')?.order;
+  if (!Array.isArray(prompts) || !Array.isArray(order)) {
+    throw new Error('无法读取酒馆当前预设的世界书槽位顺序，不能定位游戏剧本设定；请更新 SillyTavern。');
+  }
+  const anchorIndex = order.findIndex((entry) => {
+    if (!entry?.enabled || !['worldInfoBefore', 'worldInfoAfter'].includes(entry.identifier)) return false;
+    const prompt = prompts.find((item) => item?.identifier === entry.identifier);
+    return prompt && (!Array.isArray(prompt.injection_trigger)
+      || !prompt.injection_trigger.length || prompt.injection_trigger.includes('normal'));
+  });
+  if (anchorIndex < 0) {
+    throw new Error('当前酒馆预设没有启用的世界书槽位；请启用 World Info (before) 或 World Info (after)，以便在其前方发送游戏剧本设定。');
+  }
+  const anchor = prompts.find((item) => item?.identifier === order[anchorIndex].identifier);
+  if (Number(anchor.injection_position || 0) !== 0) {
+    throw new Error('当前世界书槽位使用聊天深度位置，无法在其前方按预设顺序发送游戏剧本设定；请将该槽位设为相对位置。');
+  }
+  const identifier = `noble-school-script-settings-${generationId}`;
+  const temporaryPrompt = {
+    identifier,
+    name: '游戏剧本设定（仅本次请求）',
+    role: 'system',
+    content,
+    // This is a custom prompt, whose model role is still system. Marking it as
+    // system_prompt would exclude it from ST's userRelativePrompts collection.
+    system_prompt: false,
+    marker: false,
+    enabled: true,
+    injection_position: 0,
+    injection_depth: 4,
+    injection_order: 100,
+    injection_trigger: [],
+    forbid_overrides: true
+  };
+  const temporaryOrder = { identifier, enabled: true };
+  prompts.push(temporaryPrompt);
+  order.splice(anchorIndex, 0, temporaryOrder);
+  let removeEarlyCleanup = () => {};
+  const injection = {
+    restore() {
+      removeEarlyCleanup();
+      // Never restore an entire settings snapshot: a user/extension may have
+      // edited other entries while assembling this request. No preset is saved.
+      const arrays = new Set([prompts, order, settings.prompts,
+        ...(settings.prompt_order || []).map((item) => item?.order)]);
+      for (const entries of arrays) {
+        if (!Array.isArray(entries)) continue;
+        for (let index = entries.length - 1; index >= 0; index -= 1) {
+          if (entries[index]?.identifier === identifier) entries.splice(index, 1);
+        }
+      }
+    }
+  };
+  // Clean before the prompt-manager's deferred render reads settings, rather
+  // than waiting for slower completion-settings extensions or the model reply.
+  for (const context of getHostContexts(hostWindow, apiWindow)) {
+    const events = context?.eventSource;
+    if (!events || typeof events.removeListener !== 'function') continue;
+    const subscribe = events.makeFirst || events.on;
+    if (typeof subscribe !== 'function') continue;
+    const eventName = context?.eventTypes?.CHAT_COMPLETION_PROMPT_READY || 'chat_completion_prompt_ready';
+    const listener = (data) => {
+      if (!data?.dryRun) injection.restore();
+    };
+    try {
+      subscribe.call(events, eventName, listener);
+      removeEarlyCleanup = () => events.removeListener(eventName, listener);
+    } catch (error) {
+      injection.restore();
+      throw error;
+    }
+    break;
+  }
+  return injection;
 }
 
 const LAST_USER_MESSAGE_MACRO_PATTERN = /\{\{\s*lastUserMessage\s*\}\}/i;
@@ -982,12 +1064,16 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const presetPromptSuppression = textPresetMode === 'tavern'
         ? suppressLastUserMessagePresetPrompts(hostWindow, apiWindow)
         : { restore() {} };
+      let scriptSettingsPresetPrompt = { restore() {} };
       const finalPromptCapture = createFinalPromptCapture(hostWindow, apiWindow, {
         removeTrailingModelPrompt,
         recentContextAssistantPrompt: buildRecentContextAssistantInstruction(payload),
         penultimateUserPrompt,
         eventPrompt: prompt,
-        onPromptReady: () => presetPromptSuppression.restore(),
+        onPromptReady: () => {
+          scriptSettingsPresetPrompt.restore();
+          presetPromptSuppression.restore();
+        },
         onCaptured: writePrompt
       });
       if (textPresetMode === 'tavern' && !finalPromptCapture.available) {
@@ -1003,6 +1089,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         if (generationHooksReleased) return;
         generationHooksReleased = true;
         generationErrorCapture.restore();
+        scriptSettingsPresetPrompt.restore();
         presetPromptSuppression.restore();
         finalPromptCapture.stop();
       };
@@ -1022,10 +1109,15 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
           const injects = [];
           if (scriptSettingsInstruction) {
+            scriptSettingsPresetPrompt = insertScriptSettingsBeforeWorldbook(
+              hostWindow, apiWindow, scriptSettingsInstruction, generationId
+            );
             injects.push({
               role: 'system',
               content: scriptSettingsInstruction,
-              position: 'before_prompt',
+              // Scan-only: the actual message is assembled by the native
+              // preset order before its worldbook slot, not by chat depth.
+              position: 'none',
               depth: 0,
               should_scan: true
             });
