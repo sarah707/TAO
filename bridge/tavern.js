@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918034159';
-import { buildExportWorldbook } from './worldbook.js?build=20260918034159';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918035956';
+import { buildExportWorldbook } from './worldbook.js?build=20260918035956';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -67,9 +67,33 @@ function readGenerationRequestMetadata(input, init) {
   };
 }
 
-function createGenerationErrorCapture(hostWindow, apiWindow) {
+function extractGenerationResponseText(body) {
+  if (typeof body === 'string') return body;
+  const content = body?.choices?.[0]?.message?.content
+    ?? body?.choices?.[0]?.text
+    ?? body?.text
+    ?? body?.message?.content;
+  if (typeof content === 'string') return content;
+  if (Array.isArray(content)) {
+    const parts = content.filter((part) => part?.type === 'text' && typeof part.text === 'string');
+    if (parts.length) return parts.map((part) => part.text).join('');
+  }
+  return null;
+}
+
+function isOwnNonStreamingRequest(input, init, eventPrompt) {
+  const rawBody = init?.body ?? input?.body;
+  if (typeof rawBody !== 'string') return false;
+  const body = parseJsonObject(rawBody);
+  if (!body || body.stream === true || !Array.isArray(body.messages)) return false;
+  const lastUser = body.messages.findLast((message) => message?.role === 'user');
+  return formatFinalPromptContent(lastUser?.content) === eventPrompt;
+}
+
+function createGenerationErrorCapture(hostWindow, apiWindow, eventPrompt) {
   const patches = [];
   let captured = null;
+  let rawResponseText = null;
   for (const candidateWindow of collectAccessibleWindows(hostWindow, apiWindow)) {
     let originalFetch;
     try {
@@ -95,6 +119,7 @@ function createGenerationErrorCapture(hostWindow, apiWindow) {
         endpoint,
         ...readGenerationRequestMetadata(input, init)
       };
+      const isOwnRequest = isOwnNonStreamingRequest(input, init, eventPrompt);
       captured = request;
       let response;
       try {
@@ -121,6 +146,15 @@ function createGenerationErrorCapture(hostWindow, apiWindow) {
           responseText: redactDiagnosticText(responseText).slice(0, 6000),
           responseBody: parseJsonObject(responseText)
         };
+      } else if (isOwnRequest && !String(response.headers?.get?.('content-type') || '').includes('text/event-stream')) {
+        // Clone before handing the response to TavernHelper: generation-end hooks can
+        // replace its returned message. Never use an unrelated request as our raw text.
+        try {
+          const body = await response.clone().json();
+          rawResponseText = extractGenerationResponseText(body);
+        } catch {
+          // Unsupported transports still use the helper result, explicitly marked below.
+        }
       }
       return response;
     };
@@ -135,6 +169,7 @@ function createGenerationErrorCapture(hostWindow, apiWindow) {
   }
   return {
     getError: () => captured,
+    getRawResponseText: () => rawResponseText,
     restore() {
       for (const { candidateWindow, originalFetch, wrappedFetch } of patches.reverse()) {
         try {
@@ -668,17 +703,20 @@ function findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId) {
   for (const context of getHostContexts(hostWindow, apiWindow)) {
     if (Array.isArray(context?.chat)) messageGroups.push(context.chat);
   }
+  let legacyText = null;
   for (const messages of messageGroups) {
     for (let index = messages.length - 1; index >= 0; index -= 1) {
       const message = messages[index];
       const data = getChatMessageData(message);
       if (String(data?.nobleSchoolRecoveryId || '') !== targetId) continue;
+      if (data?.nobleSchoolGameResponse !== true && data?.nobleSchoolResponseEmpty !== true) continue;
+      if (typeof data.nobleSchoolRawResponse === 'string') return data.nobleSchoolRawResponse;
       if (data?.nobleSchoolResponseEmpty === true) return '';
       const text = typeof message?.message === 'string' ? message.message : message?.mes;
-      if (typeof text === 'string') return text;
+      if (legacyText === null && typeof text === 'string') legacyText = text;
     }
   }
-  return null;
+  return legacyText;
 }
 
 async function saveChatMetadataDurably(hostWindow, apiWindow) {
@@ -938,9 +976,11 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       }
       let text;
       const recoveryId = String(payload?.recoveryId || '').trim();
-      const generationId = recoveryId || makeGenerationId();
-      const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow);
+      const generationId = makeGenerationId();
+      const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow, prompt);
       let fullText;
+      let responseSource = 'helper';
+      let helperTextChanged = false;
       try {
         if (!finalPromptCapture.available) await writePrompt();
         stage = '等待酒馆生成结果';
@@ -983,6 +1023,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             preset_name: 'in_use',
             user_input: prompt,
             should_silence: true,
+            should_stream: false,
             max_chat_history: 0,
             injects,
             overrides: emptyPromptOverrides(),
@@ -994,6 +1035,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           }
           text = await apiWindow.generateRaw({
             user_input: prompt,
+            should_stream: false,
             ordered_prompts: buildOrderedPrompts(payload),
             max_chat_history: 0,
             injects: [],
@@ -1002,14 +1044,22 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           });
         }
         await writePrompt(finalPromptCapture.getMessages());
-        fullText = typeof text === 'string' ? text : String(text?.content || '');
+        const helperText = typeof text === 'string' ? text : String(text?.content || '');
+        const networkText = generationErrorCapture.getRawResponseText();
+        responseSource = networkText !== null ? 'network' : 'helper';
+        fullText = networkText ?? helperText;
+        helperTextChanged = networkText !== null && networkText !== helperText;
         stage = '写入酒馆模型楼层（AI 已返回）';
-        // 先保存原文，再把副本交给游戏解析。
+        // 正文可能被其他扩展改写；恢复时优先读取独立备份，不反读展示正文。
         await appendTextMessageToChat(helper, hostWindow, 'assistant',
           fullText || '【贵族学校的特招生｜AI 返回内容为空】',
-          fullText
-            ? { nobleSchoolGameResponse: true, ...(recoveryId ? { nobleSchoolRecoveryId: recoveryId } : {}) }
-            : { nobleSchoolGameError: true, nobleSchoolResponseEmpty: true, ...(recoveryId ? { nobleSchoolRecoveryId: recoveryId } : {}) });
+          {
+            ...(fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true, nobleSchoolResponseEmpty: true }),
+            ...(recoveryId ? { nobleSchoolRecoveryId: recoveryId } : {}),
+            nobleSchoolRawResponse: fullText,
+            nobleSchoolResponseSource: responseSource,
+            nobleSchoolHelperTextChanged: helperTextChanged
+          });
       } catch (error) {
         const diagnostic = enhanceGenerationError(error, generationErrorCapture.getError(), {
           generationId,
@@ -1032,7 +1082,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       }
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },
-        raw: { fullText }
+        raw: { fullText, responseSource, helperTextChanged }
       };
     },
     async exportWorldbook(runtime, promptSettings) {
