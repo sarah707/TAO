@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918044758';
-import { buildExportWorldbook } from './worldbook.js?build=20260918044758';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918055031';
+import { buildExportWorldbook } from './worldbook.js?build=20260918055031';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -676,7 +676,7 @@ async function appendTextMessageToChat(helper, hostWindow, role, message, data) 
     extra: { source: 'noble-school-tavern-card' }
   }], {
     insert_before: 'end',
-    refresh: 'all'
+    refresh: 'affected'
   });
   if (role === 'assistant') forceHostChatToBottom(hostWindow);
 }
@@ -688,20 +688,22 @@ function getChatMessageData(message) {
   return message?.variables && typeof message.variables === 'object' ? message.variables : {};
 }
 
-function findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId) {
+function findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId, { requireRaw = false } = {}) {
   const targetId = String(recoveryId || '').trim();
   if (!targetId) return null;
   const messageGroups = [];
-  if (typeof helper?.getChatMessages === 'function') {
+  for (const context of getHostContexts(hostWindow, apiWindow)) {
+    if (Array.isArray(context?.chat)) messageGroups.push(context.chat);
+  }
+  // Poll the live chat directly when available; cloning every historical floor
+  // every two seconds is unnecessary while waiting for one generation's backup.
+  if ((!requireRaw || messageGroups.length === 0) && typeof helper?.getChatMessages === 'function') {
     try {
       const messages = helper.getChatMessages('0-{{lastMessageId}}');
       if (Array.isArray(messages)) messageGroups.push(messages);
     } catch {
-      // Fall back to SillyTavern's raw chat records below.
+      // The accessible live chat records remain available below.
     }
-  }
-  for (const context of getHostContexts(hostWindow, apiWindow)) {
-    if (Array.isArray(context?.chat)) messageGroups.push(context.chat);
   }
   let legacyText = null;
   for (const messages of messageGroups) {
@@ -711,6 +713,7 @@ function findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId) {
       if (String(data?.nobleSchoolRecoveryId || '') !== targetId) continue;
       if (data?.nobleSchoolGameResponse !== true && data?.nobleSchoolResponseEmpty !== true) continue;
       if (typeof data.nobleSchoolRawResponse === 'string') return data.nobleSchoolRawResponse;
+      if (requireRaw) continue;
       if (data?.nobleSchoolResponseEmpty === true) return '';
       const text = typeof message?.message === 'string' ? message.message : message?.mes;
       if (legacyText === null && typeof text === 'string') legacyText = text;
@@ -820,8 +823,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       await saveChatMetadataDurably(hostWindow, apiWindow);
       return { ok: true, chatId: currentChatId };
     },
-    loadStoryResponse(recoveryId) {
-      const fullText = findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId);
+    loadStoryResponse(recoveryId, options) {
+      const fullText = findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId, options);
       return fullText === null
         ? { found: false, fullText: '' }
         : { found: true, fullText };
@@ -978,6 +981,14 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const recoveryId = String(payload?.recoveryId || '').trim();
       const generationId = makeGenerationId();
       const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow, prompt);
+      let generationHooksReleased = false;
+      const releaseGenerationHooks = () => {
+        if (generationHooksReleased) return;
+        generationHooksReleased = true;
+        generationErrorCapture.restore();
+        presetPromptSuppression.restore();
+        finalPromptCapture.stop();
+      };
       let fullText;
       let responseSource = 'helper';
       let helperTextChanged = false;
@@ -1043,6 +1054,9 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             generation_id: generationId
           });
         }
+        // Rendering a chat floor may wait on third-party extensions. The model
+        // request is already over, so never keep its global hooks active there.
+        releaseGenerationHooks();
         await writePrompt(finalPromptCapture.getMessages());
         const helperText = typeof text === 'string' ? text : String(text?.content || '');
         const networkText = generationErrorCapture.getRawResponseText();
@@ -1061,24 +1075,29 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             nobleSchoolHelperTextChanged: helperTextChanged
           });
       } catch (error) {
-        const diagnostic = enhanceGenerationError(error, generationErrorCapture.getError(), {
-          generationId,
-          textPresetMode,
-          stage,
-          elapsedMs: Date.now() - startedAt,
-          rawText: fullText
-        });
-        // 网络断开时写聊天也可能失败或久等，不能让它遮住最初的诊断。
-        void writePrompt(finalPromptCapture.getMessages()).then(() => (
-          appendTextMessageToChat(helper, hostWindow, 'assistant',
-            `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic.message)}`,
-            { nobleSchoolGameError: true })
-        )).catch(() => {});
-        throw diagnostic;
+        // A rendering callback can fail after the raw reply was inserted. Keep
+        // that successful reply instead of adding a misleading failure floor.
+        const storedReply = typeof fullText === 'string' && recoveryId
+          ? findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId, { requireRaw: true })
+          : null;
+        if (storedReply === null || storedReply !== fullText) {
+          const diagnostic = enhanceGenerationError(error, generationErrorCapture.getError(), {
+            generationId,
+            textPresetMode,
+            stage,
+            elapsedMs: Date.now() - startedAt,
+            rawText: fullText
+          });
+          // 网络断开时写聊天也可能失败或久等，不能让它遮住最初的诊断。
+          void writePrompt(finalPromptCapture.getMessages()).then(() => (
+            appendTextMessageToChat(helper, hostWindow, 'assistant',
+              `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic.message)}`,
+              { nobleSchoolGameError: true })
+          )).catch(() => {});
+          throw diagnostic;
+        }
       } finally {
-        generationErrorCapture.restore();
-        presetPromptSuppression.restore();
-        finalPromptCapture.stop();
+        releaseGenerationHooks();
       }
       return {
         output: { textParts: [sanitizeAiText(fullText)], thoughtParts: [], imageParts: [] },

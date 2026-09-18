@@ -47,19 +47,45 @@
 
   function createJob(payload) {
     const id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const job = { id, status: 'queued', result: null, error: '' };
+    const job = { id, status: 'queued', result: null, error: '', recoveryId: String(payload?.recoveryId || '').trim() };
     jobs.set(id, job);
     Promise.resolve().then(async () => {
       job.status = 'running';
       try {
-        job.result = await bridge().request(payload);
-        job.status = 'completed';
+        const result = await bridge().request(payload);
+        if (job.status !== 'completed') {
+          job.result = result;
+          job.status = 'completed';
+        }
       } catch (error) {
+        if (job.status === 'completed' || recoverStoredJobResponse(job)) return;
         job.error = String(error?.message || error || '请求失败');
         job.status = 'failed';
       }
     });
     return job;
+  }
+
+  function recoverStoredJobResponse(job) {
+    if (job.status !== 'running' || !job.recoveryId) return false;
+    try {
+      // A helper may have already stored the complete reply but still be waiting
+      // for a rendering extension. Only this request's independent backup counts;
+      // never parse the displayed message or start a replacement generation.
+      const recovered = bridge().loadStoryResponse?.(job.recoveryId, { requireRaw: true });
+      if (!recovered?.found || typeof recovered.fullText !== 'string') return false;
+      const fullText = recovered.fullText;
+      job.result = {
+        output: { textParts: [fullText.replace(/极其|极度/g, '')], thoughtParts: [], imageParts: [] },
+        raw: { fullText, responseSource: 'chat_backup' }
+      };
+      job.error = '';
+      job.status = 'completed';
+      return true;
+    } catch {
+      // A recovery lookup must not interrupt a generation that is still running.
+      return false;
+    }
   }
 
   async function getRequestBody(input, init) {
@@ -105,6 +131,7 @@
     if (jobMatch) {
       const job = jobs.get(decodeURIComponent(jobMatch[1]));
       if (!job) return jsonResponse({ error: 'AI 任务不存在。' }, 404);
+      recoverStoredJobResponse(job);
       return jsonResponse({ job: { id: job.id, status: job.status, result: job.result, error: job.error } });
     }
     return jsonResponse({ error: `酒馆版不支持接口：${path}` }, 404);
