@@ -24,6 +24,7 @@
     graduationTermId: 'y4-lower',
     graduationTermStartDate: '2004-03-01',
     playerStartingAge: 21,
+    dailyCost: 50,
     assistantCourse: Object.freeze({ id: 'assistant-microeconomics', courseName: '微观经济学' }),
     businessEndingScore: 100,
     graduationActionProgress: 8,
@@ -335,6 +336,57 @@
     return runtime;
   }
 
+  function stripRuntimeRuleFields(runtime) {
+    if (!runtime || typeof runtime !== 'object') return runtime;
+
+    if (runtime.player && typeof runtime.player === 'object') {
+      delete runtime.player.dailyCost;
+      delete runtime.player.gender;
+      if (runtime.player.assistantRole && typeof runtime.player.assistantRole === 'object') {
+        delete runtime.player.assistantRole.courseId;
+        delete runtime.player.assistantRole.courseName;
+      }
+    }
+
+    const courseRuleFields = [
+      'courseId',
+      'courseName',
+      'termId',
+      'termLabel',
+      'homeworkIntervalWeeks',
+      'homeworkGrowthFactor'
+    ];
+    for (const course of Object.values(runtime.courses || {})) {
+      if (!course || typeof course !== 'object') continue;
+      for (const field of courseRuleFields) delete course[field];
+    }
+
+    for (const plan of Object.values(runtime.schedulePlans || {})) {
+      if (!plan || typeof plan !== 'object') continue;
+      delete plan.label;
+      delete plan.specKey;
+    }
+
+    for (const boardKey of ['mergeGame', 'bizMergeGame']) {
+      const board = runtime[boardKey];
+      if (!board || typeof board !== 'object' || !Array.isArray(board.tasks)) continue;
+      const isBusinessBoard = boardKey === 'bizMergeGame' || board.mode === 'biz';
+      for (const task of board.tasks) {
+        if (!task || typeof task !== 'object') continue;
+        delete task.courseName;
+        delete task.isThesis;
+        if (isBusinessBoard) delete task.courseId;
+        for (const piece of task.requiredPieces || []) {
+          if (!piece || typeof piece !== 'object') continue;
+          delete piece.svg;
+          delete piece.name;
+        }
+      }
+    }
+
+    return runtime;
+  }
+
   function splitTopLevelJsonObjects(text) {
     const source = String(text || '');
     const blocks = [];
@@ -608,6 +660,7 @@
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
+    stripRuntimeRuleFields,
     splitTopLevelJsonObjects,
     extractNearestTagContent,
     extractNearestTagContents,

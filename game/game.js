@@ -38,6 +38,7 @@
     makeImageScopePrefix,
     getImageScopeFromSaveKey,
     migrateRuntimeVersion,
+    stripRuntimeRuleFields,
     extractNearestTagContent,
     extractInfoBlockContent,
     parseLooseCharacterRecords
@@ -46,15 +47,15 @@
   if (typeof requestJson !== 'function' || typeof postJson !== 'function' || typeof escapeHtml !== 'function' || typeof parseDurationMs !== 'function') {
     throw new Error('公共客户端工具加载失败。');
   }
-  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof selectNewestStoredValue !== 'function' || typeof resolveStoredPlanFixed !== 'function' || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof shouldResetHomeworkMergeBoard !== 'function' || typeof shouldPayInternshipSalary !== 'function' || typeof findCharactersForCourse !== 'function' || typeof isStudentCouncilPresident !== 'function' || typeof normalizeGeneratedCharactersForEvent !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof findMatchingPetrifiedPieceIndex !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function' || typeof extractNearestTagContent !== 'function' || typeof extractInfoBlockContent !== 'function' || typeof parseLooseCharacterRecords !== 'function') {
+  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof selectNewestStoredValue !== 'function' || typeof resolveStoredPlanFixed !== 'function' || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof shouldResetHomeworkMergeBoard !== 'function' || typeof shouldPayInternshipSalary !== 'function' || typeof findCharactersForCourse !== 'function' || typeof isStudentCouncilPresident !== 'function' || typeof normalizeGeneratedCharactersForEvent !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof findMatchingPetrifiedPieceIndex !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function' || typeof stripRuntimeRuleFields !== 'function' || typeof extractNearestTagContent !== 'function' || typeof extractInfoBlockContent !== 'function' || typeof parseLooseCharacterRecords !== 'function') {
     throw new Error('游戏核心规则加载失败。');
   }
   if (!GAME_PROMPTS?.eventSpecs || typeof GAME_PROMPTS.buildPromptModules !== 'function' || typeof GAME_PROMPTS.buildEventPromptTexts !== 'function') {
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260918070034';
-  const DAILY_COST = 50;
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260918071050';
+  const DAILY_COST = CAMPAIGN_CONFIG.dailyCost;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
   const GRADUATION_TERM_ID = CAMPAIGN_CONFIG.graduationTermId;
@@ -191,51 +192,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260918070034', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260918071050', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260918070034', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260918070034', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260918070034', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260918070034', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260918070034', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260918070034', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260918070034', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260918071050', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260918071050', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260918071050', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260918071050', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260918071050', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260918071050', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260918071050', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260918070034', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260918071050', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260918070034', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260918070034', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260918070034', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260918070034', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260918070034', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260918070034', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260918070034', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260918071050', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260918071050', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260918071050', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260918071050', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260918071050', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260918071050', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260918071050', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260918070034', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260918071050', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260918070034', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260918070034', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260918070034', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260918070034', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260918070034', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260918070034', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260918070034', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260918071050', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260918071050', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260918071050', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260918071050', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260918071050', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260918071050', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260918071050', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260918070034', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260918071050', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260918070034', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260918070034', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260918070034', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260918070034', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260918070034', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260918070034', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260918070034', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260918071050', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260918071050', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260918071050', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260918071050', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260918071050', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260918071050', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260918071050', name: '讨论定稿' }
       ]
     }
   ];
@@ -244,63 +245,63 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260918070034', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260918071050', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260918070034', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260918070034', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260918070034', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260918070034', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260918070034', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260918070034', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260918070034', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260918071050', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260918071050', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260918071050', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260918071050', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260918071050', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260918071050', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260918071050', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260918070034', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260918071050', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260918070034', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260918070034', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260918070034', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260918070034', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260918070034', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260918070034', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260918070034', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260918071050', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260918071050', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260918071050', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260918071050', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260918071050', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260918071050', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260918071050', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260918070034', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260918071050', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260918070034', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260918070034', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260918070034', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260918070034', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260918070034', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260918070034', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260918070034', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260918071050', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260918071050', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260918071050', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260918071050', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260918071050', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260918071050', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260918071050', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260918070034', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260918071050', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260918070034', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260918070034', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260918070034', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260918070034', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260918070034', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260918070034', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260918070034', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260918071050', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260918071050', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260918071050', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260918071050', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260918071050', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260918071050', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260918071050', name: '落地路线图' }
       ]
     }
   ];
 
   const MERGE_BIZ_CHAIN_MAP = new Map(MERGE_BIZ_CHAINS.map((c) => [c.id, c]));
 
-  function getMergeChainMap() {
-    return state.mergeGame?.mode === 'biz' ? MERGE_BIZ_CHAIN_MAP : MERGE_CHAIN_MAP;
+  function getMergeChainMap(mode = state.mergeGame?.mode) {
+    return mode === 'biz' ? MERGE_BIZ_CHAIN_MAP : MERGE_CHAIN_MAP;
   }
 
-  function getMergePieceInfo(chainId, level, petrified) {
-    const chain = getMergeChainMap().get(chainId);
+  function getMergePieceInfo(chainId, level, petrified, mode = state.mergeGame?.mode) {
+    const chain = getMergeChainMap(mode).get(chainId);
     if (!chain) return null;
     const prefix = petrified ? '未验证' : '';
     if (level === 0) return { chainId, level: 0, svg: chain.motherSvg, name: prefix + chain.motherName, chainName: chain.name };
@@ -719,6 +720,23 @@
     return { version: 1, values };
   }
 
+  function pruneStoredRuntimeRuleFields() {
+    let changed = false;
+    for (const scope of CHAT_STORAGE_SCOPES) {
+      const key = makeScopedKey(scope);
+      const stored = loadJson(key, null);
+      const runtime = scope === 'runtime' ? stored : stored?.runtime;
+      if (!runtime || typeof runtime !== 'object') continue;
+      const before = JSON.stringify(stored);
+      stripRuntimeRuleFields(runtime);
+      if (JSON.stringify(stored) !== before) {
+        saveJson(key, stored);
+        changed = true;
+      }
+    }
+    return changed;
+  }
+
   async function persistChatStorage(snapshot = collectChatStorageSnapshot()) {
     return postJson(CHAT_STORAGE_URL, { data: snapshot, chatId: activeChatStorageId });
   }
@@ -860,6 +878,7 @@
 
   function createRuntimeSnapshot(runtime) {
     const snapshot = deepClone(runtime);
+    stripRuntimeRuleFields(snapshot);
     return {
       snapshot,
       images: extractRuntimeImages(snapshot)
@@ -1409,9 +1428,14 @@
       : null;
     runtime.meta.textPresetMode = runtime.meta.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
     runtime.courses = reconcileCourseStates(runtime.courses);
-    runtime.player.dailyCost = DAILY_COST;
+    delete runtime.player.dailyCost;
+    delete runtime.player.gender;
     runtime.player.assistantRole = runtime.player.assistantRole && typeof runtime.player.assistantRole === 'object'
-      ? runtime.player.assistantRole
+      ? {
+          ...runtime.player.assistantRole,
+          courseId: ASSISTANT_COURSE.id,
+          courseName: ASSISTANT_COURSE.courseName
+        }
       : null;
     runtime.player.graduationInternship = runtime.player.graduationInternship || null;
     runtime.player.graduationInternshipBossId = runtime.player.graduationInternshipBossId || '';
@@ -1437,10 +1461,11 @@
       ensureCharacterEventFlags(character);
     });
     runtime.schedulePlans = runtime.schedulePlans && typeof runtime.schedulePlans === 'object' ? runtime.schedulePlans : {};
-    for (const plan of Object.values(runtime.schedulePlans)) {
+    for (const [dateText, plan] of Object.entries(runtime.schedulePlans)) {
       if (!plan || typeof plan !== 'object') {
         continue;
       }
+      hydrateSchedulePlanMetadata(runtime, dateText, plan);
       const fallbackFixed = plan.kind === 'date'
         || plan.kind === 'exam'
         || (plan.kind === 'activity' && isLockedScheduleActivity(normalizeActivityLabel(plan.activity || plan.label || '')));
@@ -2514,12 +2539,10 @@
       player: {
         name: playerInput.name,
         age: CAMPAIGN_CONFIG.playerStartingAge,
-        gender: '女',
         birthdayMonth: playerInput.birthMonth,
         birthdayDay: playerInput.birthDay,
         money: 1000,
         fatigue: 0,
-        dailyCost: DAILY_COST,
         currentDate: START_DATE,
         assistantRole: null,
         graduationInternship: null,
@@ -2878,6 +2901,38 @@
     }
 
     return null;
+  }
+
+  function hydrateSchedulePlanMetadata(runtime, dateText, plan) {
+    if (!plan || typeof plan !== 'object' || plan.cleared) return plan;
+    if (['course', 'homework', 'review'].includes(plan.kind)) {
+      const courseName = String(runtime.courses?.[plan.courseId]?.courseName || '');
+      const prefixes = { course: '上', homework: '写', review: '复习' };
+      const suffix = plan.kind === 'homework' ? '的作业' : '';
+      plan.label = `${prefixes[plan.kind]}${courseName}${suffix}`;
+    } else if (plan.kind === 'date') {
+      const character = runtime.characters?.find((item) => item.id === plan.characterId);
+      plan.label = `与${character?.name || '某人'}约会`;
+    } else if (plan.kind === 'activity' || plan.kind === 'exam') {
+      const activity = normalizeActivityLabel(plan.activity || plan.label || getFixedActivity(dateText) || (plan.kind === 'exam' ? '考试' : ''));
+      plan.activity = activity;
+      plan.label = activity;
+    } else {
+      const labels = {
+        flyer: '发传单',
+        tutor: '做家教',
+        'student-secretary': '做学生会秘书',
+        assistant: '做助教',
+        sleep: '睡觉',
+        'winter-job': '新年礼宾临时工',
+        'graduation-internship': '毕业实习',
+        'graduation-thesis': '写毕业论文',
+        'debate-prep': '准备校际辩论会'
+      };
+      plan.label = labels[plan.kind] || String(plan.label || '');
+    }
+    plan.specKey = getActionGroup(plan);
+    return plan;
   }
 
   function setPlanForDate(runtime, dateText, plan) {
@@ -6784,6 +6839,28 @@ ${promptContextLines.join('\n')}`;
     }
   }
 
+  function hydrateMergeTask(mode, task) {
+    const source = task && typeof task === 'object' ? task : {};
+    const isBusinessTask = mode === 'biz';
+    const courseId = isBusinessTask ? null : source.courseId;
+    const course = courseId ? state.runtime?.courses?.[courseId] : null;
+    const requiredPieces = (Array.isArray(source.requiredPieces) ? source.requiredPieces : [])
+      .map((piece) => {
+        const chainId = Number(piece?.chainId);
+        const level = Number(piece?.level);
+        const info = getMergePieceInfo(chainId, level, false, mode);
+        return info ? { chainId, level, svg: info.svg, name: info.name } : null;
+      })
+      .filter(Boolean);
+    return {
+      ...source,
+      courseId,
+      courseName: isBusinessTask ? '创业企划书' : String(course?.courseName || ''),
+      isThesis: !isBusinessTask && courseId === 'graduation-thesis',
+      requiredPieces
+    };
+  }
+
   function initMergeGame(mode) {
     mode = mode || 'homework';
     var saved = state.runtime?.mergeGame;
@@ -6796,7 +6873,7 @@ ${promptContextLines.join('\n')}`;
       // 未完成的教程连同当前步骤一起恢复，刷新不会跳过引导或重复消耗灵感。
       state.mergeGame = createMergeGameState(mode);
       state.mergeGame.board = saved.board.slice();
-      state.mergeGame.tasks = Array.isArray(saved.tasks) ? saved.tasks.slice() : [];
+      state.mergeGame.tasks = Array.isArray(saved.tasks) ? saved.tasks.map((task) => hydrateMergeTask(mode, task)) : [];
       state.mergeGame.tutorial = JSON.parse(JSON.stringify(saved.tutorial));
       state.mergeGame.initialized = true;
     } else if (shouldStartTutorial) {
@@ -6808,7 +6885,7 @@ ${promptContextLines.join('\n')}`;
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260918070034', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260918071050', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -6816,7 +6893,7 @@ ${promptContextLines.join('\n')}`;
       state.mergeGame.initialized = true;
       state.mergeGame.tutorial = null;
       if (Array.isArray(saved.tasks) && saved.tasks.length) {
-        state.mergeGame.tasks = cleanupStaleMergeTasks(mode, saved.tasks);
+        state.mergeGame.tasks = cleanupStaleMergeTasks(mode, saved.tasks.map((task) => hydrateMergeTask(mode, task)));
       }
       if (!state.mergeGame.tasks.length) {
         refreshMergeTasks();
@@ -7441,7 +7518,7 @@ ${promptContextLines.join('\n')}`;
             <span>金钱：${runtime.player.money}</span>
             <span>灵感：${state.runtime?.player?.inspiration ?? 0}</span>
             <span>${escapeHtml(getTimelineLabel(runtime.player.currentDate))}</span>
-            <span>每日生活费：${runtime.player.dailyCost}</span>
+            <span>每日生活费：${DAILY_COST}</span>
             <span class="${fatigueClass}">疲劳度：${runtime.player.fatigue}</span>
           </div>
           <div class="schedule-summary-actions">
@@ -8200,6 +8277,9 @@ ${promptContextLines.join('\n')}`;
     await refreshAiSettings();
     state.aiActivity = loadAiActivity();
     await hydrateChatStorage();
+    if (pruneStoredRuntimeRuleFields()) {
+      await flushChatStorage().catch(() => null);
+    }
     await migrateImagesToIDB();
     state.runtime = loadPreferredRuntime();
     state.mergeGame = null;
