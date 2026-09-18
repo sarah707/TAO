@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918142507';
-import { buildExportWorldbook } from './worldbook.js?build=20260918142507';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918162549';
+import { buildExportWorldbook } from './worldbook.js?build=20260918162549';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -351,13 +351,17 @@ function sanitizeUploadName(value) {
 function buildOrderedPrompts(payload) {
   const ordered = [];
   const systemInstruction = buildBuiltInSystemInstruction(payload);
-  const supportingContextInstruction = buildSupportingContextInjection(payload);
+  const historyUserInstruction = buildHistoryUserInstruction(payload);
+  const recentContextAssistantInstruction = buildRecentContextAssistantInstruction(payload);
   const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
   if (systemInstruction) {
     ordered.push({ role: 'system', content: systemInstruction });
   }
-  if (supportingContextInstruction) {
-    ordered.push({ role: 'user', content: supportingContextInstruction });
+  if (historyUserInstruction) {
+    ordered.push({ role: 'user', content: historyUserInstruction });
+  }
+  if (recentContextAssistantInstruction) {
+    ordered.push({ role: 'assistant', content: recentContextAssistantInstruction });
   }
   if (penultimateUserInstruction) {
     ordered.push({ role: 'user', content: penultimateUserInstruction });
@@ -366,7 +370,7 @@ function buildOrderedPrompts(payload) {
   return ordered;
 }
 
-function buildSupportingContextInjection(payload) {
+function buildHistoryUserInstruction(payload) {
   const options = payload?.options || {};
   const parts = [];
   if (options.retryMarker) {
@@ -375,6 +379,12 @@ function buildSupportingContextInjection(payload) {
   if (options.historySystemInstruction) {
     parts.push(String(options.historySystemInstruction));
   }
+  return parts.map((part) => part.trim()).filter(Boolean).join('\n\n');
+}
+
+function buildRecentContextAssistantInstruction(payload) {
+  const options = payload?.options || {};
+  const parts = [];
   if (options.assistantInstruction) {
     parts.push(String(options.assistantInstruction));
   }
@@ -412,12 +422,14 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
 
   if (textPresetMode === 'tavern') {
     pushSection('SYSTEM｜before_prompt｜游戏剧本设定', options.scriptSettingsInstruction);
-    pushSection('USER｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
+    pushSection('USER｜in_chat depth=3｜履历与重试标记', buildHistoryUserInstruction(payload));
+    pushSection('ASSISTANT｜in_chat depth=2｜最近几章与地点资料', buildRecentContextAssistantInstruction(payload));
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   } else {
     pushSection('SYSTEM｜游戏内置文风与剧本设定', buildBuiltInSystemInstruction(payload));
-    pushSection('USER｜in_chat depth=2｜履历、旧章节与地点资料', buildSupportingContextInjection(payload));
+    pushSection('USER｜履历与重试标记', buildHistoryUserInstruction(payload));
+    pushSection('ASSISTANT｜最近几章与地点资料', buildRecentContextAssistantInstruction(payload));
     pushSection('USER｜倒数第二条｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   }
@@ -532,7 +544,11 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
       if (!Array.isArray(completion?.messages)) return;
       if (options.removeTrailingModelPrompt) {
         const lastMessage = completion.messages.at(-1);
-        if (lastMessage && ['assistant', 'model'].includes(String(lastMessage.role || '').toLowerCase())) {
+        // Our chapter/location context is an assistant example, not a preset
+        // prefill. The required user messages below will always follow it.
+        const isRecentContext = options.recentContextAssistantPrompt
+          && formatFinalPromptContent(lastMessage?.content) === options.recentContextAssistantPrompt;
+        if (lastMessage && !isRecentContext && ['assistant', 'model'].includes(String(lastMessage.role || '').toLowerCase())) {
           completion.messages.pop();
         }
       }
@@ -968,6 +984,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         : { restore() {} };
       const finalPromptCapture = createFinalPromptCapture(hostWindow, apiWindow, {
         removeTrailingModelPrompt,
+        recentContextAssistantPrompt: buildRecentContextAssistantInstruction(payload),
         penultimateUserPrompt,
         eventPrompt: prompt,
         onPromptReady: () => presetPromptSuppression.restore(),
@@ -1000,7 +1017,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             throw new Error('当前酒馆助手缺少 generate 接口，无法读取酒馆当前预设；请更新酒馆助手，或在“系统”页切换为“游戏内置预设”。');
           }
           const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
-          const supportingContextInstruction = buildSupportingContextInjection(payload);
+          const historyUserInstruction = buildHistoryUserInstruction(payload);
+          const recentContextAssistantInstruction = buildRecentContextAssistantInstruction(payload);
           const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
           const injects = [];
           if (scriptSettingsInstruction) {
@@ -1012,10 +1030,19 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
               should_scan: true
             });
           }
-          if (supportingContextInstruction) {
+          if (historyUserInstruction) {
             injects.push({
               role: 'user',
-              content: supportingContextInstruction,
+              content: historyUserInstruction,
+              position: 'in_chat',
+              depth: 3,
+              should_scan: false
+            });
+          }
+          if (recentContextAssistantInstruction) {
+            injects.push({
+              role: 'assistant',
+              content: recentContextAssistantInstruction,
               position: 'in_chat',
               depth: 2,
               should_scan: false
