@@ -1,11 +1,11 @@
 {
   "savedAt": "2026-09-15T00:00:00.000Z",
   "settings": {
-    "y4-upper-1": { "intervalWeeks": 2, "growthFactor": 1 },
-    "y4-upper-2": { "intervalWeeks": 2, "growthFactor": 1 },
-    "y4-upper-3": { "intervalWeeks": 2, "growthFactor": 1 },
-    "y4-upper-4": { "intervalWeeks": 2, "growthFactor": 1 },
-    "y4-lower-1": { "intervalWeeks": 2, "growthFactor": 1 },
-    "y4-lower-2": { "intervalWeeks": 2, "growthFactor": 1 }
+    "y4-upper-1": { "intervalWeeks": 3, "growthFactor": 1 },
+    "y4-upper-2": { "intervalWeeks": 3, "growthFactor": 1 },
+    "y4-upper-3": { "intervalWeeks": 3, "growthFactor": 1 },
+    "y4-upper-4": { "intervalWeeks": 3, "growthFactor": 1 },
+    "y4-lower-1": { "intervalWeeks": 3, "growthFactor": 1 },
+    "y4-lower-2": { "intervalWeeks": 3, "growthFactor": 1 }
   }
 }
