@@ -152,16 +152,18 @@
   function selectFirstClassIntroduction({
     hasKnownProfessor,
     hasKnownAssistant,
-    probability = 0.15,
+    probability = 0.5,
     random = Math.random
   }) {
-    if (!hasKnownProfessor && random() < probability) {
-      return '认识教授事件';
+    const roll = random();
+    if (roll >= probability || (hasKnownProfessor && hasKnownAssistant)) {
+      return null;
     }
-    if (!hasKnownAssistant && random() < probability) {
-      return '认识助教事件';
+    const preferProfessor = roll < probability / 2;
+    if (preferProfessor) {
+      return !hasKnownProfessor ? '认识教授事件' : '认识助教事件';
     }
-    return null;
+    return !hasKnownAssistant ? '认识助教事件' : '认识教授事件';
   }
 
   function selectRandomAPlusCourseId(courses = {}, courseIds = [], random = Math.random) {
