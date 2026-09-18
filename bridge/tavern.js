@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918001356';
-import { buildExportWorldbook } from './worldbook.js?build=20260918001356';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918003429';
+import { buildExportWorldbook } from './worldbook.js?build=20260918003429';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
