@@ -371,6 +371,7 @@
       const board = runtime[boardKey];
       if (!board || typeof board !== 'object' || !Array.isArray(board.tasks)) continue;
       const isBusinessBoard = boardKey === 'bizMergeGame' || board.mode === 'biz';
+      delete board.mode;
       for (const task of board.tasks) {
         if (!task || typeof task !== 'object') continue;
         delete task.courseName;
