@@ -22,6 +22,7 @@
     endDate: '2004-06-06',
     upperTermId: 'y4-upper',
     graduationTermId: 'y4-lower',
+    graduationTermStartDate: '2004-03-01',
     playerStartingAge: 21,
     assistantCourse: Object.freeze({ id: 'assistant-microeconomics', courseName: '微观经济学' }),
     businessEndingScore: 100,
@@ -69,6 +70,18 @@
   function getWeekDates(dateText) {
     const start = getWeekStart(dateText);
     return Array.from({ length: 7 }, (_, index) => addDays(start, index));
+  }
+
+  function isLastDayOfMonth(dateText) {
+    return addDays(dateText, 1).slice(8, 10) === '01';
+  }
+
+  function shouldPayInternshipSalary({ dateText, internship, paidMonths = {}, payrollStartDate = CAMPAIGN_CONFIG.graduationTermStartDate } = {}) {
+    const normalizedDate = String(dateText || '');
+    if (!internship || normalizedDate < payrollStartDate || !isLastDayOfMonth(normalizedDate)) {
+      return false;
+    }
+    return !paidMonths[normalizedDate.slice(0, 7)];
   }
 
   function clamp(value, min, max) {
@@ -573,6 +586,8 @@
     diffDays,
     getWeekStart,
     getWeekDates,
+    isLastDayOfMonth,
+    shouldPayInternshipSalary,
     clamp,
     getStoredSaveTimestamp,
     selectNewestStoredValue,
