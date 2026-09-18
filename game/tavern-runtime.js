@@ -84,6 +84,10 @@
       const payload = await getRequestBody(input, init);
       return jsonResponse(await bridge().saveGameStorage(payload.data, payload.chatId));
     }
+    if (path.endsWith('/api/story-response/recovery') && method === 'POST') {
+      const payload = await getRequestBody(input, init);
+      return jsonResponse(await bridge().loadStoryResponse(payload.recoveryId));
+    }
     if (path.endsWith('/api/card-images/upload') && method === 'POST') {
       const payload = await getRequestBody(input, init);
       return jsonResponse(await bridge().uploadImage(payload));

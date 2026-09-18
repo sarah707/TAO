@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918031741';
-import { buildExportWorldbook } from './worldbook.js?build=20260918031741';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918034159';
+import { buildExportWorldbook } from './worldbook.js?build=20260918034159';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -646,6 +646,41 @@ async function appendTextMessageToChat(helper, hostWindow, role, message, data) 
   if (role === 'assistant') forceHostChatToBottom(hostWindow);
 }
 
+function getChatMessageData(message) {
+  if (message?.data && typeof message.data === 'object') return message.data;
+  const swipeId = Number(message?.swipe_id || 0);
+  if (Array.isArray(message?.variables)) return message.variables[swipeId] || message.variables[0] || {};
+  return message?.variables && typeof message.variables === 'object' ? message.variables : {};
+}
+
+function findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId) {
+  const targetId = String(recoveryId || '').trim();
+  if (!targetId) return null;
+  const messageGroups = [];
+  if (typeof helper?.getChatMessages === 'function') {
+    try {
+      const messages = helper.getChatMessages('0-{{lastMessageId}}');
+      if (Array.isArray(messages)) messageGroups.push(messages);
+    } catch {
+      // Fall back to SillyTavern's raw chat records below.
+    }
+  }
+  for (const context of getHostContexts(hostWindow, apiWindow)) {
+    if (Array.isArray(context?.chat)) messageGroups.push(context.chat);
+  }
+  for (const messages of messageGroups) {
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      const message = messages[index];
+      const data = getChatMessageData(message);
+      if (String(data?.nobleSchoolRecoveryId || '') !== targetId) continue;
+      if (data?.nobleSchoolResponseEmpty === true) return '';
+      const text = typeof message?.message === 'string' ? message.message : message?.mes;
+      if (typeof text === 'string') return text;
+    }
+  }
+  return null;
+}
+
 async function saveChatMetadataDurably(hostWindow, apiWindow) {
   const candidates = [
     ...getHostContexts(hostWindow, apiWindow),
@@ -746,6 +781,12 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       }, { type: 'chat' });
       await saveChatMetadataDurably(hostWindow, apiWindow);
       return { ok: true, chatId: currentChatId };
+    },
+    loadStoryResponse(recoveryId) {
+      const fullText = findStoredStoryResponse(helper, hostWindow, apiWindow, recoveryId);
+      return fullText === null
+        ? { found: false, fullText: '' }
+        : { found: true, fullText };
     },
     async uploadImage({ data, mimeType, fileName } = {}) {
       const base64Data = String(data || '').replace(/^data:[^;,]+;base64,/, '');
@@ -896,7 +937,8 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         throw new Error('当前酒馆助手未开放最终提示词事件，无法保证输出格式和事件提示词位于请求末尾；请更新酒馆助手。');
       }
       let text;
-      const generationId = makeGenerationId();
+      const recoveryId = String(payload?.recoveryId || '').trim();
+      const generationId = recoveryId || makeGenerationId();
       const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow);
       let fullText;
       try {
@@ -965,7 +1007,9 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         // 先保存原文，再把副本交给游戏解析。
         await appendTextMessageToChat(helper, hostWindow, 'assistant',
           fullText || '【贵族学校的特招生｜AI 返回内容为空】',
-          fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true });
+          fullText
+            ? { nobleSchoolGameResponse: true, ...(recoveryId ? { nobleSchoolRecoveryId: recoveryId } : {}) }
+            : { nobleSchoolGameError: true, nobleSchoolResponseEmpty: true, ...(recoveryId ? { nobleSchoolRecoveryId: recoveryId } : {}) });
       } catch (error) {
         const diagnostic = enhanceGenerationError(error, generationErrorCapture.getError(), {
           generationId,
