@@ -1,5 +1,5 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918003429';
-import { buildExportWorldbook } from './worldbook.js?build=20260918003429';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918004038';
+import { buildExportWorldbook } from './worldbook.js?build=20260918004038';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -615,7 +615,22 @@ function isImagePayload(payload) {
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
 }
 
-async function appendTextMessageToChat(helper, role, message, data) {
+function forceHostChatToBottom(hostWindow) {
+  try {
+    const chat = hostWindow?.document?.getElementById?.('chat');
+    if (!chat) return;
+    const scroll = () => { chat.scrollTop = chat.scrollHeight; };
+    if (typeof hostWindow?.requestAnimationFrame === 'function') {
+      hostWindow.requestAnimationFrame(scroll);
+    } else {
+      scroll();
+    }
+  } catch {
+    // 聊天滚动只是显示增强，不能影响已经写入的剧情楼层。
+  }
+}
+
+async function appendTextMessageToChat(helper, hostWindow, role, message, data) {
   if (typeof helper?.createChatMessages !== 'function') {
     throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整提示词和 AI 回复写入聊天楼层；请更新酒馆助手。');
   }
@@ -628,6 +643,7 @@ async function appendTextMessageToChat(helper, role, message, data) {
     insert_before: 'end',
     refresh: 'all'
   });
+  if (role === 'assistant') forceHostChatToBottom(hostWindow);
 }
 
 async function saveChatMetadataDurably(hostWindow, apiWindow) {
@@ -857,7 +873,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
             ? formatCapturedFinalPrompt(messages)
             : buildVisibleTextPrompt(payload, textPresetMode);
           stage = '写入酒馆 user 楼层';
-          promptWrite = appendTextMessageToChat(helper, 'user',
+          promptWrite = appendTextMessageToChat(helper, hostWindow, 'user',
             wrapPromptForChat(visiblePrompt, textPresetMode, captured),
             { nobleSchoolGamePrompt: true }).then(() => { stage = '等待 AI 回复'; });
         }
@@ -947,7 +963,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         fullText = typeof text === 'string' ? text : String(text?.content || '');
         stage = '写入酒馆模型楼层（AI 已返回）';
         // 先保存原文，再把副本交给游戏解析。
-        await appendTextMessageToChat(helper, 'assistant',
+        await appendTextMessageToChat(helper, hostWindow, 'assistant',
           fullText || '【贵族学校的特招生｜AI 返回内容为空】',
           fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true });
       } catch (error) {
@@ -960,7 +976,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         });
         // 网络断开时写聊天也可能失败或久等，不能让它遮住最初的诊断。
         void writePrompt(finalPromptCapture.getMessages()).then(() => (
-          appendTextMessageToChat(helper, 'assistant',
+          appendTextMessageToChat(helper, hostWindow, 'assistant',
             `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic.message)}`,
             { nobleSchoolGameError: true })
         )).catch(() => {});
