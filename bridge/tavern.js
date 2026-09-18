@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918211225';
-import { buildExportWorldbook } from './worldbook.js?build=20260918211225';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInPresetSettings } from './builtin-preset.js?build=20260918211225';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260918214624';
+import { buildExportWorldbook } from './worldbook.js?build=20260918214624';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260918214624';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -70,10 +70,17 @@ function readGenerationRequestMetadata(input, init) {
 
 function extractGenerationResponseText(body) {
   if (typeof body === 'string') return body;
+  // Claude may retain thinking before text in its native content array while
+  // ST's compatibility choices[0].message.content is empty (first block only).
+  if (Array.isArray(body?.content)) {
+    const parts = body.content.filter((part) => part?.type === 'text' && typeof part.text === 'string');
+    if (parts.length) return parts.map((part) => part.text).join('\n\n');
+  }
   const content = body?.choices?.[0]?.message?.content
     ?? body?.choices?.[0]?.text
     ?? body?.text
-    ?? body?.message?.content;
+    ?? body?.message?.content
+    ?? body?.content;
   if (typeof content === 'string') return content;
   if (Array.isArray(content)) {
     const parts = content.filter((part) => part?.type === 'text' && typeof part.text === 'string');
@@ -381,6 +388,60 @@ function buildPenultimateUserInstruction(payload) {
     .join('\n\n');
 }
 
+export function buildBuiltInPromptMessages(payload) {
+  const playerName = String(payload?.options?.playerName || '').trim();
+  // Only game-owned names are substituted; never evaluate host/preset macros.
+  const expand = (value) => String(value || '')
+    .replace(/<user>|\{\{user\}\}/g, (match) => playerName || match)
+    .replace(/\{\{char\}\}/g, '贵族学校的特招生');
+  const fixedPrompt = (name) => expand(BUILTIN_PRESET_SETTINGS.prompts.find((item) => item.name === name)?.content);
+  const messages = [];
+  const add = (role, content) => {
+    const text = String(content || '').trim();
+    if (text) messages.push({ role, content: text });
+  };
+  // The minimal preset emits two separate system messages: its empty user
+  // markers block native squash before those markers get filtered. Copy that
+  // final result, without retaining any worldbook/Persona/card/chat slots.
+  add('system', fixedPrompt('top'));
+  add('system', payload?.options?.scriptSettingsInstruction);
+  add('user', fixedPrompt('Enhance Definitions'));
+  add('user', buildHistoryUserInstruction(payload));
+  add('assistant', buildRecentContextAssistantInstruction(payload));
+  add('user', buildPenultimateUserInstruction(payload));
+  add('user', payload?.prompt);
+  return messages;
+}
+
+async function buildBuiltInRequest(hostWindow, apiWindow, payload) {
+  const context = getHostContexts(hostWindow, apiWindow).find((item) => (
+    typeof item?.ChatCompletionService?.presetToGeneratePayload === 'function'
+    && typeof item.ChatCompletionService.sendRequest === 'function'
+    && typeof item.getChatCompletionModel === 'function'
+  ));
+  if (!context) {
+    throw new Error('当前酒馆缺少独立聊天补全请求接口，无法隔离本地预设使用内置提示词；请更新 SillyTavern。');
+  }
+  if (context.mainApi && context.mainApi !== 'openai') {
+    throw new Error('当前酒馆选择的是文字补全连接，内置预设暂未适配该 API 类型；本次未调用其他连接。聊天补全连接的提供商和模型不受限制。');
+  }
+  const service = context.ChatCompletionService;
+  // ST 1.19.0 custom-request.js: literal preset -> cloned settings -> native
+  // provider conversion. Unlike Helper generate/generateRaw this does not scan
+  // worldbooks or invoke prompt/regex events. It never mutates player settings.
+  const request = await service.presetToGeneratePayload(cloneBuiltInRequestPreset(), {}, {
+    model: context.getChatCompletionModel(),
+    messages: buildBuiltInPromptMessages(payload)
+  });
+  // These controls are read from global power-user state by native conversion.
+  // Never send them (or extension tool definitions) in this fixed request.
+  for (const key of ['stop', 'logprobs', 'top_logprobs', 'logit_bias', 'tools', 'tool_choice']) delete request[key];
+  request.user_name = String(payload?.options?.playerName || '').trim() || '<user>';
+  request.char_name = '贵族学校的特招生';
+  request.group_names = [];
+  return { service, request };
+}
+
 function buildVisibleTextPrompt(payload, textPresetMode) {
   const options = payload?.options || {};
   const prompt = String(payload?.prompt || '').trim();
@@ -397,12 +458,7 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   } else {
-    pushSection('SYSTEM｜内置极简预设固定文风', BUILTIN_PRESET_SETTINGS.prompts.find((item) => item.name === 'top')?.content);
-    pushSection('SYSTEM｜固定世界书槽位之前｜游戏剧本设定', options.scriptSettingsInstruction);
-    pushSection('USER｜履历与重试标记', buildHistoryUserInstruction(payload));
-    pushSection('ASSISTANT｜最近几章与地点资料', buildRecentContextAssistantInstruction(payload));
-    pushSection('USER｜倒数第二条｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
-    pushSection('USER｜user_input｜本次事件', prompt);
+    return formatCapturedFinalPrompt(buildBuiltInPromptMessages(payload));
   }
 
   return sections.join('\n\n');
@@ -564,7 +620,9 @@ function wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt) {
   const fence = '`'.repeat(Math.max(3, longestBacktickRun + 1));
   const modeLabel = textPresetMode === 'tavern' ? '酒馆当前预设' : '游戏内置预设';
   const note = capturedFinalPrompt
-    ? '以下内容截取自酒馆提示词查看器使用的最终消息事件，已经过预设宏、变量、世界书、模板和游戏注入处理。'
+    ? (textPresetMode === 'builtin'
+      ? '以下是内置固定提示词经当前模型接口适配后实际提交的消息；未使用本地预设、世界书或额外玩家描述。'
+      : '以下内容截取自酒馆提示词查看器使用的最终消息事件，已经过预设宏、变量、世界书、模板和游戏注入处理。')
     : '当前酒馆助手没有暴露最终消息事件；以下仅展示游戏本次提交的提示词。';
   return `【贵族学校的特招生｜本次发送给 AI 的完整提示词】\n模式：${modeLabel}\n${note}\n\n${fence}text\n${source}\n${fence}`;
 }
@@ -589,89 +647,6 @@ function getChatCompletionSettings(hostWindow, apiWindow) {
     .find((settings) => settings && typeof settings === 'object') || null;
 }
 
-// Native prompt assembly and request parameter conversion both read this core
-// object. Borrow only fixed non-connection fields; do not select/save a preset.
-// JSON saves during asynchronous assembly must still see the player's settings.
-function borrowSettings(target, fixed) {
-  if (Object.hasOwn(target, 'toJSON')) {
-    throw new Error('当前酒馆配置带有自定义序列化器，无法安全临时应用内置预设。');
-  }
-  const originals = new Map(Object.keys(fixed).map((key) => [key, {
-    existed: Object.hasOwn(target, key), value: target[key], applied: fixed[key]
-  }]));
-  const restoredView = () => {
-    const view = { ...target };
-    for (const [key, old] of originals) {
-      if (target[key] !== old.applied) continue;
-      if (old.existed) view[key] = old.value;
-      else delete view[key];
-    }
-    return view;
-  };
-  Object.defineProperty(target, 'toJSON', { configurable: true, value: restoredView });
-  const restoreKeys = (keys) => {
-    for (const key of keys) {
-      const old = originals.get(key);
-      if (!old) continue;
-      // Preserve a user's/extension's newer setting or selected preset.
-      if (target[key] === old.applied) {
-        if (old.existed) target[key] = old.value;
-        else delete target[key];
-      }
-      originals.delete(key);
-    }
-  };
-  const restore = () => {
-    restoreKeys([...originals.keys()]);
-    if (target.toJSON === restoredView) delete target.toJSON;
-  };
-  try {
-    Object.assign(target, fixed);
-  } catch (error) {
-    restore();
-    throw error;
-  }
-  return { restoreKeys, restore };
-}
-
-function applyBuiltInPreset(hostWindow, apiWindow) {
-  const context = getHostContexts(hostWindow, apiWindow).find((item) => item?.chatCompletionSettings);
-  if (!context) throw new Error('当前酒馆未开放聊天补全配置，无法安全使用固定内置预设；请更新 SillyTavern。');
-  if (!context.powerUserSettings || typeof context.powerUserSettings !== 'object') {
-    throw new Error('当前酒馆未开放高级生成配置，无法固定内置预设的停止词与概率参数；请更新 SillyTavern。');
-  }
-  const settings = borrowSettings(context.chatCompletionSettings, cloneBuiltInPresetSettings());
-  let powerSettings;
-  let removeEarlyCleanup = () => {};
-  const restore = () => {
-    removeEarlyCleanup();
-    settings.restore();
-    powerSettings?.restore();
-  };
-  try {
-    // These two request controls live outside oai_settings in ST 1.19.0.
-    powerSettings = borrowSettings(context.powerUserSettings, {
-      custom_stopping_strings: '', request_token_probabilities: false
-    });
-    const events = context.eventSource;
-    const subscribe = events?.makeFirst || events?.on;
-    if (typeof subscribe !== 'function' || typeof events?.removeListener !== 'function') {
-      throw new Error('当前酒馆缺少提示词清理事件，无法安全使用固定内置预设。');
-    }
-    const eventName = context.eventTypes?.CHAT_COMPLETION_PROMPT_READY || 'chat_completion_prompt_ready';
-    const listener = (data) => {
-      if (data?.dryRun) return;
-      settings.restoreKeys(['prompts', 'prompt_order']);
-      removeEarlyCleanup();
-    };
-    subscribe.call(events, eventName, listener);
-    removeEarlyCleanup = () => events.removeListener(eventName, listener);
-    return { restore };
-  } catch (error) {
-    restore();
-    throw error;
-  }
-}
 
 function insertScriptSettingsBeforeWorldbook(hostWindow, apiWindow, content, generationId) {
   if (!content) return { restore() {} };
@@ -1117,21 +1092,21 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         return promptWrite;
       };
       const penultimateUserPrompt = buildPenultimateUserInstruction(payload);
-      const removeTrailingModelPrompt = isGeminiChatConnection(hostWindow, apiWindow);
       const presetPromptSuppression = textPresetMode === 'tavern'
         ? suppressLastUserMessagePresetPrompts(hostWindow, apiWindow)
         : { restore() {} };
       let scriptSettingsPresetPrompt = { restore() {} };
-      let builtInPreset = { restore() {} };
-      const finalPromptCapture = createFinalPromptCapture(hostWindow, apiWindow, {
-        removeTrailingModelPrompt,
+      let builtInMessages = null;
+      const finalPromptCapture = textPresetMode === 'builtin'
+        ? { available: true, getMessages: () => builtInMessages, stop() {} }
+        : createFinalPromptCapture(hostWindow, apiWindow, {
+        removeTrailingModelPrompt: isGeminiChatConnection(hostWindow, apiWindow),
         recentContextAssistantPrompt: buildRecentContextAssistantInstruction(payload),
         penultimateUserPrompt,
         eventPrompt: prompt,
         onPromptReady: () => {
           scriptSettingsPresetPrompt.restore();
           presetPromptSuppression.restore();
-          builtInPreset.restore();
         },
         onCaptured: writePrompt
       });
@@ -1151,82 +1126,87 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         generationErrorCapture.restore();
         scriptSettingsPresetPrompt.restore();
         presetPromptSuppression.restore();
-        builtInPreset.restore();
         finalPromptCapture.stop();
         textRequestActive = false;
       };
       let fullText;
-      let responseSource = 'helper';
+      let responseSource = textPresetMode === 'builtin' ? 'native' : 'helper';
       let helperTextChanged = false;
       try {
         stage = '等待酒馆生成结果';
-        if (typeof apiWindow.generate !== 'function') {
-          throw new Error('当前酒馆助手缺少 generate 接口，无法使用原生预设拼接；请更新酒馆助手。');
-        }
-        if (textPresetMode === 'builtin') builtInPreset = applyBuiltInPreset(hostWindow, apiWindow);
-        const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
-        const historyUserInstruction = buildHistoryUserInstruction(payload);
-        const recentContextAssistantInstruction = buildRecentContextAssistantInstruction(payload);
-        const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
-        const injects = [];
-        if (scriptSettingsInstruction) {
-          scriptSettingsPresetPrompt = insertScriptSettingsBeforeWorldbook(
-            hostWindow, apiWindow, scriptSettingsInstruction, generationId
-          );
-          injects.push({
-            role: 'system',
-            content: scriptSettingsInstruction,
-            // Scan-only: the actual message is assembled by the native
-            // preset order before its worldbook slot, not by chat depth.
-            position: 'none',
-            depth: 0,
-            should_scan: true
+        if (textPresetMode === 'builtin') {
+          const { service, request } = await buildBuiltInRequest(hostWindow, apiWindow, payload);
+          builtInMessages = request.messages.map((message) => ({ role: message.role, content: message.content }));
+          await writePrompt(builtInMessages);
+          text = extractGenerationResponseText(await service.sendRequest(request, false)) ?? '';
+        } else {
+          if (typeof apiWindow.generate !== 'function') {
+            throw new Error('当前酒馆助手缺少 generate 接口，无法使用原生预设拼接；请更新酒馆助手。');
+          }
+          const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
+          const historyUserInstruction = buildHistoryUserInstruction(payload);
+          const recentContextAssistantInstruction = buildRecentContextAssistantInstruction(payload);
+          const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
+          const injects = [];
+          if (scriptSettingsInstruction) {
+            scriptSettingsPresetPrompt = insertScriptSettingsBeforeWorldbook(
+              hostWindow, apiWindow, scriptSettingsInstruction, generationId
+            );
+            injects.push({
+              role: 'system',
+              content: scriptSettingsInstruction,
+              // Scan-only: the actual message is assembled by the native
+              // preset order before its worldbook slot, not by chat depth.
+              position: 'none',
+              depth: 0,
+              should_scan: true
+            });
+          }
+          if (historyUserInstruction) {
+            injects.push({
+              role: 'user',
+              content: historyUserInstruction,
+              position: 'in_chat',
+              depth: 3,
+              should_scan: false
+            });
+          }
+          if (recentContextAssistantInstruction) {
+            injects.push({
+              role: 'assistant',
+              content: recentContextAssistantInstruction,
+              position: 'in_chat',
+              depth: 2,
+              should_scan: false
+            });
+          }
+          if (penultimateUserInstruction) {
+            injects.push({
+              role: 'user',
+              content: penultimateUserInstruction,
+              position: 'in_chat',
+              depth: 1,
+              should_scan: false
+            });
+          }
+          text = await apiWindow.generate({
+            preset_name: 'in_use',
+            user_input: prompt,
+            should_silence: true,
+            should_stream: false,
+            max_chat_history: 0,
+            injects,
+            overrides: emptyPromptOverrides(),
+            generation_id: generationId
           });
         }
-        if (historyUserInstruction) {
-          injects.push({
-            role: 'user',
-            content: historyUserInstruction,
-            position: 'in_chat',
-            depth: 3,
-            should_scan: false
-          });
-        }
-        if (recentContextAssistantInstruction) {
-          injects.push({
-            role: 'assistant',
-            content: recentContextAssistantInstruction,
-            position: 'in_chat',
-            depth: 2,
-            should_scan: false
-          });
-        }
-        if (penultimateUserInstruction) {
-          injects.push({
-            role: 'user',
-            content: penultimateUserInstruction,
-            position: 'in_chat',
-            depth: 1,
-            should_scan: false
-          });
-        }
-        text = await apiWindow.generate({
-          preset_name: 'in_use',
-          user_input: prompt,
-          should_silence: true,
-          should_stream: false,
-          max_chat_history: 0,
-          injects,
-          overrides: emptyPromptOverrides(),
-          generation_id: generationId
-        });
         // Rendering a chat floor may wait on third-party extensions. The model
         // request is already over, so never keep its global hooks active there.
         releaseGenerationHooks();
         await writePrompt(finalPromptCapture.getMessages());
         const helperText = typeof text === 'string' ? text : String(text?.content || '');
         const networkText = generationErrorCapture.getRawResponseText();
-        responseSource = networkText !== null ? 'network' : 'helper';
+        responseSource = networkText !== null ? 'network' : responseSource;
         fullText = networkText ?? helperText;
         helperTextChanged = networkText !== null && networkText !== helperText;
         stage = '写入酒馆模型楼层（AI 已返回）';
