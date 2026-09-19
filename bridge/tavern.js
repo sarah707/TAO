@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260919053639';
-import { buildExportWorldbook } from './worldbook.js?build=20260919053639';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260919053639';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260919062854';
+import { buildExportWorldbook } from './worldbook.js?build=20260919062854';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260919062854';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -368,16 +368,18 @@ function buildHistoryUserInstruction(payload) {
   return parts.map((part) => part.trim()).filter(Boolean).join('\n\n');
 }
 
-function buildRecentContextAssistantInstruction(payload) {
+function buildRecentContextAssistantInstructions(payload) {
   const options = payload?.options || {};
-  const parts = [];
-  if (options.assistantInstruction) {
-    parts.push(String(options.assistantInstruction));
-  }
+  const parts = Array.isArray(options.assistantInstructions)
+    ? options.assistantInstructions.map((part) => String(part || '').trim()).filter(Boolean)
+    : [];
+  // Retain support for payloads created by older callers while all current game
+  // story requests use one entry per chapter.
+  if (!parts.length && options.assistantInstruction) parts.push(String(options.assistantInstruction).trim());
   if (options.locationInstruction) {
     parts.push(`以下是此前已经确定的地点描述，后续章节可据此保持一致：\n${String(options.locationInstruction)}`);
   }
-  return parts.map((part) => part.trim()).filter(Boolean).join('\n\n');
+  return parts.filter(Boolean);
 }
 
 function buildPenultimateUserInstruction(payload) {
@@ -407,7 +409,9 @@ export function buildBuiltInPromptMessages(payload) {
   add('system', payload?.options?.scriptSettingsInstruction);
   add('user', fixedPrompt('Enhance Definitions'));
   add('user', buildHistoryUserInstruction(payload));
-  add('assistant', buildRecentContextAssistantInstruction(payload));
+  for (const instruction of buildRecentContextAssistantInstructions(payload)) {
+    add('assistant', instruction);
+  }
   add('user', buildPenultimateUserInstruction(payload));
   add('user', payload?.prompt);
   return messages;
@@ -453,8 +457,12 @@ function buildVisibleTextPrompt(payload, textPresetMode) {
 
   if (textPresetMode === 'tavern') {
     pushSection('SYSTEM｜当前预设首个启用的世界书槽位之前｜游戏剧本设定', options.scriptSettingsInstruction);
-    pushSection('USER｜in_chat depth=3｜履历与重试标记', buildHistoryUserInstruction(payload));
-    pushSection('ASSISTANT｜in_chat depth=2｜最近几章与地点资料', buildRecentContextAssistantInstruction(payload));
+    const assistantInstructions = buildRecentContextAssistantInstructions(payload);
+    const historyDepth = assistantInstructions.length ? assistantInstructions.length + 2 : 3;
+    pushSection(`USER｜in_chat depth=${historyDepth}｜履历与重试标记`, buildHistoryUserInstruction(payload));
+    assistantInstructions.forEach((instruction, index) => {
+      pushSection(`ASSISTANT｜in_chat depth=${assistantInstructions.length + 1 - index}｜章节或地点资料`, instruction);
+    });
     pushSection('USER｜in_chat depth=1｜输出格式与写作要求', buildPenultimateUserInstruction(payload));
     pushSection('USER｜user_input｜本次事件', prompt);
   } else {
@@ -573,8 +581,9 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
         const lastMessage = completion.messages.at(-1);
         // Our chapter/location context is an assistant example, not a preset
         // prefill. The required user messages below will always follow it.
-        const isRecentContext = options.recentContextAssistantPrompt
-          && formatFinalPromptContent(lastMessage?.content) === options.recentContextAssistantPrompt;
+        const isRecentContext = options.recentContextAssistantPrompts?.includes(
+          formatFinalPromptContent(lastMessage?.content)
+        );
         if (lastMessage && !isRecentContext && ['assistant', 'model'].includes(String(lastMessage.role || '').toLowerCase())) {
           completion.messages.pop();
         }
@@ -1101,7 +1110,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
         ? { available: true, getMessages: () => builtInMessages, stop() {} }
         : createFinalPromptCapture(hostWindow, apiWindow, {
         removeTrailingModelPrompt: isGeminiChatConnection(hostWindow, apiWindow),
-        recentContextAssistantPrompt: buildRecentContextAssistantInstruction(payload),
+        recentContextAssistantPrompts: buildRecentContextAssistantInstructions(payload),
         penultimateUserPrompt,
         eventPrompt: prompt,
         onPromptReady: () => {
@@ -1145,8 +1154,11 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           }
           const scriptSettingsInstruction = String(payload?.options?.scriptSettingsInstruction || '').trim();
           const historyUserInstruction = buildHistoryUserInstruction(payload);
-          const recentContextAssistantInstruction = buildRecentContextAssistantInstruction(payload);
+          const recentContextAssistantInstructions = buildRecentContextAssistantInstructions(payload);
           const penultimateUserInstruction = buildPenultimateUserInstruction(payload);
+          const historyDepth = recentContextAssistantInstructions.length
+            ? recentContextAssistantInstructions.length + 2
+            : 3;
           const injects = [];
           if (scriptSettingsInstruction) {
             scriptSettingsPresetPrompt = insertScriptSettingsBeforeWorldbook(
@@ -1167,16 +1179,16 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
               role: 'user',
               content: historyUserInstruction,
               position: 'in_chat',
-              depth: 3,
+              depth: historyDepth,
               should_scan: false
             });
           }
-          if (recentContextAssistantInstruction) {
+          for (const [index, recentContextAssistantInstruction] of recentContextAssistantInstructions.entries()) {
             injects.push({
               role: 'assistant',
               content: recentContextAssistantInstruction,
               position: 'in_chat',
-              depth: 2,
+              depth: recentContextAssistantInstructions.length + 1 - index,
               should_scan: false
             });
           }

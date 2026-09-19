@@ -523,8 +523,9 @@ ${scriptSettingsCharacterBlock}
     const historySystemInstruction = `以下是之前的剧情梗概：
 ${historys}`.trim();
 
-    const chaptersSystemInstruction = `以下是我写的前几章的剧情
-${chapters}`.trim();
+    const assistantInstructions = Array.isArray(chapters)
+      ? chapters.map((chapter) => String(chapter || '').trim()).filter(Boolean)
+      : [];
 
     const writingPointsSystemInstruction = `<writingPoints>
         - 思考当前是否进展到了需要展开NFSW剧情的情况，如果是的话，不避讳，不省略的按照NSFW_Guidelines的要求进行编写。
@@ -562,7 +563,6 @@ ${chapters}`.trim();
       historySystemInstruction,
       writingPointsSystemInstruction
     ].filter(Boolean);
-    const assistantInstruction = chaptersSystemInstruction;
     const userPrompt = `${eventUserPrompt}
     ${time}
     请以第二人称（用”你”来称呼<user>)进行剧情编写，你会注意编写1500字以上的剧情，不会让剧情太短。
@@ -589,7 +589,7 @@ ${modeluList}`.replaceAll('<user>', playerName).replaceAll('${names}', names || 
       scriptSettingsLocationBlock: scriptSettingsLocationBlock,
       userPrompt,
       systemInstructionParts,
-      assistantInstruction
+      assistantInstructions
     };
   }
 
