@@ -157,14 +157,14 @@
     random = Math.random
   }) {
     const roll = random();
-    if (roll >= probability || (hasKnownProfessor && hasKnownAssistant)) {
+    if (roll >= probability) {
       return null;
     }
-    const preferProfessor = roll < probability / 2;
-    if (preferProfessor) {
-      return !hasKnownProfessor ? '认识教授事件' : '认识助教事件';
+    if (hasKnownProfessor !== hasKnownAssistant) {
+      return hasKnownProfessor ? '认识助教事件' : '认识教授事件';
     }
-    return !hasKnownAssistant ? '认识助教事件' : '认识教授事件';
+    const preferProfessor = roll < probability / 2;
+    return preferProfessor ? '认识教授事件' : '认识助教事件';
   }
 
   function selectRandomAPlusCourseId(courses = {}, courseIds = [], random = Math.random) {
