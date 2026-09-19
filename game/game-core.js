@@ -477,28 +477,34 @@
 
   function extractNearestTagContent(text, tag) {
     const normalizedTag = String(tag || '').trim().toLowerCase();
+    const taggedContents = extractNearestTagContents(text, normalizedTag);
+    if (taggedContents.length) return taggedContents.at(-1) || '';
     if (normalizedTag === 'content') {
-      const recovered = extractContentAfterLeadingBareInfoBlock(text);
+      const recovered = extractContentAfterBareInfoBlock(text);
       if (recovered !== null) return recovered;
     }
-    return extractNearestTagContents(text, tag).at(-1) || '';
+    return '';
   }
 
-  function extractContentAfterLeadingBareInfoBlock(text) {
+  function extractContentAfterBareInfoBlock(text) {
     const source = String(text || '');
     const lowerSource = source.toLowerCase();
     const closeIndex = lowerSource.lastIndexOf('</content>');
-    if (closeIndex < 0) return null;
+    const historyIndex = lowerSource.indexOf('<newhistory>');
+    const endCandidates = [closeIndex, historyIndex].filter((index) => index >= 0);
+    if (!endCandidates.length) return null;
 
-    const beforeClose = source.slice(0, closeIndex);
-    const leadingInfo = beforeClose.match(
-      /^(?:\uFEFF)?[\t ]*(?:```(?:xml|html)?[\t ]*(?:\r?\n|$))?[\t ]*『[^\r\n』]+』[\t ]*(?:\r?\n)+/i
-    );
-    if (!leadingInfo) return null;
+    const contentEnd = Math.min(...endCandidates);
+    const prefix = source.slice(0, contentEnd);
+    const bareBlocks = [...prefix.matchAll(/^[\t ]*『[^\r\n』]+』[\t ]*$/gm)];
+    const bareInfo = bareBlocks.at(-1);
+    if (!bareInfo || bareInfo.index === undefined) return null;
 
-    const remainder = beforeClose.slice(leadingInfo[0].length);
-    if (/^[\s]*<content>/i.test(remainder)) return null;
-    return remainder.trim();
+    const contentStart = bareInfo.index + bareInfo[0].length;
+    return source
+      .slice(contentStart, contentEnd)
+      .replace(/^[\s]*(?:<\/info_block>[\s]*)?(?:<content>[\s]*)?/i, '')
+      .trim();
   }
 
   function extractNearestTagContents(text, tag) {
