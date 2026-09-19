@@ -210,6 +210,23 @@
       && previousTermId !== CAMPAIGN_CONFIG.graduationTermId;
   }
 
+  function isAfterTermExams({ dateText, termId, activities = {} } = {}) {
+    const term = TERM_DEFINITIONS.find((item) => item.id === termId);
+    if (!term || !dateText) {
+      return false;
+    }
+    const lastExamDate = Object.entries(activities)
+      .filter(([activityDate, activity]) => (
+        activity === '考试'
+        && activityDate >= term.start
+        && activityDate <= term.end
+      ))
+      .map(([activityDate]) => activityDate)
+      .sort()
+      .at(-1);
+    return Boolean(lastExamDate && dateText > lastExamDate);
+  }
+
   function findCharactersForCourse(characters = [], courseName, identityText) {
     const normalizedCourseName = String(courseName || '').trim();
     const normalizedIdentity = String(identityText || '').trim();
@@ -713,6 +730,7 @@
     selectRandomAPlusCourseId,
     canReceiveGraduationInternshipOffer,
     shouldResetHomeworkMergeBoard,
+    isAfterTermExams,
     findCharactersForCourse,
     isStudentCouncilPresident,
     normalizeGeneratedCharactersForEvent,
