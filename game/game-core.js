@@ -198,7 +198,7 @@
   }
 
   function isStudentCouncilPresident(character) {
-    return String(character?.identity || '').includes('学生会长');
+    return /学生(?:联合)?会(?:会长|主席)|学生会长/.test(String(character?.identity || ''));
   }
 
   function appendIdentityLabel(character, label) {
@@ -213,8 +213,16 @@
     const first = generated[0] || null;
     const courseName = String(options.courseName || CAMPAIGN_CONFIG.assistantCourse.courseName).trim();
 
+    for (const character of generated) {
+      if (!Object.prototype.hasOwnProperty.call(character, 'displayIdentity')) {
+        character.displayIdentity = String(character.identity || '').trim();
+      }
+    }
+
     if (eventName === '第一次开学典礼事件' && first) {
-      appendIdentityLabel(first, '学生会长');
+      if (!isStudentCouncilPresident(first)) {
+        appendIdentityLabel(first, '学生会长');
+      }
       first.school = '兰斯特皇家学院';
       first.grade = 4;
       first.gender = '男';
