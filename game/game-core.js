@@ -32,7 +32,13 @@
     minimumGraduationGrade: 'B',
     minimumGraduationProgress: 80,
     honorsGraduationProgress: 90,
-    relationshipThresholds: Object.freeze({ friend: 25, admirer: 45, confession: 65 }),
+    relationshipThresholds: Object.freeze({
+      acquaintanceMax: 10,
+      interestMax: 30,
+      deepenMax: 50,
+      admirer: 51,
+      confession: 70
+    }),
     regularCourses: REGULAR_COURSES,
     specialCourses: SPECIAL_COURSES
   });
@@ -87,6 +93,15 @@
 
   function clamp(value, min, max) {
     return Math.max(min, Math.min(max, value));
+  }
+
+  function getCharacterRelation(character, thresholds = CAMPAIGN_CONFIG.relationshipThresholds) {
+    if (character?.isLover) return '恋人';
+    const favorability = Number(character?.favorability) || 0;
+    if (favorability <= thresholds.acquaintanceMax) return '认识的人';
+    if (favorability <= thresholds.interestMax) return '对<user>产生兴趣';
+    if (favorability <= thresholds.deepenMax) return '渴望和<user>加深相互了解，深入彼此生活';
+    return '爱慕者';
   }
 
   function getStoredSaveTimestamp(value) {
@@ -652,6 +667,7 @@
     isLastDayOfMonth,
     shouldPayInternshipSalary,
     clamp,
+    getCharacterRelation,
     getStoredSaveTimestamp,
     selectNewestStoredValue,
     resolveStoredPlanFixed,
