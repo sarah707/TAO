@@ -449,7 +449,29 @@
   }
 
   function extractNearestTagContent(text, tag) {
+    const normalizedTag = String(tag || '').trim().toLowerCase();
+    if (normalizedTag === 'content') {
+      const recovered = extractContentAfterLeadingBareInfoBlock(text);
+      if (recovered !== null) return recovered;
+    }
     return extractNearestTagContents(text, tag).at(-1) || '';
+  }
+
+  function extractContentAfterLeadingBareInfoBlock(text) {
+    const source = String(text || '');
+    const lowerSource = source.toLowerCase();
+    const closeIndex = lowerSource.lastIndexOf('</content>');
+    if (closeIndex < 0) return null;
+
+    const beforeClose = source.slice(0, closeIndex);
+    const leadingInfo = beforeClose.match(
+      /^(?:\uFEFF)?[\t ]*(?:```(?:xml|html)?[\t ]*(?:\r?\n|$))?[\t ]*『[^\r\n』]+』[\t ]*(?:\r?\n)+/i
+    );
+    if (!leadingInfo) return null;
+
+    const remainder = beforeClose.slice(leadingInfo[0].length);
+    if (/^[\s]*<content>/i.test(remainder)) return null;
+    return remainder.trim();
   }
 
   function extractNearestTagContents(text, tag) {
