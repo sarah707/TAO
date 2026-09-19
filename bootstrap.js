@@ -1,6 +1,6 @@
 const BOOTSTRAP_STATE_KEY = '__NOBLE_SCHOOL_REMOTE_BOOTSTRAP_V1__';
 const VERSION_MANIFEST_URL = 'https://sarah707.github.io/TAO/version.json';
-const FALLBACK_LOADER_URL = 'https://sarah707.github.io/TAO/loader.js?build=20260919053222';
+const FALLBACK_LOADER_URL = 'https://sarah707.github.io/TAO/loader.js?build=20260919053639';
 
 async function resolveLoaderUrl() {
   try {
