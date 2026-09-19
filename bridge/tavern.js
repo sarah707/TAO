@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260919133818';
-import { buildExportWorldbook } from './worldbook.js?build=20260919133818';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260919133818';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260919140615';
+import { buildExportWorldbook } from './worldbook.js?build=20260919140615';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260919140615';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -802,11 +802,32 @@ function forceHostChatToBottom(hostWindow) {
   }
 }
 
-async function appendTextMessageToChat(helper, hostWindow, role, message, data) {
+function hasStoredChatMessageData(hostWindow, apiWindow, key, value) {
+  const expected = String(value || '');
+  if (!expected) return false;
+  for (const context of getHostContexts(hostWindow, apiWindow)) {
+    if (!Array.isArray(context?.chat)) continue;
+    if (context.chat.some((item) => String(getChatMessageData(item)?.[key] || '') === expected)) return true;
+  }
+  return false;
+}
+
+function waitForPromiseWithTimeout(promise, timeoutMs, message, timerWindow = globalThis) {
+  let timerId = null;
+  const timerHost = typeof timerWindow?.setTimeout === 'function' ? timerWindow : globalThis;
+  const timeout = new Promise((_, reject) => {
+    timerId = timerHost.setTimeout(() => reject(new Error(message)), timeoutMs);
+  });
+  return Promise.race([Promise.resolve(promise), timeout]).finally(() => {
+    if (timerId !== null) timerHost.clearTimeout(timerId);
+  });
+}
+
+async function appendTextMessageToChat(helper, hostWindow, role, message, data, options = {}) {
   if (typeof helper?.createChatMessages !== 'function') {
     throw new Error('当前酒馆助手缺少 createChatMessages 接口，无法把完整提示词和 AI 回复写入聊天楼层；请更新酒馆助手。');
   }
-  await helper.createChatMessages([{
+  const write = Promise.resolve(helper.createChatMessages([{
     role,
     message,
     data,
@@ -814,7 +835,25 @@ async function appendTextMessageToChat(helper, hostWindow, role, message, data) 
   }], {
     insert_before: 'end',
     refresh: 'affected'
-  });
+  }));
+  const storedMarker = options.storedMarker;
+  if (storedMarker?.key && storedMarker?.value) {
+    // Tavern Helper writes context.chat before awaiting MESSAGE_*_RENDERED hooks.
+    // Let those hooks finish in the background once the exact prompt is durable
+    // in the live chat, so a rendering extension cannot prevent model dispatch.
+    await Promise.resolve();
+    await Promise.resolve();
+    if (hasStoredChatMessageData(hostWindow, options.apiWindow, storedMarker.key, storedMarker.value)) {
+      void write.catch(() => {});
+      return;
+    }
+  }
+  await waitForPromiseWithTimeout(
+    write,
+    Number(options.timeoutMs || 15000),
+    options.timeoutMessage || '酒馆聊天楼层写入超时，请检查可能卡住的消息渲染扩展。',
+    hostWindow
+  );
   if (role === 'assistant') forceHostChatToBottom(hostWindow);
 }
 
@@ -872,7 +911,7 @@ async function saveChatMetadataDurably(hostWindow, apiWindow) {
   throw new Error('当前酒馆没有提供立即保存对话变量的接口；为避免刷新后回档，本次存档未标记为成功。请更新 SillyTavern。');
 }
 
-export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
+export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptWriteTimeoutMs = 15000 }) {
   const helper = apiWindow.TavernHelper || apiWindow;
   let textRequestActive = false;
   const getCurrentChatId = () => String(
@@ -1086,6 +1125,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       const textPresetMode = payload?.options?.textPresetMode === 'builtin' ? 'builtin' : 'tavern';
       const startedAt = Date.now();
       let stage = '准备生成请求';
+      const generationId = makeGenerationId();
       let promptWrite = null;
       const writePrompt = (messages) => {
         if (!promptWrite) {
@@ -1096,7 +1136,12 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
           stage = '写入酒馆 user 楼层';
           promptWrite = appendTextMessageToChat(helper, hostWindow, 'user',
             wrapPromptForChat(visiblePrompt, textPresetMode, captured),
-            { nobleSchoolGamePrompt: true }).then(() => { stage = '等待 AI 回复'; });
+            { nobleSchoolGamePrompt: true, nobleSchoolPromptId: generationId }, {
+              apiWindow,
+              storedMarker: { key: 'nobleSchoolPromptId', value: generationId },
+              timeoutMs: promptWriteTimeoutMs,
+              timeoutMessage: '酒馆 user 楼层写入超时，模型请求尚未发送；请检查可能卡住的消息渲染扩展。'
+            }).then(() => { stage = '等待 AI 回复'; });
         }
         return promptWrite;
       };
@@ -1125,7 +1170,6 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis }) {
       }
       let text;
       const recoveryId = String(payload?.recoveryId || '').trim();
-      const generationId = makeGenerationId();
       const generationErrorCapture = createGenerationErrorCapture(hostWindow, apiWindow, prompt);
       textRequestActive = true;
       let generationHooksReleased = false;
