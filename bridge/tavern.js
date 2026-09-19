@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260919130620';
-import { buildExportWorldbook } from './worldbook.js?build=20260919130620';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260919130620';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260919132702';
+import { buildExportWorldbook } from './worldbook.js?build=20260919132702';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260919132702';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
