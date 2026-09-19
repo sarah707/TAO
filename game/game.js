@@ -55,7 +55,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260919181212';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260919183004';
   const DAILY_COST = CAMPAIGN_CONFIG.dailyCost;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -194,51 +194,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260919181212', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260919183004', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260919181212', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260919181212', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260919181212', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260919181212', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260919181212', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260919181212', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260919181212', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260919183004', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260919183004', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260919183004', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260919183004', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260919183004', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260919183004', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260919183004', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260919181212', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260919183004', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260919181212', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260919181212', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260919181212', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260919181212', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260919181212', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260919181212', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260919181212', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260919183004', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260919183004', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260919183004', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260919183004', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260919183004', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260919183004', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260919183004', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260919181212', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260919183004', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260919181212', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260919181212', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260919181212', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260919181212', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260919181212', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260919181212', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260919181212', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260919183004', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260919183004', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260919183004', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260919183004', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260919183004', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260919183004', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260919183004', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260919181212', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260919183004', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260919181212', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260919181212', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260919181212', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260919181212', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260919181212', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260919181212', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260919181212', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260919183004', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260919183004', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260919183004', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260919183004', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260919183004', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260919183004', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260919183004', name: '讨论定稿' }
       ]
     }
   ];
@@ -247,51 +247,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260919181212', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260919183004', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260919181212', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260919181212', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260919181212', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260919181212', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260919181212', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260919181212', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260919181212', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260919183004', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260919183004', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260919183004', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260919183004', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260919183004', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260919183004', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260919183004', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260919181212', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260919183004', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260919181212', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260919181212', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260919181212', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260919181212', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260919181212', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260919181212', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260919181212', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260919183004', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260919183004', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260919183004', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260919183004', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260919183004', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260919183004', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260919183004', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260919181212', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260919183004', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260919181212', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260919181212', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260919181212', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260919181212', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260919181212', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260919181212', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260919181212', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260919183004', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260919183004', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260919183004', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260919183004', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260919183004', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260919183004', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260919183004', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260919181212', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260919183004', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260919181212', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260919181212', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260919181212', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260919181212', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260919181212', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260919181212', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260919181212', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260919183004', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260919183004', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260919183004', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260919183004', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260919183004', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260919183004', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260919183004', name: '落地路线图' }
       ]
     }
   ];
@@ -3375,57 +3375,55 @@
     return { premiumRecipients, regularRecipients };
   }
 
-  function isCurrentSchoolStudent(character) {
-    return Boolean(character)
-      && character.gender === '男'
-      && character.grade > 0
-      && String(character.school || '').includes('兰斯特皇家学院');
-  }
-
-  function isEligibleDanceInviteCharacter(character) {
-    return isCurrentSchoolStudent(character) && (character.isLover || character.favorability >= RELATIONSHIP_THRESHOLDS.admirer);
-  }
-
-  function isDateInNewYearInviteWindow(dateText) {
-    return dateText.slice(5) >= '12-20' && dateText.slice(5) <= '12-30';
-  }
-
-  function isDateInMaskBallInviteWindow(runtime, dateText) {
-    if (formatWeekday(dateText) === '周日') {
+  function isDanceEligibleLover(character) {
+    if (!character?.isLover) {
       return false;
     }
-    return getWeekDates(getWeekStart(dateText)).some((weekDate) => {
-      const plan = getPlanForDate(runtime, weekDate);
-      return normalizeActivityLabel(plan?.activity || plan?.label || '') === '仲夏夜假面舞会';
-    });
+    const affiliation = String(character.affiliation || '');
+    const identity = String(character.identity || '');
+    const school = String(character.school || '');
+    const isCurrentSchoolStudent = affiliation.includes('本校学生')
+      || (school.includes('兰斯特皇家学院') && Number(character.grade) > 0);
+    const isCurrentSchoolProfessor = affiliation.includes('本校教授')
+      || identity.includes('本校教授')
+      || ((affiliation.includes('本校老师') || school.includes('兰斯特皇家学院')) && identity.includes('教授'));
+    const isCurrentSchoolAssistant = affiliation.includes('本校助教')
+      || identity.includes('本校助教')
+      || (identity.includes('助教') && (isCurrentSchoolStudent || school.includes('兰斯特皇家学院')));
+    const isAlumnus = affiliation.includes('毕业校友')
+      || affiliation.includes('杰出校友')
+      || identity.includes('毕业校友')
+      || identity.includes('杰出校友');
+    return isCurrentSchoolStudent || isCurrentSchoolProfessor || isCurrentSchoolAssistant || isAlumnus;
   }
 
-  async function maybeHandleDanceInvite(runtime, dateText, config) {
+  function isDancePartnerSelectionDate(dateText, eventTitle) {
+    return Object.entries(getScheduleActivities()).some(([eventDate, activity]) => (
+      normalizeActivityLabel(activity) === eventTitle
+      && addDays(eventDate, -7) === dateText
+    ));
+  }
+
+  async function maybeHandleDancePartnerSelection(runtime, dateText, config) {
     const annual = ensureAnnualFlags(runtime, dateText.slice(0, 4));
     if (annual[config.partnerKey]) {
-      return;
+      return false;
     }
-    if (!config.shouldCheck(runtime, dateText)) {
-      return;
+    if (!isDancePartnerSelectionDate(dateText, config.eventTitle)) {
+      return false;
     }
-    const askedIds = annual[config.askedKey];
-    const candidates = runtime.characters.filter((character) => isEligibleDanceInviteCharacter(character) && !askedIds.includes(character.id));
-    if (!candidates.length || !chance(0.5)) {
-      return;
+    const candidates = runtime.characters.filter(isDanceEligibleLover);
+    if (!candidates.length) {
+      return false;
     }
-    const candidate = pickRandom(candidates);
-    if (!candidate) {
-      return;
+    const selectedCharacterId = await waitForDancePartnerChoice(candidates, `选择${config.eventTitle}舞伴`);
+    const selectedCharacter = candidates.find((character) => character.id === selectedCharacterId);
+    if (!selectedCharacter) {
+      return false;
     }
-    askedIds.push(candidate.id);
-    const accepted = await waitForBooleanChoice(config.title, `${candidate.name}邀请你做他${config.partnerLabel}，是否同意？`, '同意', '拒绝');
-    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${candidate.name}邀请${runtime.player.name}做他${config.partnerLabel}。`);
-    if (accepted) {
-      annual[config.partnerKey] = candidate.id;
-      addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}答应做${candidate.name}${config.partnerLabel}。`);
-    } else {
-      addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}拒绝了${candidate.name}的邀约。`);
-    }
+    annual[config.partnerKey] = selectedCharacter.id;
+    addHistory(runtime, dateText, `${formatHistoryDatePrefix(dateText)}，${runtime.player.name}选择了${selectedCharacter.name}作为${config.eventTitle}舞伴。`);
+    return true;
   }
 
   async function maybeHandleBirthdayGifts(runtime, dateText) {
@@ -4443,6 +4441,17 @@ ${promptContextLines.join('\n')}`;
       openModal({
         type: 'lover-outfit-picker',
         title: '选择谁送的礼服呢？',
+        characters: lovers,
+        resolver: resolve
+      });
+    });
+  }
+
+  function waitForDancePartnerChoice(lovers, title) {
+    return new Promise((resolve) => {
+      openModal({
+        type: 'dance-partner-picker',
+        title,
         characters: lovers,
         resolver: resolve
       });
@@ -5784,28 +5793,43 @@ ${promptContextLines.join('\n')}`;
     return true;
   }
 
-  function buildLoverOutfitPromptLine(lovers, selectedLoverId) {
+  function getLoverOutfitCandidates(runtime, eventTitle) {
+    const lovers = runtime.characters.filter((character) => character.isLover);
+    if (eventTitle === '校庆晚宴' || eventTitle === '慈善拍卖会') {
+      return lovers;
+    }
+    if (eventTitle === '新年舞会' || eventTitle === '仲夏夜假面舞会') {
+      return lovers.filter((character) => !isDanceEligibleLover(character));
+    }
+    return [];
+  }
+
+  function buildLoverOutfitPromptLine(lovers, selectedLoverId, eventTitle) {
     const selectedLover = lovers.find((character) => character.id === selectedLoverId);
     if (!selectedLover) {
       return '';
     }
     if (lovers.length === 1) {
-      return `<user>穿了${selectedLover.name}送的礼服参加校庆晚宴。`;
+      return `<user>穿了${selectedLover.name}送的礼服参加${eventTitle}。`;
     }
     return `<user>在${lovers.map((character) => character.name).join('，')}送的礼服中选择了${selectedLover.name}的礼服。`;
   }
 
   async function handleFormalClothingEvent(runtime, dateText, eventTitle) {
-    const lovers = eventTitle === '校庆晚宴'
-      ? runtime.characters.filter((character) => character.isLover)
-      : [];
+    const lovers = getLoverOutfitCandidates(runtime, eventTitle);
     if (lovers.length) {
       const selectedLoverId = await waitForLoverOutfitChoice(lovers);
-      const extraPrompt = buildLoverOutfitPromptLine(lovers, selectedLoverId);
+      const extraPrompt = buildLoverOutfitPromptLine(lovers, selectedLoverId, eventTitle);
       if (!extraPrompt) {
         return false;
       }
-      await executeStoryEvent('穿恋人送的礼服参加校庆晚宴事件', dateText, {
+      const loverOutfitEventMap = {
+        '校庆晚宴': '穿恋人送的礼服参加校庆晚宴事件',
+        '慈善拍卖会': '穿恋人送的礼服参加慈善拍卖会事件',
+        '新年舞会': '穿恋人送的礼服参加新年舞会事件',
+        '仲夏夜假面舞会': '穿恋人送的礼服参加假面舞会事件'
+      };
+      await executeStoryEvent(loverOutfitEventMap[eventTitle], dateText, {
         extraCharacterIds: lovers.map((character) => character.id),
         extraPrompt,
         loverOutfitGiverCharacterId: selectedLoverId
@@ -6542,19 +6566,13 @@ ${promptContextLines.join('\n')}`;
 
   async function runPostPlanAddDaySteps(runtime, dateText) {
     await maybeHandleBirthdayGifts(runtime, dateText);
-    await maybeHandleDanceInvite(runtime, dateText, {
-      shouldCheck: (_runtime, currentDate) => isDateInNewYearInviteWindow(currentDate),
-      askedKey: 'newYearInviteAskedCharacterIds',
+    await maybeHandleDancePartnerSelection(runtime, dateText, {
+      eventTitle: '新年舞会',
       partnerKey: 'newYearPartnerCharacterId',
-      title: '新年舞会邀约',
-      partnerLabel: '的新年舞会舞伴'
     });
-    await maybeHandleDanceInvite(runtime, dateText, {
-      shouldCheck: (currentRuntime, currentDate) => isDateInMaskBallInviteWindow(currentRuntime, currentDate),
-      askedKey: 'maskBallInviteAskedCharacterIds',
+    await maybeHandleDancePartnerSelection(runtime, dateText, {
+      eventTitle: '仲夏夜假面舞会',
       partnerKey: 'maskBallPartnerCharacterId',
-      title: '仲夏夜假面舞会邀约',
-      partnerLabel: '的仲夏夜假面舞会舞伴'
     });
     const showedNightPopup = await maybeHandleIncomingCharacterInvite(runtime, dateText);
     if (showedNightPopup) {
@@ -7000,7 +7018,7 @@ ${promptContextLines.join('\n')}`;
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260919181212', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260919183004', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -7965,6 +7983,29 @@ ${promptContextLines.join('\n')}`;
       `;
     }
 
+    if (modal.type === 'dance-partner-picker') {
+      return `
+        <div class="modal-backdrop">
+          <div class="modal">
+            <div class="modal-header">
+              <h2>${escapeHtml(modal.title)}</h2>
+            </div>
+            <div class="modal-body">
+              <div class="subtle">请选择一位能够参加舞会的恋人作为舞伴。</div>
+              <div class="action-list">
+                ${modal.characters.map((character) => `
+                  <button class="action-card action-picker-button" data-action="select-dance-partner" data-character-id="${escapeHtml(character.id)}">
+                    <strong>${escapeHtml(character.name)}</strong>
+                    <small>${escapeHtml(getCharacterSummary(character) || character.identity || '')}</small>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     if (modal.type === 'internship-offers') {
       return `
         <div class="modal-backdrop">
@@ -8672,6 +8713,16 @@ ${promptContextLines.join('\n')}`;
           return;
         case 'select-lover-outfit-giver':
           if (state.ui.modal?.type === 'lover-outfit-picker') {
+            const resolver = state.ui.modal.resolver;
+            state.ui.modal.resolver = null;
+            closeModal();
+            if (resolver) {
+              resolver(button.dataset.characterId);
+            }
+          }
+          return;
+        case 'select-dance-partner':
+          if (state.ui.modal?.type === 'dance-partner-picker') {
             const resolver = state.ui.modal.resolver;
             state.ui.modal.resolver = null;
             closeModal();
