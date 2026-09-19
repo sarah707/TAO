@@ -20,6 +20,7 @@
     startDate: '2003-09-01',
     firstPlayableDate: '2003-09-02',
     endDate: '2004-06-06',
+    displayStartYear: 2513,
     upperTermId: 'y4-upper',
     graduationTermId: 'y4-lower',
     graduationTermStartDate: '2004-03-01',
@@ -47,6 +48,15 @@
   function parseDate(dateText) {
     const [year, month, day] = String(dateText).split('-').map(Number);
     return new Date(Date.UTC(year, month - 1, day));
+  }
+
+  function formatCampaignMonth(monthKey) {
+    const [year, month] = String(monthKey).split('-').map(Number);
+    const sourceStartYear = Number(CAMPAIGN_CONFIG.startDate.slice(0, 4));
+    if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) {
+      return String(monthKey || '');
+    }
+    return `${CAMPAIGN_CONFIG.displayStartYear + year - sourceStartYear}年${month}月`;
   }
 
   function toIsoDate(date) {
@@ -681,6 +691,7 @@
     CAMPAIGN_CONFIG,
     TERM_DEFINITIONS,
     parseDate,
+    formatCampaignMonth,
     toIsoDate,
     addDays,
     diffDays,
