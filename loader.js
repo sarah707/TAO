@@ -1,15 +1,17 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260920034800';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260920041601';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260920034800';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260920034800';
+} from './overlay-position.js?build=20260920041601';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260920041601';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
 const ROOT_ID = 'noble-school-root';
 const IMAGE_EXTENSION_URL = 'https://github.com/sarah707/SillyTavern-MiniGame-Image-API';
+const IMAGE_STATUS_CHECKED_PREFIX = 'noble-school.image-status-checked.v1';
+const IMAGE_STATUS_CHECK_TIMEOUT_MS = 2500;
 const BUILD_MODE = 'github';
 
 const hostWindow = (() => {
@@ -28,6 +30,49 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function getImageStatusCheckedKey(characterKey, chatId) {
+  const normalizedCharacterKey = String(characterKey || '').trim();
+  const normalizedChatId = String(chatId || '').trim();
+  if (!normalizedCharacterKey || !normalizedChatId) return '';
+  return `${IMAGE_STATUS_CHECKED_PREFIX}:${encodeURIComponent(normalizedCharacterKey)}:${encodeURIComponent(normalizedChatId)}`;
+}
+
+function hasCheckedImageStatus(storage, key) {
+  if (!key) return false;
+  try {
+    return storage?.getItem(key) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function markImageStatusChecked(storage, key) {
+  if (!key) return;
+  try {
+    storage?.setItem(key, '1');
+  } catch {
+    // A blocked localStorage must not stop this optional check or the game.
+  }
+}
+
+async function getImageGeneratorStatusWithTimeout(bridge) {
+  let timerId = null;
+  const timeout = new Promise((resolve) => {
+    timerId = hostWindow.setTimeout(() => resolve({
+      installed: false,
+      configured: false,
+      ready: false,
+      timedOut: true,
+      message: '生图插件状态检测超时；这不会影响游戏，可以稍后从系统页重新检测。'
+    }), IMAGE_STATUS_CHECK_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([bridge.getImageGeneratorStatus(), timeout]);
+  } finally {
+    if (timerId !== null) hostWindow.clearTimeout(timerId);
+  }
 }
 
 function overlayCss() {
@@ -127,7 +172,7 @@ function setupDrag(handle, target, getPosition, setPosition, excludedSelector, d
 function makePluginNoticeMarkup(status, { openedFromGame = false } = {}) {
   const installed = Boolean(status?.installed);
   const ready = Boolean(status?.ready);
-  const title = ready ? '生图插件已就绪' : installed ? '生图插件尚未配置' : '可选生图插件未安装';
+  const title = ready ? '生图插件已就绪' : status?.timedOut ? '生图插件检测超时' : installed ? '生图插件尚未配置' : '可选生图插件未安装';
   const message = ready
     ? '已经检测到“小游戏轻度生图插件”，当前生图服务配置完整。你可以生成一张测试图再次确认模型、权限、地区和额度，也可以直接返回游戏。'
     : installed
@@ -202,6 +247,13 @@ async function mount() {
   let removeChatChangeListener = () => {};
   const ownerCharacterKey = getActiveChatSnapshot(hostWindow, window).characterKey;
   let activeChatId = getActiveChatSnapshot(hostWindow, window).chatId;
+  const statusCheckStorage = (() => {
+    try {
+      return hostWindow.localStorage;
+    } catch {
+      return null;
+    }
+  })();
   let cardPosition = { x: 0, y: 0 };
   let minimizedPosition = null;
   const isCompactViewport = () => Boolean(hostWindow.matchMedia?.('(max-width: 576px), (max-height: 560px)').matches);
@@ -423,8 +475,14 @@ async function mount() {
     body.replaceChildren();
     overlay.hidden = false;
     restore();
-    const imageStatus = await bridge.getImageGeneratorStatus();
+    const statusCheckKey = getImageStatusCheckedKey(ownerCharacterKey, activeChatId);
+    if (hasCheckedImageStatus(statusCheckStorage, statusCheckKey)) {
+      await showGame(epoch);
+      return;
+    }
+    const imageStatus = await getImageGeneratorStatusWithTimeout(bridge);
     if (destroyed || epoch !== contentEpoch) return;
+    markImageStatusChecked(statusCheckStorage, statusCheckKey);
     if (imageStatus.ready) await showGame(epoch);
     else await showPluginNotice(imageStatus, epoch);
   };

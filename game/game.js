@@ -59,7 +59,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260920034800';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260920041601';
   const DAILY_COST = CAMPAIGN_CONFIG.dailyCost;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -197,51 +197,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260920034800', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260920041601', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260920034800', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260920034800', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260920034800', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260920034800', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260920034800', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260920034800', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260920034800', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260920041601', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260920041601', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260920041601', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260920041601', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260920041601', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260920041601', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260920041601', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260920034800', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260920041601', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260920034800', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260920034800', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260920034800', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260920034800', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260920034800', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260920034800', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260920034800', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260920041601', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260920041601', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260920041601', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260920041601', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260920041601', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260920041601', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260920041601', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260920034800', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260920041601', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260920034800', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260920034800', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260920034800', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260920034800', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260920034800', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260920034800', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260920034800', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260920041601', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260920041601', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260920041601', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260920041601', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260920041601', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260920041601', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260920041601', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260920034800', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260920041601', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260920034800', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260920034800', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260920034800', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260920034800', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260920034800', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260920034800', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260920034800', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260920041601', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260920041601', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260920041601', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260920041601', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260920041601', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260920041601', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260920041601', name: '讨论定稿' }
       ]
     }
   ];
@@ -250,51 +250,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260920034800', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260920041601', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260920034800', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260920034800', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260920034800', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260920034800', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260920034800', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260920034800', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260920034800', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260920041601', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260920041601', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260920041601', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260920041601', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260920041601', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260920041601', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260920041601', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260920034800', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260920041601', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260920034800', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260920034800', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260920034800', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260920034800', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260920034800', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260920034800', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260920034800', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260920041601', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260920041601', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260920041601', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260920041601', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260920041601', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260920041601', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260920041601', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260920034800', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260920041601', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260920034800', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260920034800', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260920034800', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260920034800', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260920034800', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260920034800', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260920034800', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260920041601', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260920041601', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260920041601', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260920041601', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260920041601', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260920041601', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260920041601', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260920034800', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260920041601', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260920034800', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260920034800', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260920034800', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260920034800', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260920034800', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260920034800', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260920034800', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260920041601', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260920041601', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260920041601', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260920041601', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260920041601', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260920041601', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260920041601', name: '落地路线图' }
       ]
     }
   ];
@@ -1063,6 +1063,36 @@
     } catch (error) {
       console.error('清理 IndexedDB 图片失败。', error);
     }
+  }
+
+  async function deleteReplacedImageFromIDB(entryKey, scope = 'runtime', namespace = 'tavern-card') {
+    const normalizedEntryKey = String(entryKey || '').trim();
+    if (!normalizedEntryKey) return false;
+    try {
+      const db = await openImageDB();
+      const tx = db.transaction(IMAGE_STORE, 'readwrite');
+      const store = tx.objectStore(IMAGE_STORE);
+      const completion = new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error('旧图片清理事务已中止。'));
+      });
+      // Delete both the current scoped entry and the unscoped key used by early
+      // card builds. Manual and automatic save scopes remain historical snapshots.
+      store.delete(`${makeImageScopePrefix(scope, namespace)}${normalizedEntryKey}`);
+      store.delete(normalizedEntryKey);
+      return await completion;
+    } catch (error) {
+      console.error('清理被替换的 IndexedDB 图片失败。', error);
+      return false;
+    }
+  }
+
+  function enqueueReplacedImageDeletion(entryKey, scope = 'runtime', namespace = 'tavern-card') {
+    pendingImageWrites = pendingImageWrites
+      .catch(() => true)
+      .then(() => deleteReplacedImageFromIDB(entryKey, scope, namespace));
+    return pendingImageWrites;
   }
 
   // 迁移：把现有 localStorage 里的图片数据挪到 IndexedDB，释放空间
@@ -4686,19 +4716,6 @@ ${promptContextLines.join('\n')}`;
       return false;
     }
 
-    const imageBridge = getTavernBridge();
-    if (typeof imageBridge?.getImageGeneratorStatus === 'function') {
-      const imageStatus = await imageBridge.getImageGeneratorStatus();
-      if (!imageStatus?.ready) {
-        character.avatarStatus = 'failed';
-        await waitForMergeGameIdleTurn();
-        saveCurrentRuntime();
-        renderBackgroundStateChange();
-        setStatus(`${imageStatus?.message || '生图插件尚未就绪。'} 你可以继续游戏，配置完成后再点“重新生成头像”。`, 'warning');
-        return false;
-      }
-    }
-
     try {
       validateAiSettings(state.aiSettings);
     } catch (error) {
@@ -4730,6 +4747,7 @@ ${promptContextLines.join('\n')}`;
         saveCurrentRuntime();
         renderBackgroundStateChange();
 
+        let generatedImageSaved = false;
         try {
           const payload = buildAiPayload(buildBackgroundAvatarPrompt(freshCharacter), {
             modelId: 'gemini-3.1-flash-image',
@@ -4766,6 +4784,7 @@ ${promptContextLines.join('\n')}`;
             freshCharacter.avatarOriginalUrl = originalUrl;
             freshCharacter.avatarUrl = displayUrl;
             freshCharacter.avatarStatus = 'ready';
+            generatedImageSaved = true;
           } else {
             freshCharacter.avatarStatus = 'failed';
           }
@@ -4773,12 +4792,15 @@ ${promptContextLines.join('\n')}`;
           freshCharacter.avatarStatus = 'failed';
         }
         await waitForMergeGameIdleTurn();
-        saveCurrentRuntime();
+        const runtimeSaved = saveCurrentRuntime();
         // Do not expose the replacement avatar as finished until the current
         // runtime snapshot has also reached the chat-bound durable storage.
         // Otherwise an immediate page refresh can hydrate the previous avatar
         // from the still-stale chat variable and overwrite the local update.
         await flushChatStorage().catch(() => null);
+        if (generatedImageSaved && runtimeSaved) {
+          await enqueueReplacedImageDeletion(`char:${characterId}`);
+        }
         renderBackgroundStateChange();
       });
     }, 100);
@@ -4791,19 +4813,6 @@ ${promptContextLines.join('\n')}`;
     const outfit = state.runtime?.outfits.find((item) => item.id === outfitId);
     if (!outfit) {
       return false;
-    }
-
-    const imageBridge = getTavernBridge();
-    if (typeof imageBridge?.getImageGeneratorStatus === 'function') {
-      const imageStatus = await imageBridge.getImageGeneratorStatus();
-      if (!imageStatus?.ready) {
-        outfit.imageStatus = 'failed';
-        await waitForMergeGameIdleTurn();
-        saveCurrentRuntime();
-        renderBackgroundStateChange();
-        setStatus(`${imageStatus?.message || '生图插件尚未就绪。'} 你可以继续游戏，配置完成后再点“重新生成礼服图片”。`, 'warning');
-        return false;
-      }
     }
 
     try {
@@ -4837,6 +4846,7 @@ ${promptContextLines.join('\n')}`;
         saveCurrentRuntime();
         renderBackgroundStateChange();
 
+        let generatedImageSaved = false;
         try {
           const payload = buildAiPayload(buildOutfitImagePrompt(freshOutfit.description), {
             modelId: 'gemini-3.1-flash-image',
@@ -4873,6 +4883,7 @@ ${promptContextLines.join('\n')}`;
             freshOutfit.imageOriginalUrl = originalUrl;
             freshOutfit.imageUrl = displayUrl;
             freshOutfit.imageStatus = 'ready';
+            generatedImageSaved = true;
           } else {
             freshOutfit.imageStatus = 'failed';
           }
@@ -4880,10 +4891,13 @@ ${promptContextLines.join('\n')}`;
           freshOutfit.imageStatus = 'failed';
         }
         await waitForMergeGameIdleTurn();
-        saveCurrentRuntime();
+        const runtimeSaved = saveCurrentRuntime();
         // Outfit images use the same background persistence path as avatars;
         // keep their refresh behavior consistent as well.
         await flushChatStorage().catch(() => null);
+        if (generatedImageSaved && runtimeSaved) {
+          await enqueueReplacedImageDeletion(`outfit:${outfitId}`);
+        }
         renderBackgroundStateChange();
       });
     }, 100);
@@ -7121,7 +7135,7 @@ ${promptContextLines.join('\n')}`;
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260920034800', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260920041601', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
