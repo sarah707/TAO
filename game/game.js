@@ -59,7 +59,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260920152507';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260920161249';
   const DAILY_COST = CAMPAIGN_CONFIG.dailyCost;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -84,6 +84,11 @@
   const CHAT_CACHE_META_KEY = 'games0.chat-cache-id.tavern-card';
   const TEXT_PRESET_PREFERENCE_SCOPE = 'settings.text-preset';
   const CHAT_STORAGE_SCOPES = ['runtime', 'save.auto', 'save.slot1', 'save.slot2', 'save.slot3', TEXT_PRESET_PREFERENCE_SCOPE];
+  const SAVE_CARD_SCOPES = ['save.auto', 'save.slot1', 'save.slot2', 'save.slot3'];
+  const RUNTIME_SAVE_DEBOUNCE_MS = 350;
+  const STAT_CHANGE_DURATION_MS = 1600;
+  const CHAPTER_DEBUG_ENTRY_LIMIT = 6;
+  const CHAPTER_DEBUG_TEXT_LIMIT = 160000;
   const EVENT_ACTIVITY_SKIP_HINTS = new Set(['参观校内马术障碍赛', '校庆晚宴', '慈善拍卖会', '新年舞会', '春游野餐会', '校园音乐节', '校内音乐节', '仲夏夜假面舞会']);
   const EVENT_SPECS = GAME_PROMPTS.eventSpecs;
   const buildPromptModules = GAME_PROMPTS.buildPromptModules;
@@ -197,51 +202,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260920152507', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260920161249', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260920152507', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260920152507', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260920152507', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260920152507', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260920152507', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260920152507', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260920152507', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260920161249', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260920161249', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260920161249', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260920161249', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260920161249', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260920161249', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260920161249', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260920152507', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260920161249', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260920152507', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260920152507', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260920152507', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260920152507', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260920152507', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260920152507', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260920152507', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260920161249', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260920161249', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260920161249', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260920161249', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260920161249', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260920161249', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260920161249', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260920152507', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260920161249', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260920152507', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260920152507', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260920152507', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260920152507', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260920152507', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260920152507', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260920152507', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260920161249', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260920161249', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260920161249', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260920161249', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260920161249', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260920161249', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260920161249', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260920152507', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260920161249', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260920152507', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260920152507', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260920152507', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260920152507', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260920152507', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260920152507', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260920152507', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260920161249', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260920161249', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260920161249', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260920161249', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260920161249', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260920161249', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260920161249', name: '讨论定稿' }
       ]
     }
   ];
@@ -250,51 +255,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260920152507', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260920161249', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260920152507', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260920152507', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260920152507', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260920152507', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260920152507', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260920152507', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260920152507', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260920161249', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260920161249', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260920161249', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260920161249', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260920161249', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260920161249', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260920161249', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260920152507', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260920161249', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260920152507', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260920152507', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260920152507', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260920152507', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260920152507', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260920152507', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260920152507', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260920161249', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260920161249', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260920161249', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260920161249', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260920161249', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260920161249', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260920161249', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260920152507', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260920161249', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260920152507', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260920152507', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260920152507', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260920152507', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260920152507', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260920152507', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260920152507', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260920161249', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260920161249', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260920161249', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260920161249', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260920161249', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260920161249', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260920161249', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260920152507', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260920161249', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260920152507', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260920152507', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260920152507', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260920152507', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260920152507', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260920152507', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260920152507', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260920161249', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260920161249', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260920161249', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260920161249', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260920161249', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260920161249', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260920161249', name: '落地路线图' }
       ]
     }
   ];
@@ -607,6 +612,12 @@
     return `${meta.label}${formatMonthDay(dateText)}`;
   }
 
+  let saveCardDataCache = null;
+
+  function isSaveCardStorageKey(key) {
+    return SAVE_CARD_SCOPES.some((scope) => key === makeScopedKey(scope));
+  }
+
   function safeStorageGet(key) {
     try {
       return window.localStorage.getItem(key);
@@ -669,6 +680,9 @@
   function safeStorageRemove(key) {
     try {
       window.localStorage.removeItem(key);
+      if (isSaveCardStorageKey(key)) {
+        saveCardDataCache = null;
+      }
       if (isChatStorageKey(key) && !chatStorageHydrating) {
         queueChatStorageSync();
       }
@@ -695,6 +709,9 @@
 
   function saveJson(key, value) {
     const saved = safeStorageSet(key, JSON.stringify(value));
+    if (saved && isSaveCardStorageKey(key)) {
+      saveCardDataCache = null;
+    }
     if (saved && isChatStorageKey(key) && !chatStorageHydrating) {
       queueChatStorageSync();
     }
@@ -719,7 +736,11 @@
 
   let chatStorageHydrating = false;
   let chatStorageTimer = null;
-  let chatStorageWriteChain = Promise.resolve();
+  let chatStorageWriteActive = false;
+  let chatStoragePendingWrite = null;
+  let chatStorageNextRevision = 0;
+  let chatStoragePersistedRevision = 0;
+  let chatStorageWriteWaiters = [];
   let activeChatStorageId = '';
   const PRE_GENERATION_STORAGE_WAIT_MS = 5000;
 
@@ -762,15 +783,58 @@
     return postJson(CHAT_STORAGE_URL, { data: snapshot, chatId: activeChatStorageId });
   }
 
+  function settleChatStorageWriteWaiters(revision, result, error = null) {
+    const remaining = [];
+    for (const waiter of chatStorageWriteWaiters) {
+      if (waiter.revision > revision) {
+        remaining.push(waiter);
+        continue;
+      }
+      if (error) {
+        waiter.reject(error);
+      } else {
+        waiter.resolve(result);
+      }
+    }
+    chatStorageWriteWaiters = remaining;
+  }
+
+  async function drainChatStorageWrites() {
+    if (chatStorageWriteActive) return;
+    chatStorageWriteActive = true;
+    try {
+      while (chatStoragePendingWrite) {
+        const write = chatStoragePendingWrite;
+        chatStoragePendingWrite = null;
+        try {
+          const result = await persistChatStorage(write.snapshot);
+          chatStoragePersistedRevision = Math.max(chatStoragePersistedRevision, write.revision);
+          settleChatStorageWriteWaiters(write.revision, result);
+        } catch (error) {
+          setStatus(`跨设备存档同步失败：${error.message || error}`, 'error');
+          if (!chatStoragePendingWrite) {
+            settleChatStorageWriteWaiters(write.revision, null, error);
+          }
+        }
+      }
+    } finally {
+      chatStorageWriteActive = false;
+      if (chatStoragePendingWrite) {
+        void drainChatStorageWrites();
+      }
+    }
+  }
+
   function commitChatStorageSnapshot(snapshot) {
-    const write = chatStorageWriteChain
-      .catch(() => null)
-      .then(() => persistChatStorage(snapshot));
-    chatStorageWriteChain = write.catch((error) => {
-      setStatus(`跨设备存档同步失败：${error.message || error}`, 'error');
-      return null;
+    const revision = ++chatStorageNextRevision;
+    const completion = new Promise((resolve, reject) => {
+      chatStorageWriteWaiters.push({ revision, resolve, reject });
     });
-    return write;
+    // Only the latest not-yet-started snapshot matters. Waiters for snapshots
+    // replaced here are fulfilled when this newer revision is persisted.
+    chatStoragePendingWrite = { revision, snapshot };
+    void drainChatStorageWrites();
+    return completion;
   }
 
   function flushChatStorage() {
@@ -804,7 +868,7 @@
       chatStorageTimer = null;
       const snapshot = collectChatStorageSnapshot();
       commitChatStorageSnapshot(snapshot).catch(() => null);
-    }, 120);
+    }, 500);
   }
 
   async function hydrateChatStorage() {
@@ -971,6 +1035,9 @@
   }
 
   function enqueueImageWrite(images, scope, namespace = 'tavern-card') {
+    if (!images || !Object.keys(images).length) {
+      return pendingImageWrites;
+    }
     pendingImageWrites = pendingImageWrites
       .catch(() => true)
       .then(() => flushImagesToIDB(images, scope, namespace))
@@ -1332,6 +1399,55 @@
     return !['queued', 'generating'].includes(String(outfit?.imageStatus || ''));
   }
 
+  let scheduledRenderHandle = null;
+  let scheduledRenderUsesAnimationFrame = false;
+  let statChangeExpiryTimer = null;
+
+  function cancelScheduledRender() {
+    if (scheduledRenderHandle === null) return;
+    if (scheduledRenderUsesAnimationFrame && typeof window.cancelAnimationFrame === 'function') {
+      window.cancelAnimationFrame(scheduledRenderHandle);
+    } else {
+      window.clearTimeout(scheduledRenderHandle);
+    }
+    scheduledRenderHandle = null;
+    scheduledRenderUsesAnimationFrame = false;
+  }
+
+  function scheduleRender() {
+    if (scheduledRenderHandle !== null) return;
+    if (typeof window.requestAnimationFrame === 'function') {
+      scheduledRenderUsesAnimationFrame = true;
+      scheduledRenderHandle = window.requestAnimationFrame(() => {
+        scheduledRenderHandle = null;
+        scheduledRenderUsesAnimationFrame = false;
+        render();
+      });
+      return;
+    }
+    scheduledRenderUsesAnimationFrame = false;
+    scheduledRenderHandle = window.setTimeout(() => {
+      scheduledRenderHandle = null;
+      render();
+    }, 0);
+  }
+
+  function scheduleStatChangeExpiry() {
+    if (statChangeExpiryTimer !== null) {
+      window.clearTimeout(statChangeExpiryTimer);
+      statChangeExpiryTimer = null;
+    }
+    if (!state.ui.statChanges.length) return;
+    const nextExpiry = Math.min(...state.ui.statChanges.map((item) => item.expiresAt));
+    statChangeExpiryTimer = window.setTimeout(() => {
+      statChangeExpiryTimer = null;
+      const now = Date.now();
+      state.ui.statChanges = state.ui.statChanges.filter((item) => item.expiresAt > now);
+      scheduleRender();
+      scheduleStatChangeExpiry();
+    }, Math.max(0, nextExpiry - Date.now()));
+  }
+
   function setStatus(message, tone = '') {
     state.ui.status = message;
     state.ui.statusTone = tone;
@@ -1347,14 +1463,12 @@
     const entry = {
       id: `stat-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
       label,
-      delta
+      delta,
+      expiresAt: Date.now() + STAT_CHANGE_DURATION_MS
     };
     state.ui.statChanges = [...state.ui.statChanges, entry].slice(-8);
-    render();
-    window.setTimeout(() => {
-      state.ui.statChanges = state.ui.statChanges.filter((item) => item.id !== entry.id);
-      render();
-    }, 1600);
+    scheduleRender();
+    scheduleStatChangeExpiry();
   }
 
   function updatePlayerMoney(runtime, delta) {
@@ -1659,7 +1773,31 @@
     }
   }
 
+  let runtimeSaveTimer = null;
+
+  function queueCurrentRuntimeSave(delay = RUNTIME_SAVE_DEBOUNCE_MS) {
+    if (!state.runtime) return;
+    if (runtimeSaveTimer !== null) {
+      window.clearTimeout(runtimeSaveTimer);
+    }
+    runtimeSaveTimer = window.setTimeout(() => {
+      runtimeSaveTimer = null;
+      saveCurrentRuntime();
+    }, delay);
+  }
+
+  function flushQueuedRuntimeSave() {
+    if (runtimeSaveTimer === null) return true;
+    window.clearTimeout(runtimeSaveTimer);
+    runtimeSaveTimer = null;
+    return saveCurrentRuntime();
+  }
+
   function saveCurrentRuntime() {
+    if (runtimeSaveTimer !== null) {
+      window.clearTimeout(runtimeSaveTimer);
+      runtimeSaveTimer = null;
+    }
     if (!state.runtime) {
       return false;
     }
@@ -1689,13 +1827,24 @@
     return ok;
   }
 
+  function truncateChapterDebugText(value) {
+    const text = String(value || '');
+    if (text.length <= CHAPTER_DEBUG_TEXT_LIMIT) return text;
+    const marker = '\n\n…[调试记录过长，中段已截断]…\n\n';
+    const sideLength = Math.floor((CHAPTER_DEBUG_TEXT_LIMIT - marker.length) / 2);
+    return `${text.slice(0, sideLength)}${marker}${text.slice(-sideLength)}`;
+  }
+
   function saveChapterDebug(chapterId, rawResponse, promptText) {
     const store = loadJson(makeScopedKey(GLOBAL_CHAPTER_DEBUG_KEY), {});
-    store[chapterId] = { rawResponse: rawResponse || '', promptText: promptText || '' };
-    // 只保留最近 20 章的 debug 数据
+    store[chapterId] = {
+      rawResponse: truncateChapterDebugText(rawResponse),
+      promptText: truncateChapterDebugText(promptText)
+    };
+    // 调试记录不参与玩法，只保留与最近上下文一致的六章，并限制单条体积。
     const keys = Object.keys(store);
-    if (keys.length > 20) {
-      keys.slice(0, keys.length - 20).forEach((key) => { delete store[key]; });
+    if (keys.length > CHAPTER_DEBUG_ENTRY_LIMIT) {
+      keys.slice(0, keys.length - CHAPTER_DEBUG_ENTRY_LIMIT).forEach((key) => { delete store[key]; });
     }
     saveJson(makeScopedKey(GLOBAL_CHAPTER_DEBUG_KEY), store);
   }
@@ -1821,25 +1970,27 @@
 
   function loadAiActivity() {
     const defaults = {
-      lastPrompt: '',
       recentPrompts: [],
       lastResponseText: '',
       lastUsageText: 'token 消耗：暂无记录',
       logs: []
     };
     const stored = loadJson(GLOBAL_AI_ACTIVITY_KEY, null);
-    return stored && typeof stored === 'object'
-      ? {
-          ...defaults,
-          ...stored,
-          recentPrompts: Array.isArray(stored.recentPrompts) ? stored.recentPrompts.slice(0, 5) : [],
-          logs: Array.isArray(stored.logs) ? stored.logs.slice(0, 20) : []
-        }
-      : defaults;
+    if (!stored || typeof stored !== 'object') return defaults;
+    const activity = {
+      ...defaults,
+      ...stored,
+      recentPrompts: Array.isArray(stored.recentPrompts) ? stored.recentPrompts.slice(0, 5) : [],
+      logs: Array.isArray(stored.logs) ? stored.logs.slice(0, 20) : []
+    };
+    delete activity.lastPrompt;
+    return activity;
   }
 
   function saveAiActivity(nextActivity) {
-    saveJson(GLOBAL_AI_ACTIVITY_KEY, nextActivity);
+    const stored = { ...nextActivity };
+    delete stored.lastPrompt;
+    saveJson(GLOBAL_AI_ACTIVITY_KEY, stored);
   }
 
   function ensureAiActivityState() {
@@ -2124,12 +2275,10 @@
   function recordAiLog(entry) {
     const activity = ensureAiActivityState();
     activity.logs = [entry, ...activity.logs].slice(0, 20);
-    saveAiActivity(activity);
   }
 
   function recordAiPrompt(prompt, label, sentAt, status) {
     const activity = ensureAiActivityState();
-    activity.lastPrompt = prompt;
     activity.recentPrompts = [{
       prompt,
       label,
@@ -3232,15 +3381,19 @@
 
   function addChapter(runtime, dateText, infoBlock, content, historyIndex, displayContent = content) {
     const chapterId = `chapter-${runtime.chapters.length + 1}`;
-    runtime.chapters.push({
+    const chapter = {
       id: chapterId,
       date: dateText,
       infoBlock,
       // 酒馆模式的 content 已经过本地显示正则；显示和后续章节范例共用该结果。
       content,
-      displayContent,
       historyIndex
-    });
+    };
+    // 绝大多数章节的显示正文与正文相同，不在长期存档里重复保存整段文本。
+    if (displayContent !== content) {
+      chapter.displayContent = displayContent;
+    }
+    runtime.chapters.push(chapter);
     const history = runtime.history.find((item) => item.index === historyIndex);
     if (history) {
       history.chapterId = chapterId;
@@ -5372,32 +5525,49 @@ ${promptContextLines.join('\n')}`;
   }
 
   function summarizeSave(runtime) {
-    if (!runtime) {
+    if (!runtime?.player) {
       return '空存档';
     }
-    return `${runtime.player.name || '未命名'} · ${getTimelineLabel(runtime.player.currentDate)}`;
+    return `${runtime.player.name || '未命名'} · ${getTimelineLabel(runtime.player.currentDate || START_DATE)}`;
+  }
+
+  function getSaveCardData() {
+    if (saveCardDataCache) return saveCardDataCache;
+    const auto = loadJson(makeScopedKey('save.auto'));
+    saveCardDataCache = {
+      auto: {
+        summary: summarizeSave(auto?.runtime),
+        savedAt: auto?.savedAt || ''
+      },
+      slots: [1, 2, 3].map((slot) => {
+        // 卡片只需要姓名、日期和保存时间；真正读档时才执行完整迁移。
+        const saved = loadJson(makeScopedKey(`save.slot${slot}`));
+        return {
+          slot,
+          summary: summarizeSave(saved?.runtime),
+          savedAt: saved?.savedAt || ''
+        };
+      })
+    };
+    return saveCardDataCache;
   }
 
   function renderSaveCards() {
-    const auto = loadJson(makeScopedKey('save.auto'));
-    const slots = [1, 2, 3].map((slot) => ({
-      slot,
-      saved: loadManualSlot(slot)
-    }));
+    const { auto, slots } = getSaveCardData();
 
     return `
       <div class="slot-list">
         <div class="slot-card">
           <strong>自动存档</strong>
-          <div class="subtle">${summarizeSave(auto?.runtime)}</div>
-          <div class="right-note">${auto?.savedAt ? `保存于 ${auto.savedAt.replace('T', ' ').slice(0, 16)}` : '暂无自动存档'}</div>
+          <div class="subtle">${escapeHtml(auto.summary)}</div>
+          <div class="right-note">${auto.savedAt ? `保存于 ${auto.savedAt.replace('T', ' ').slice(0, 16)}` : '暂无自动存档'}</div>
           ${state.ui.saveMode === 'load' ? '<button class="secondary" data-action="load-auto-save">读取自动存档</button>' : '<button class="secondary" disabled>自动存档不能手动覆盖</button>'}
         </div>
-        ${slots.map(({ slot, saved }) => `
+        ${slots.map(({ slot, summary, savedAt }) => `
           <div class="slot-card">
             <strong>存档位 ${slot}</strong>
-            <div class="subtle">${summarizeSave(saved?.runtime)}</div>
-            <div class="right-note">${saved?.savedAt ? `保存于 ${saved.savedAt.replace('T', ' ').slice(0, 16)}` : '暂无内容'}</div>
+            <div class="subtle">${escapeHtml(summary)}</div>
+            <div class="right-note">${savedAt ? `保存于 ${savedAt.replace('T', ' ').slice(0, 16)}` : '暂无内容'}</div>
             <button class="${state.ui.saveMode === 'save' ? 'primary' : 'secondary'}" data-action="${state.ui.saveMode === 'save' ? 'save-slot' : 'load-slot'}" data-slot="${slot}">
               ${state.ui.saveMode === 'save' ? '保存到这里' : '从这里读档'}
             </button>
@@ -7075,7 +7245,7 @@ ${promptContextLines.join('\n')}`;
         courseId: null,
         courseName: '创业企划书',
         isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260920152507', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260920161249', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -7303,18 +7473,18 @@ ${promptContextLines.join('\n')}`;
 
   function handleMergePieceClick(cellIndex) {
     const mg = state.mergeGame;
-    if (!mg) return;
+    if (!mg) return false;
     const piece = mg.board[cellIndex];
     if (!piece || piece.petrified) {
       mg.selectedPieceCell = null;
       mg.generationMotherId = null;
-      return;
+      return false;
     }
     // Tutorial: block clicking non-tutorial pieces during guided steps
     if (mg.tutorial) {
-      if (mg.tutorial.step >= 3) return; // block ALL piece clicks in steps 3-4
+      if (mg.tutorial.step >= 3) return false; // block ALL piece clicks in steps 3-4
       if (mg.tutorial.step === 1 || mg.tutorial.step === 2) {
-        if (piece.level !== 0 || piece.chainId !== 1) return; // only chain 1 mother allowed
+        if (piece.level !== 0 || piece.chainId !== 1) return false; // only chain 1 mother allowed
       }
     }
     mg.selectedPieceCell = cellIndex;
@@ -7353,16 +7523,16 @@ ${promptContextLines.join('\n')}`;
                 }
                 state.mergeGame.generationMotherId = null;
                 render();
-                setTimeout(function () { saveCurrentRuntime(); }, 0);
+                queueCurrentRuntimeSave();
               }
             });
           }
         } else {
-          if (mg.tutorial) {
-            generateTutorialChildPiece(piece.chainId);
-          } else {
-            generateChildPiece(piece.chainId);
-          }
+          const generated = mg.tutorial
+            ? generateTutorialChildPiece(piece.chainId)
+            : generateChildPiece(piece.chainId);
+          mg.generationMotherId = null;
+          return generated;
         }
         mg.generationMotherId = null;
       } else {
@@ -7370,33 +7540,35 @@ ${promptContextLines.join('\n')}`;
         mg.generationLastClick = now;
       }
     }
+    return false;
   }
 
   function handleMergePieceDiscard(cellIndex) {
     const mg = state.mergeGame;
-    if (!mg) return;
+    if (!mg) return false;
     const piece = mg.board[cellIndex];
-    if (!piece || piece.level === 0 || piece.petrified) return;
+    if (!piece || piece.level === 0 || piece.petrified) return false;
     // Block discard during tutorial
-    if (mg.tutorial && mg.tutorial.step < 5) return;
+    if (mg.tutorial && mg.tutorial.step < 5) return false;
     mg.board[cellIndex] = null;
     mg.selectedPieceCell = null;
     mg.generationMotherId = null;
+    return true;
   }
 
   function handleMergeDrop(dragCellIndex, dropCellIndex) {
     const mg = state.mergeGame;
-    if (!mg) return;
-    if (dragCellIndex === dropCellIndex) return;
+    if (!mg) return false;
+    if (dragCellIndex === dropCellIndex) return false;
 
     const dragPiece = mg.board[dragCellIndex];
     const dropPiece = mg.board[dropCellIndex];
-    if (!dragPiece || dragPiece.petrified) return;
+    if (!dragPiece || dragPiece.petrified) return false;
 
     // Allow normal piece to merge onto petrified piece of same type/level
     if (dropPiece && dropPiece.chainId === dragPiece.chainId && dropPiece.level === dragPiece.level && dropPiece.level < 7 && dropPiece.level > 0) {
       // Tutorial step 3: only allow merging the two tutorial pieces (chain 1, level 1)
-      if (mg.tutorial && mg.tutorial.step === 3 && (dragPiece.chainId !== 1 || dragPiece.level !== 1)) return;
+      if (mg.tutorial && mg.tutorial.step === 3 && (dragPiece.chainId !== 1 || dragPiece.level !== 1)) return false;
       mg.board[dragCellIndex] = null;
       mg.board[dropCellIndex] = { id: `piece-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`, chainId: dragPiece.chainId, level: dragPiece.level + 1 };
       mg.selectedPieceCell = dropCellIndex;
@@ -7404,19 +7576,19 @@ ${promptContextLines.join('\n')}`;
       // Tutorial: check if player completed the merge step
       if (mg.tutorial && mg.tutorial.step === 3) {
         mg.tutorial.step = 4;
-        render();
       }
-      return;
+      return true;
     }
 
     if (!dropPiece) {
       // Tutorial step 3: only allow moving tutorial pieces (chain 1, level 1) to empty cells
-      if (mg.tutorial && mg.tutorial.step === 3 && (dragPiece.chainId !== 1 || dragPiece.level !== 1)) return;
+      if (mg.tutorial && mg.tutorial.step === 3 && (dragPiece.chainId !== 1 || dragPiece.level !== 1)) return false;
       mg.board[dropCellIndex] = dragPiece;
       mg.board[dragCellIndex] = null;
       mg.selectedPieceCell = dropCellIndex;
-      return;
+      return true;
     }
+    return false;
   }
 
   function leaveMergeGame() {
@@ -7812,7 +7984,7 @@ ${promptContextLines.join('\n')}`;
               <div class="character-card">
                 <div class="character-avatar-actions">
                   <button class="image-preview-button" data-action="open-character-image" data-character-id="${character.id}" ${displayAvatarUrl === PLACEHOLDER_AVATAR ? 'disabled' : ''}>
-                    <img class="avatar" src="${escapeHtml(displayAvatarUrl)}" alt="${escapeHtml(character.name)}" />
+                    <img class="avatar" src="${escapeHtml(displayAvatarUrl)}" alt="${escapeHtml(character.name)}" loading="lazy" decoding="async" fetchpriority="low" />
                   </button>
                   <button class="secondary" data-action="retry-avatar" data-character-id="${character.id}" ${avatarGenerationReady ? '' : 'disabled'}>${avatarGenerationReady ? '重新生成头像' : '头像生成中…'}</button>
                 </div>
@@ -8257,7 +8429,7 @@ ${promptContextLines.join('\n')}`;
                     <div class="outfit-gallery-card">
                       <button class="image-preview-button" data-action="open-outfit-image" data-outfit-id="${item.id}" ${hasImage ? '' : 'disabled'}>
                         ${hasImage
-                          ? `<img class="outfit-gallery-image" src="${escapeHtml(imageUrl)}" alt="礼服展示" />`
+                          ? `<img class="outfit-gallery-image" src="${escapeHtml(imageUrl)}" alt="礼服展示" loading="lazy" decoding="async" fetchpriority="low" />`
                           : '<div class="outfit-gallery-placeholder">礼服图片尚未生成</div>'}
                       </button>
                       <div class="subtle">${escapeHtml(item.description || '未记录礼服描述')}</div>
@@ -8438,7 +8610,63 @@ ${promptContextLines.join('\n')}`;
     return '';
   }
 
+  const MERGE_RENDER_KEYS = [
+    'merge-header',
+    'merge-tasks',
+    'merge-board',
+    'merge-desc-area',
+    'merge-tutorial-overlay',
+    'merge-tutorial-bubble'
+  ];
+
+  function getMergeRenderKey(element) {
+    return MERGE_RENDER_KEYS.find((className) => element.classList.contains(className)) || '';
+  }
+
+  function syncElementAttributes(current, next) {
+    for (const name of current.getAttributeNames()) {
+      if (!next.hasAttribute(name)) current.removeAttribute(name);
+    }
+    for (const name of next.getAttributeNames()) {
+      const value = next.getAttribute(name);
+      if (current.getAttribute(name) !== value) current.setAttribute(name, value);
+    }
+  }
+
+  function patchMergeBoardElement(currentBoard, nextBoard) {
+    const currentCells = Array.from(currentBoard.children);
+    const nextCells = Array.from(nextBoard.children);
+    if (currentCells.length !== nextCells.length) return nextBoard;
+    syncElementAttributes(currentBoard, nextBoard);
+    for (let index = 0; index < currentCells.length; index += 1) {
+      if (!currentCells[index].isEqualNode(nextCells[index])) {
+        currentCells[index].replaceWith(nextCells[index]);
+      }
+    }
+    return currentBoard;
+  }
+
+  function patchMergeGameContainer(container, nextHtml) {
+    const template = document.createElement('template');
+    template.innerHTML = nextHtml.trim();
+    const currentByKey = new Map(Array.from(container.children).map((element) => [getMergeRenderKey(element), element]));
+    const fragment = document.createDocumentFragment();
+    for (const nextElement of Array.from(template.content.children)) {
+      const key = getMergeRenderKey(nextElement);
+      const currentElement = key ? currentByKey.get(key) : null;
+      if (key === 'merge-board' && currentElement) {
+        fragment.append(patchMergeBoardElement(currentElement, nextElement));
+      } else if (currentElement?.isEqualNode(nextElement)) {
+        fragment.append(currentElement);
+      } else {
+        fragment.append(nextElement);
+      }
+    }
+    container.replaceChildren(fragment);
+  }
+
   function render() {
+    cancelScheduledRender();
     if (state.ui.loading) {
       app.innerHTML = `
         <div class="page">
@@ -8460,7 +8688,7 @@ ${promptContextLines.join('\n')}`;
       } else {
         var container = document.querySelector('.merge-game-container');
         if (container) {
-          container.innerHTML = renderMergeGameContent();
+          patchMergeGameContainer(container, renderMergeGameContent());
         } else {
           app.innerHTML = renderMergeGame() + renderAiLoading();
         }
@@ -9068,9 +9296,9 @@ ${promptContextLines.join('\n')}`;
           if (event.detail !== 0) return;
           const cellIndex = Number(button.dataset.cell);
           state.mergeGame.taskInfoDisplay = null;
-          handleMergePieceClick(cellIndex);
+          const changed = handleMergePieceClick(cellIndex);
           render();
-          setTimeout(function () { saveCurrentRuntime(); }, 0);
+          if (changed) queueCurrentRuntimeSave();
           return;
         }
         case 'merge-task-piece-info': {
@@ -9082,20 +9310,23 @@ ${promptContextLines.join('\n')}`;
           state.mergeGame.generationMotherId = null;
           state.mergeGame.taskInfoDisplay = { chainId, level };
           state.mergeGame.lastTaskPieceClick = { chainId, level, time: Date.now() };
-          if (state.mergeGame.tutorial && state.mergeGame.tutorial.step === 0) {
+          const tutorialChanged = Boolean(state.mergeGame.tutorial
+            && state.mergeGame.tutorial.step === 0
+            && !state.mergeGame.tutorial.introDetailShown);
+          if (tutorialChanged) {
             state.mergeGame.tutorial.introDetailShown = true;
           }
           render();
-          setTimeout(function () { saveCurrentRuntime(); }, 0);
+          if (tutorialChanged) queueCurrentRuntimeSave();
           return;
         }
         case 'merge-discard': {
           // Block discard during tutorial
           if (state.mergeGame.tutorial && state.mergeGame.tutorial.step < 5) return;
           const cellIndex = Number(button.dataset.cell);
-          handleMergePieceDiscard(cellIndex);
+          const changed = handleMergePieceDiscard(cellIndex);
           render();
-          setTimeout(function () { saveCurrentRuntime(); }, 0);
+          if (changed) queueCurrentRuntimeSave();
           return;
         }
         case 'merge-submit': {
@@ -9114,15 +9345,17 @@ ${promptContextLines.join('\n')}`;
         case 'merge-tutorial-advance':
           if (state.mergeGame && state.mergeGame.tutorial) {
             var tut = state.mergeGame.tutorial;
+            var tutorialChanged = false;
             if (tut.step === 0 && tut.introDetailShown) {
               tut.step = 1;
               state.mergeGame.taskInfoDisplay = null;
+              tutorialChanged = true;
             }
             // step 1 and 2 advance via generateTutorialChildPiece
             // step 3 advances via handleMergeDrop
             // step 4 advances via submitMergeTask
             render();
-            setTimeout(function () { saveCurrentRuntime(); }, 0);
+            if (tutorialChanged) queueCurrentRuntimeSave();
           }
           return;
         case 'merge-leave':
@@ -9130,6 +9363,7 @@ ${promptContextLines.join('\n')}`;
             state.mergeGame.generationMotherId = null;
             state.mergeGame.selectedPieceCell = null;
           }
+          flushQueuedRuntimeSave();
           leaveMergeGame();
           return;
         default:
@@ -9244,22 +9478,23 @@ ${promptContextLines.join('\n')}`;
     if (state.mergeGame !== completedDrag.game || state.mergeGame.board[completedDrag.cell]?.id !== completedDrag.pieceId) return;
     if (completedDrag.moved) {
       if (!completedDrag.canDrag) return;
+      let changed = false;
       const boardEl = document.querySelector('.merge-board');
       if (boardEl) {
         const targetCell = getMergeCellFromBoard(boardEl, event.clientX, event.clientY);
         if (targetCell >= 0 && targetCell !== completedDrag.cell) {
-          handleMergeDrop(completedDrag.cell, targetCell);
+          changed = handleMergeDrop(completedDrag.cell, targetCell);
         }
       }
       render();
-      setTimeout(function () { saveCurrentRuntime(); }, 0);
+      if (changed) queueCurrentRuntimeSave();
     } else {
       const boardEl = document.querySelector('.merge-board');
       if (!boardEl || getMergeCellFromBoard(boardEl, event.clientX, event.clientY) !== completedDrag.cell) return;
       state.mergeGame.taskInfoDisplay = null;
-      handleMergePieceClick(completedDrag.cell);
+      const changed = handleMergePieceClick(completedDrag.cell);
       render();
-      setTimeout(function () { saveCurrentRuntime(); }, 0);
+      if (changed) queueCurrentRuntimeSave();
     }
   });
 
@@ -9285,6 +9520,12 @@ ${promptContextLines.join('\n')}`;
     }
   });
 
+  app.addEventListener('animationend', (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    target.classList.remove('merge-piece-spawn', 'merge-tap-bounce');
+  });
+
   app.addEventListener('scroll', (event) => {
     if (state.ui.modal?.type !== 'chapter') {
       return;
@@ -9297,6 +9538,8 @@ ${promptContextLines.join('\n')}`;
     state.ui.modal.scrollTop = target.scrollTop;
     saveChapterModalState(state.ui.modal);
   }, true);
+
+  window.addEventListener('pagehide', flushQueuedRuntimeSave);
 
   boot();
 }());

@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260920152507';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260920161249';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260920152507';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260920152507';
+} from './overlay-position.js?build=20260920161249';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260920161249';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -136,6 +136,24 @@ function installStyle() {
   style.id = STYLE_ID;
   style.textContent = overlayCss();
   hostDocument.head.append(style);
+}
+
+function createAnimationFrameBatcher(targetWindow, callback) {
+  let frameId = null;
+  const flush = () => {
+    frameId = null;
+    callback();
+  };
+  const schedule = () => {
+    if (frameId !== null) return;
+    frameId = targetWindow.requestAnimationFrame(flush);
+  };
+  const cancel = () => {
+    if (frameId === null) return;
+    targetWindow.cancelAnimationFrame(frameId);
+    frameId = null;
+  };
+  return { schedule, cancel };
 }
 
 function setupDrag(handle, target, getPosition, setPosition, excludedSelector, disabledWhen = null, requiredHandleSelector = null) {
@@ -403,6 +421,7 @@ async function mount() {
   const restore = () => {
     minimized.hidden = true;
     card.hidden = false;
+    scheduleViewportFit();
   };
   const showImageSetup = async () => {
     const epoch = ++contentEpoch;
@@ -449,24 +468,36 @@ async function mount() {
   );
 
   const fitToViewport = () => {
-    if (isCompactViewport()) {
-      cardPosition = { x: 0, y: 0 };
-      root.style.removeProperty('transform');
+    if (destroyed || overlay.hidden) return;
+    if (!card.hidden && isCompactViewport()) {
+      if (cardPosition.x !== 0 || cardPosition.y !== 0) {
+        cardPosition = { x: 0, y: 0 };
+      }
+      if (root.style.transform) {
+        root.style.removeProperty('transform');
+      }
     }
-    if (minimizedPosition) {
+    if (!minimized.hidden && minimizedPosition) {
       const rect = minimized.getBoundingClientRect();
-      minimizedPosition = clampFloatingPosition(
+      const nextPosition = clampFloatingPosition(
         minimizedPosition,
         rect,
         getVisibleViewportBounds(hostWindow)
       );
-      Object.assign(minimized.style, { left: `${minimizedPosition.x}px`, top: `${minimizedPosition.y}px` });
+      if (nextPosition.x !== minimizedPosition.x || nextPosition.y !== minimizedPosition.y) {
+        minimizedPosition = nextPosition;
+        Object.assign(minimized.style, { left: `${minimizedPosition.x}px`, top: `${minimizedPosition.y}px` });
+      }
     }
   };
-  hostWindow.addEventListener('resize', fitToViewport);
-  hostWindow.visualViewport?.addEventListener('resize', fitToViewport);
-  hostWindow.visualViewport?.addEventListener('scroll', fitToViewport);
-  hostWindow.addEventListener('orientationchange', fitToViewport);
+  const {
+    schedule: scheduleViewportFit,
+    cancel: cancelScheduledViewportFit
+  } = createAnimationFrameBatcher(hostWindow, fitToViewport);
+  hostWindow.addEventListener('resize', scheduleViewportFit);
+  hostWindow.visualViewport?.addEventListener('resize', scheduleViewportFit);
+  hostWindow.visualViewport?.addEventListener('scroll', scheduleViewportFit);
+  hostWindow.addEventListener('orientationchange', scheduleViewportFit);
 
   const openCurrentChat = async () => {
     const epoch = ++contentEpoch;
@@ -510,10 +541,12 @@ async function mount() {
     removeChatChangeListener();
     removeCardDrag();
     removeMinimizedDrag();
-    hostWindow.removeEventListener('resize', fitToViewport);
-    hostWindow.visualViewport?.removeEventListener('resize', fitToViewport);
-    hostWindow.visualViewport?.removeEventListener('scroll', fitToViewport);
-    hostWindow.removeEventListener('orientationchange', fitToViewport);
+    hostWindow.removeEventListener('resize', scheduleViewportFit);
+    hostWindow.visualViewport?.removeEventListener('resize', scheduleViewportFit);
+    hostWindow.visualViewport?.removeEventListener('scroll', scheduleViewportFit);
+    hostWindow.removeEventListener('orientationchange', scheduleViewportFit);
+    cancelScheduledViewportFit();
+    window.removeEventListener('pagehide', destroy);
     overlay.remove();
     hostDocument.getElementById(STYLE_ID)?.remove();
     if (hostWindow[BRIDGE_KEY] === bridge) delete hostWindow[BRIDGE_KEY];

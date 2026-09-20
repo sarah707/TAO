@@ -2,8 +2,41 @@
   'use strict';
 
   const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
+  const TERMINAL_JOB_TTL_MS = 15 * 60 * 1000;
   const originalFetch = window.fetch.bind(window);
   const jobs = new Map();
+
+  function clearTerminalJobExpiry(job) {
+    const expiry = job?.expiry;
+    if (!expiry) return;
+    job.expiry = null;
+    try {
+      expiry.host.clearTimeout(expiry.id);
+    } catch {
+      // The terminal job is still safe to consume if its timer host disappeared.
+    }
+  }
+
+  function deleteJob(job) {
+    if (!job || jobs.get(job.id) !== job) return false;
+    clearTerminalJobExpiry(job);
+    return jobs.delete(job.id);
+  }
+
+  function scheduleTerminalJobExpiry(job) {
+    if (!job || !['completed', 'failed'].includes(job.status) || job.expiry) return;
+    const timerHost = typeof window.setTimeout === 'function' && typeof window.clearTimeout === 'function'
+      ? window
+      : null;
+    if (!timerHost) return;
+    const id = timerHost.setTimeout(() => {
+      if (jobs.get(job.id) === job && ['completed', 'failed'].includes(job.status)) {
+        jobs.delete(job.id);
+      }
+      job.expiry = null;
+    }, TERMINAL_JOB_TTL_MS);
+    job.expiry = { host: timerHost, id };
+  }
 
   function bridge() {
     const value = window.parent?.[BRIDGE_KEY];
@@ -47,7 +80,14 @@
 
   function createJob(payload) {
     const id = globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-    const job = { id, status: 'queued', result: null, error: '', recoveryId: String(payload?.recoveryId || '').trim() };
+    const job = {
+      id,
+      status: 'queued',
+      result: null,
+      error: '',
+      recoveryId: String(payload?.recoveryId || '').trim(),
+      expiry: null
+    };
     jobs.set(id, job);
     Promise.resolve().then(async () => {
       job.status = 'running';
@@ -56,11 +96,13 @@
         if (job.status !== 'completed') {
           job.result = result;
           job.status = 'completed';
+          scheduleTerminalJobExpiry(job);
         }
       } catch (error) {
         if (job.status === 'completed' || recoverStoredJobResponse(job)) return;
         job.error = String(error?.message || error || '请求失败');
         job.status = 'failed';
+        scheduleTerminalJobExpiry(job);
       }
     });
     return job;
@@ -81,6 +123,7 @@
       };
       job.error = '';
       job.status = 'completed';
+      scheduleTerminalJobExpiry(job);
       return true;
     } catch {
       // A recovery lookup must not interrupt a generation that is still running.
@@ -132,7 +175,9 @@
       const job = jobs.get(decodeURIComponent(jobMatch[1]));
       if (!job) return jsonResponse({ error: 'AI 任务不存在。' }, 404);
       recoverStoredJobResponse(job);
-      return jsonResponse({ job: { id: job.id, status: job.status, result: job.result, error: job.error } });
+      const response = jsonResponse({ job: { id: job.id, status: job.status, result: job.result, error: job.error } });
+      if (job.status === 'completed' || job.status === 'failed') deleteJob(job);
+      return response;
     }
     return jsonResponse({ error: `酒馆版不支持接口：${path}` }, 404);
   };

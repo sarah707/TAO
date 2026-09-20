@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260920152507';
-import { buildExportWorldbook } from './worldbook.js?build=20260920152507';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260920152507';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260920161249';
+import { buildExportWorldbook } from './worldbook.js?build=20260920161249';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260920161249';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -608,7 +608,11 @@ function createFinalPromptCapture(hostWindow, apiWindow, options = {}) {
       available: true,
       getMessages: () => capturedMessages,
       stop() {
-        eventSource.removeListener?.(eventName, listener);
+        if (typeof eventSource.removeListener === 'function') {
+          eventSource.removeListener(eventName, listener);
+        } else if (typeof eventSource.off === 'function') {
+          eventSource.off(eventName, listener);
+        }
       }
     };
   }
@@ -786,6 +790,19 @@ function isImagePayload(payload) {
   return modalities.includes('IMAGE') || /(?:^|[-_])(image|imagen)(?:[-_]|$)/i.test(String(payload?.modelId || ''));
 }
 
+function buildImageResultMetadata(generated) {
+  const metadata = {};
+  const provider = String(generated?.provider || '').trim();
+  const model = String(generated?.model || '').trim();
+  const usageMetadata = generated?.usageMetadata ?? generated?.raw?.usageMetadata;
+  const usage = generated?.usage ?? generated?.raw?.usage;
+  if (provider) metadata.provider = provider;
+  if (model) metadata.model = model;
+  if (usageMetadata && typeof usageMetadata === 'object') metadata.usageMetadata = usageMetadata;
+  if (usage && typeof usage === 'object') metadata.usage = usage;
+  return metadata;
+}
+
 function forceHostChatToBottom(hostWindow) {
   try {
     const chat = hostWindow?.document?.getElementById?.('chat');
@@ -801,12 +818,18 @@ function forceHostChatToBottom(hostWindow) {
   }
 }
 
-function hasStoredChatMessageData(hostWindow, apiWindow, key, value) {
-  const expected = String(value || '');
-  if (!expected) return false;
+function hasStoredChatMessageData(hostWindow, apiWindow, marker) {
+  const checks = marker?.values && typeof marker.values === 'object'
+    ? Object.entries(marker.values)
+    : (marker?.key ? [[marker.key, marker.value]] : []);
+  if (!checks.length) return false;
   for (const context of getHostContexts(hostWindow, apiWindow)) {
     if (!Array.isArray(context?.chat)) continue;
-    if (context.chat.some((item) => String(getChatMessageData(item)?.[key] || '') === expected)) return true;
+    if (context.chat.some((item) => {
+      const data = getChatMessageData(item);
+      return checks.every(([key, value]) => Object.hasOwn(data, key)
+        && String(data[key] ?? '') === String(value ?? ''));
+    })) return true;
   }
   return false;
 }
@@ -836,14 +859,15 @@ async function appendTextMessageToChat(helper, hostWindow, role, message, data, 
     refresh: 'affected'
   }));
   const storedMarker = options.storedMarker;
-  if (storedMarker?.key && storedMarker?.value) {
+  if (storedMarker?.key || storedMarker?.values) {
     // Tavern Helper writes context.chat before awaiting MESSAGE_*_RENDERED hooks.
     // Let those hooks finish in the background once the exact prompt is durable
     // in the live chat, so a rendering extension cannot prevent model dispatch.
     await Promise.resolve();
     await Promise.resolve();
-    if (hasStoredChatMessageData(hostWindow, options.apiWindow, storedMarker.key, storedMarker.value)) {
+    if (hasStoredChatMessageData(hostWindow, options.apiWindow, storedMarker)) {
       void write.catch(() => {});
+      if (role === 'assistant') forceHostChatToBottom(hostWindow);
       return;
     }
   }
@@ -1115,7 +1139,9 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptW
         if (!image?.data) throw new Error('生图插件没有返回图片数据。');
         return {
           output: { textParts: [], thoughtParts: [], imageParts: [{ mimeType: image.mimeType, data: image.data }] },
-          raw: generated.raw
+          // Keep only the small fields consumed by the activity UI. Provider
+          // responses may repeat the full base64 image inside `generated.raw`.
+          raw: buildImageResultMetadata(generated)
         };
       }
       const prompt = String(payload?.prompt || '').trim();
@@ -1274,7 +1300,16 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptW
             nobleSchoolRawResponse: fullText,
             nobleSchoolResponseSource: responseSource,
             nobleSchoolHelperTextChanged: helperTextChanged
-          });
+          }, recoveryId ? {
+            apiWindow,
+            storedMarker: {
+              values: {
+                nobleSchoolRecoveryId: recoveryId,
+                nobleSchoolRawResponse: fullText
+              }
+            },
+            timeoutMessage: '酒馆 assistant 楼层写入超时，请检查可能卡住的消息渲染扩展。'
+          } : {});
       } catch (error) {
         // A rendering callback can fail after the raw reply was inserted. Keep
         // that successful reply instead of adding a misleading failure floor.
