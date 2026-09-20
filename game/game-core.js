@@ -128,8 +128,8 @@
   }
 
   function getCharacterRelation(character, thresholds = CAMPAIGN_CONFIG.relationshipThresholds) {
-    if (character?.isLover) return '恋人';
     const favorability = Number(character?.favorability) || 0;
+    if (character?.isLover) return favorability >= 100 ? '恋人，一生挚爱' : '恋人';
     if (favorability <= thresholds.acquaintanceMax) return '认识的人';
     if (favorability <= thresholds.interestMax) return '对<user>产生兴趣';
     if (favorability <= thresholds.deepenMax) return '渴望和<user>加深相互了解，深入彼此生活';
