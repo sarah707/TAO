@@ -81,7 +81,7 @@
     }
 
     .page {
-      width: min(100vw - 24px, 1160px);
+      width: min(calc(100% - 24px), 1160px);
       margin: 0 auto;
       padding: 0 0 32px;
       display: grid;
@@ -616,17 +616,23 @@
     .character-card {
       grid-template-columns: 256px minmax(0, 1fr);
       align-items: start;
+      width: 100%;
+      min-width: 0;
+      max-width: 100%;
       content-visibility: auto;
-      contain-intrinsic-size: 430px;
+      contain-intrinsic-inline-size: none;
+      contain-intrinsic-block-size: auto 430px;
     }
 
     .character-card .character-list {
+      min-width: 0;
       padding: 8px 10px;
     }
 
     .character-avatar-actions {
       display: flex;
-      width: 256px;
+      width: min(256px, 100%);
+      min-width: 0;
       flex-direction: column;
       align-items: stretch;
       gap: 8px;
@@ -637,8 +643,10 @@
     }
 
     .avatar {
-      width: 256px;
-      height: 256px;
+      width: 100%;
+      max-width: 256px;
+      height: auto;
+      aspect-ratio: 1 / 1;
       border-radius: 20px;
       object-fit: cover;
       border: 1px solid var(--border);
@@ -646,6 +654,8 @@
     }
 
     .image-preview-button {
+      width: 100%;
+      max-width: 256px;
       padding: 0;
       border: 0;
       background: transparent;
@@ -846,7 +856,8 @@
       display: grid;
       gap: 10px;
       content-visibility: auto;
-      contain-intrinsic-size: 320px;
+      contain-intrinsic-inline-size: none;
+      contain-intrinsic-block-size: auto 320px;
     }
 
     .outfit-gallery-image {
@@ -985,7 +996,7 @@
 
     @media (max-width: 640px) {
       .page {
-        width: min(100vw - 16px, 1160px);
+        width: min(calc(100% - 16px), 1160px);
       }
 
       .floating-action-button {
@@ -1464,10 +1475,10 @@
     <button id="gameInfoButton" class="title-info-button" type="button" aria-label="查看游戏信息" title="游戏信息">i</button>
   </div>
   <div id="app"></div>
-  <script src="tavern-runtime.js?build=20260920161249"></script>
-  <script src="client-common.js?build=20260920161249"></script>
-  <script src="game-core.js?build=20260920161249"></script>
-  <script src="prompts.js?build=20260920161249"></script>
-  <script src="game.js?build=20260920161249"></script>
+  <script src="tavern-runtime.js?build=20260920162927"></script>
+  <script src="client-common.js?build=20260920162927"></script>
+  <script src="game-core.js?build=20260920162927"></script>
+  <script src="prompts.js?build=20260920162927"></script>
+  <script src="game.js?build=20260920162927"></script>
 </body>
 </html>
