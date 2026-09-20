@@ -91,6 +91,13 @@
     return Array.from({ length: 7 }, (_, index) => addDays(start, index));
   }
 
+  function getGraduationActionKinds({ termId, isWeekend = false } = {}) {
+    if (termId !== CAMPAIGN_CONFIG.graduationTermId) return [];
+    return isWeekend
+      ? ['graduation-thesis']
+      : ['graduation-internship', 'graduation-thesis'];
+  }
+
   function isLastDayOfMonth(dateText) {
     return addDays(dateText, 1).slice(8, 10) === '01';
   }
@@ -738,6 +745,7 @@
     diffDays,
     getWeekStart,
     getWeekDates,
+    getGraduationActionKinds,
     isLastDayOfMonth,
     shouldPayInternshipSalary,
     getInternshipSalaryAmount,
