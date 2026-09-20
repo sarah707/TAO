@@ -24,6 +24,8 @@
     upperTermId: 'y4-upper',
     graduationTermId: 'y4-lower',
     graduationTermStartDate: '2004-02-16',
+    internshipMonthlySalary: 10000,
+    internshipFirstMonthSalary: 5000,
     playerStartingAge: 21,
     dailyCost: 50,
     assistantCourse: Object.freeze({ id: 'assistant-microeconomics', courseName: '微观经济学' }),
@@ -99,6 +101,19 @@
       return false;
     }
     return !paidMonths[normalizedDate.slice(0, 7)];
+  }
+
+  function getInternshipSalaryAmount({
+    dateText,
+    payrollStartDate = CAMPAIGN_CONFIG.graduationTermStartDate,
+    monthlySalary = CAMPAIGN_CONFIG.internshipMonthlySalary,
+    firstMonthSalary = CAMPAIGN_CONFIG.internshipFirstMonthSalary
+  } = {}) {
+    const monthKey = String(dateText || '').slice(0, 7);
+    if (!monthKey) return 0;
+    return monthKey === String(payrollStartDate || '').slice(0, 7)
+      ? firstMonthSalary
+      : monthlySalary;
   }
 
   function clamp(value, min, max) {
@@ -725,6 +740,7 @@
     getWeekDates,
     isLastDayOfMonth,
     shouldPayInternshipSalary,
+    getInternshipSalaryAmount,
     clamp,
     getCharacterRelation,
     getStoredSaveTimestamp,
