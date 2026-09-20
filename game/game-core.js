@@ -1,7 +1,7 @@
 (function (global) {
   const TERM_DEFINITIONS = Object.freeze([
     { id: 'y4-upper', academicYear: 4, semester: '上学期', label: '毕业学年上学期', start: '2003-09-01', end: '2003-12-28' },
-    { id: 'y4-lower', academicYear: 4, semester: '下学期', label: '毕业学年下学期', start: '2004-03-01', end: '2004-05-30' }
+    { id: 'y4-lower', academicYear: 4, semester: '下学期', label: '毕业学年下学期', start: '2004-02-16', end: '2004-05-30' }
   ].map((term) => Object.freeze(term)));
   const REGULAR_COURSES = Object.freeze([
     { id: 'y4-upper-1', termId: 'y4-upper', courseName: '金融工程学' },
@@ -23,7 +23,7 @@
     displayStartYear: 2513,
     upperTermId: 'y4-upper',
     graduationTermId: 'y4-lower',
-    graduationTermStartDate: '2004-03-01',
+    graduationTermStartDate: '2004-02-16',
     playerStartingAge: 21,
     dailyCost: 50,
     assistantCourse: Object.freeze({ id: 'assistant-microeconomics', courseName: '微观经济学' }),
