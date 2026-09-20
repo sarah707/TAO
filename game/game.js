@@ -59,7 +59,7 @@
     throw new Error('提示词模板加载失败。');
   }
   const STORAGE_VERSION = CAMPAIGN_CONFIG.storageVersion;
-  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260920203408';
+  const PLACEHOLDER_AVATAR = 'placeholder-avatar.svg?build=20260920203724';
   const DAILY_COST = CAMPAIGN_CONFIG.dailyCost;
   const START_DATE = CAMPAIGN_CONFIG.startDate;
   const FIRST_PLAYABLE_DATE = CAMPAIGN_CONFIG.firstPlayableDate;
@@ -193,7 +193,6 @@
   const MERGE_GENERATION_COST = 1;
   const MERGE_GENERATION_INTERVAL_MS = 600;
   const MERGE_HOMEWORK_PROGRESS_NORMAL = 10;
-  const MERGE_HOMEWORK_PROGRESS_THESIS = 2;
   const MERGE_BOARD_CENTER_COL_START = 1;
   const MERGE_BOARD_CENTER_COL_END = 4;
   const MERGE_BOARD_CENTER_ROW_START = 2;
@@ -202,51 +201,51 @@
 
   const MERGE_CHAINS = [
     {
-      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260920203408', motherName: '构思',
+      id: 1, name: '构思链', motherSvg: '1-0.svg?build=20260920203724', motherName: '构思',
       pieces: [
-        { level: 1, svg: '1-1.svg?build=20260920203408', name: '灵感微光' },
-        { level: 2, svg: '1-2.svg?build=20260920203408', name: '零散想法' },
-        { level: 3, svg: '1-3.svg?build=20260920203408', name: '初步构思' },
-        { level: 4, svg: '1-4.svg?build=20260920203408', name: '核心论点' },
-        { level: 5, svg: '1-5.svg?build=20260920203408', name: '论文大纲' },
-        { level: 6, svg: '1-6.svg?build=20260920203408', name: '引言初稿' },
-        { level: 7, svg: '1-7.svg?build=20260920203408', name: '引言定稿' }
+        { level: 1, svg: '1-1.svg?build=20260920203724', name: '灵感微光' },
+        { level: 2, svg: '1-2.svg?build=20260920203724', name: '零散想法' },
+        { level: 3, svg: '1-3.svg?build=20260920203724', name: '初步构思' },
+        { level: 4, svg: '1-4.svg?build=20260920203724', name: '核心论点' },
+        { level: 5, svg: '1-5.svg?build=20260920203724', name: '论文大纲' },
+        { level: 6, svg: '1-6.svg?build=20260920203724', name: '引言初稿' },
+        { level: 7, svg: '1-7.svg?build=20260920203724', name: '引言定稿' }
       ]
     },
     {
-      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260920203408', motherName: '文献',
+      id: 2, name: '文献链', motherSvg: '2-0.svg?build=20260920203724', motherName: '文献',
       pieces: [
-        { level: 1, svg: '2-1.svg?build=20260920203408', name: '阅读闪念' },
-        { level: 2, svg: '2-2.svg?build=20260920203408', name: '文献摘录' },
-        { level: 3, svg: '2-3.svg?build=20260920203408', name: '综述片段' },
-        { level: 4, svg: '2-4.svg?build=20260920203408', name: '文献综述' },
-        { level: 5, svg: '2-5.svg?build=20260920203408', name: '理论框架' },
-        { level: 6, svg: '2-6.svg?build=20260920203408', name: '方法初稿' },
-        { level: 7, svg: '2-7.svg?build=20260920203408', name: '方法定稿' }
+        { level: 1, svg: '2-1.svg?build=20260920203724', name: '阅读闪念' },
+        { level: 2, svg: '2-2.svg?build=20260920203724', name: '文献摘录' },
+        { level: 3, svg: '2-3.svg?build=20260920203724', name: '综述片段' },
+        { level: 4, svg: '2-4.svg?build=20260920203724', name: '文献综述' },
+        { level: 5, svg: '2-5.svg?build=20260920203724', name: '理论框架' },
+        { level: 6, svg: '2-6.svg?build=20260920203724', name: '方法初稿' },
+        { level: 7, svg: '2-7.svg?build=20260920203724', name: '方法定稿' }
       ]
     },
     {
-      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260920203408', motherName: '实证',
+      id: 3, name: '实证链', motherSvg: '3-0.svg?build=20260920203724', motherName: '实证',
       pieces: [
-        { level: 1, svg: '3-1.svg?build=20260920203408', name: '数据直觉' },
-        { level: 2, svg: '3-2.svg?build=20260920203408', name: '实验记录' },
-        { level: 3, svg: '3-3.svg?build=20260920203408', name: '分析图表' },
-        { level: 4, svg: '3-4.svg?build=20260920203408', name: '结果汇总' },
-        { level: 5, svg: '3-5.svg?build=20260920203408', name: '结果解读' },
-        { level: 6, svg: '3-6.svg?build=20260920203408', name: '结果初稿' },
-        { level: 7, svg: '3-7.svg?build=20260920203408', name: '结果定稿' }
+        { level: 1, svg: '3-1.svg?build=20260920203724', name: '数据直觉' },
+        { level: 2, svg: '3-2.svg?build=20260920203724', name: '实验记录' },
+        { level: 3, svg: '3-3.svg?build=20260920203724', name: '分析图表' },
+        { level: 4, svg: '3-4.svg?build=20260920203724', name: '结果汇总' },
+        { level: 5, svg: '3-5.svg?build=20260920203724', name: '结果解读' },
+        { level: 6, svg: '3-6.svg?build=20260920203724', name: '结果初稿' },
+        { level: 7, svg: '3-7.svg?build=20260920203724', name: '结果定稿' }
       ]
     },
     {
-      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260920203408', motherName: '思辨',
+      id: 4, name: '思辨链', motherSvg: '4-0.svg?build=20260920203724', motherName: '思辨',
       pieces: [
-        { level: 1, svg: '4-1.svg?build=20260920203408', name: '讨论灵感' },
-        { level: 2, svg: '4-2.svg?build=20260920203408', name: '批判笔记' },
-        { level: 3, svg: '4-3.svg?build=20260920203408', name: '逻辑论证' },
-        { level: 4, svg: '4-4.svg?build=20260920203408', name: '讨论要点' },
-        { level: 5, svg: '4-5.svg?build=20260920203408', name: '结论雏形' },
-        { level: 6, svg: '4-6.svg?build=20260920203408', name: '讨论初稿' },
-        { level: 7, svg: '4-7.svg?build=20260920203408', name: '讨论定稿' }
+        { level: 1, svg: '4-1.svg?build=20260920203724', name: '讨论灵感' },
+        { level: 2, svg: '4-2.svg?build=20260920203724', name: '批判笔记' },
+        { level: 3, svg: '4-3.svg?build=20260920203724', name: '逻辑论证' },
+        { level: 4, svg: '4-4.svg?build=20260920203724', name: '讨论要点' },
+        { level: 5, svg: '4-5.svg?build=20260920203724', name: '结论雏形' },
+        { level: 6, svg: '4-6.svg?build=20260920203724', name: '讨论初稿' },
+        { level: 7, svg: '4-7.svg?build=20260920203724', name: '讨论定稿' }
       ]
     }
   ];
@@ -255,51 +254,51 @@
 
   const MERGE_BIZ_CHAINS = [
     {
-      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260920203408', motherName: '机会',
+      id: 1, name: '机会', motherSvg: 'g1-0.svg?build=20260920203724', motherName: '机会',
       pieces: [
-        { level: 1, svg: 'g1-1.svg?build=20260920203408', name: '市场杂闻' },
-        { level: 2, svg: 'g1-2.svg?build=20260920203408', name: '用户抱怨' },
-        { level: 3, svg: 'g1-3.svg?build=20260920203408', name: '需求碎片' },
-        { level: 4, svg: 'g1-4.svg?build=20260920203408', name: '目标用户画像' },
-        { level: 5, svg: 'g1-5.svg?build=20260920203408', name: '需求验证报告' },
-        { level: 6, svg: 'g1-6.svg?build=20260920203408', name: '市场规模预估' },
-        { level: 7, svg: 'g1-7.svg?build=20260920203408', name: '市场分析篇' }
+        { level: 1, svg: 'g1-1.svg?build=20260920203724', name: '市场杂闻' },
+        { level: 2, svg: 'g1-2.svg?build=20260920203724', name: '用户抱怨' },
+        { level: 3, svg: 'g1-3.svg?build=20260920203724', name: '需求碎片' },
+        { level: 4, svg: 'g1-4.svg?build=20260920203724', name: '目标用户画像' },
+        { level: 5, svg: 'g1-5.svg?build=20260920203724', name: '需求验证报告' },
+        { level: 6, svg: 'g1-6.svg?build=20260920203724', name: '市场规模预估' },
+        { level: 7, svg: 'g1-7.svg?build=20260920203724', name: '市场分析篇' }
       ]
     },
     {
-      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260920203408', motherName: '产品',
+      id: 2, name: '产品', motherSvg: 'g2-0.svg?build=20260920203724', motherName: '产品',
       pieces: [
-        { level: 1, svg: 'g2-1.svg?build=20260920203408', name: '产品想法' },
-        { level: 2, svg: 'g2-2.svg?build=20260920203408', name: '功能清单' },
-        { level: 3, svg: 'g2-3.svg?build=20260920203408', name: '核心功能原型' },
-        { level: 4, svg: 'g2-4.svg?build=20260920203408', name: '价值主张' },
-        { level: 5, svg: 'g2-5.svg?build=20260920203408', name: '最小可行产品计划' },
-        { level: 6, svg: 'g2-6.svg?build=20260920203408', name: '技术路线图' },
-        { level: 7, svg: 'g2-7.svg?build=20260920203408', name: '解决方案篇' }
+        { level: 1, svg: 'g2-1.svg?build=20260920203724', name: '产品想法' },
+        { level: 2, svg: 'g2-2.svg?build=20260920203724', name: '功能清单' },
+        { level: 3, svg: 'g2-3.svg?build=20260920203724', name: '核心功能原型' },
+        { level: 4, svg: 'g2-4.svg?build=20260920203724', name: '价值主张' },
+        { level: 5, svg: 'g2-5.svg?build=20260920203724', name: '最小可行产品计划' },
+        { level: 6, svg: 'g2-6.svg?build=20260920203724', name: '技术路线图' },
+        { level: 7, svg: 'g2-7.svg?build=20260920203724', name: '解决方案篇' }
       ]
     },
     {
-      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260920203408', motherName: '商业',
+      id: 3, name: '商业', motherSvg: 'g3-0.svg?build=20260920203724', motherName: '商业',
       pieces: [
-        { level: 1, svg: 'g3-1.svg?build=20260920203408', name: '盈利点子' },
-        { level: 2, svg: 'g3-2.svg?build=20260920203408', name: '收入来源列表' },
-        { level: 3, svg: 'g3-3.svg?build=20260920203408', name: '成本结构分析' },
-        { level: 4, svg: 'g3-4.svg?build=20260920203408', name: '定价策略' },
-        { level: 5, svg: 'g3-5.svg?build=20260920203408', name: '客户关系策略' },
-        { level: 6, svg: 'g3-6.svg?build=20260920203408', name: '核心伙伴设想' },
-        { level: 7, svg: 'g3-7.svg?build=20260920203408', name: '商业模式篇' }
+        { level: 1, svg: 'g3-1.svg?build=20260920203724', name: '盈利点子' },
+        { level: 2, svg: 'g3-2.svg?build=20260920203724', name: '收入来源列表' },
+        { level: 3, svg: 'g3-3.svg?build=20260920203724', name: '成本结构分析' },
+        { level: 4, svg: 'g3-4.svg?build=20260920203724', name: '定价策略' },
+        { level: 5, svg: 'g3-5.svg?build=20260920203724', name: '客户关系策略' },
+        { level: 6, svg: 'g3-6.svg?build=20260920203724', name: '核心伙伴设想' },
+        { level: 7, svg: 'g3-7.svg?build=20260920203724', name: '商业模式篇' }
       ]
     },
     {
-      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260920203408', motherName: '执行',
+      id: 4, name: '执行', motherSvg: 'g4-0.svg?build=20260920203724', motherName: '执行',
       pieces: [
-        { level: 1, svg: 'g4-1.svg?build=20260920203408', name: '创始初心' },
-        { level: 2, svg: 'g4-2.svg?build=20260920203408', name: '团队雏形' },
-        { level: 3, svg: 'g4-3.svg?build=20260920203408', name: '关键里程碑' },
-        { level: 4, svg: 'g4-4.svg?build=20260920203408', name: '资源配置计划' },
-        { level: 5, svg: 'g4-5.svg?build=20260920203408', name: '风险预案' },
-        { level: 6, svg: 'g4-6.svg?build=20260920203408', name: '财务预测' },
-        { level: 7, svg: 'g4-7.svg?build=20260920203408', name: '落地路线图' }
+        { level: 1, svg: 'g4-1.svg?build=20260920203724', name: '创始初心' },
+        { level: 2, svg: 'g4-2.svg?build=20260920203724', name: '团队雏形' },
+        { level: 3, svg: 'g4-3.svg?build=20260920203724', name: '关键里程碑' },
+        { level: 4, svg: 'g4-4.svg?build=20260920203724', name: '资源配置计划' },
+        { level: 5, svg: 'g4-5.svg?build=20260920203724', name: '风险预案' },
+        { level: 6, svg: 'g4-6.svg?build=20260920203724', name: '财务预测' },
+        { level: 7, svg: 'g4-7.svg?build=20260920203724', name: '落地路线图' }
       ]
     }
   ];
@@ -7149,22 +7148,20 @@ ${promptContextLines.join('\n')}`;
     if (!term || term.isBreak) return [];
     var effectiveTermId = term.id.endsWith('-break') ? term.id.replace(/-break$/, '') : term.id;
     const results = [];
-    for (const courseId of getTermCourseIds(effectiveTermId, { includeSpecial: true })) {
+    // 作业只属于普通课程；毕业论文和毕业实习仅通过各自的行程推进。
+    for (const courseId of getTermCourseIds(effectiveTermId)) {
       const course = runtime.courses[courseId];
       if (!course || course.finalGrade) continue;
       const hasAttended = runtime.flags.courseFirstClassDone[courseId];
       const isActive = hasAttended && course.currentAssignmentActive && course.currentHomeworkProgress < 100;
-      const isThesis = courseId === 'graduation-thesis';
-      const isGraduationInternship = courseId === 'graduation-internship';
-      if (isGraduationInternship) continue;
-      if (isActive || (isThesis && hasAttended && course.studyProgress < 100)) {
-        results.push({ courseId, courseName: course.courseName, isThesis, progress: isThesis ? course.studyProgress : course.currentHomeworkProgress });
+      if (isActive) {
+        results.push({ courseId, courseName: course.courseName, progress: course.currentHomeworkProgress });
       }
     }
     return results;
   }
 
-  function generateMergeTask(courseId, courseName, isThesis) {
+  function generateMergeTask(courseId, courseName) {
     const requiredPieces = [];
     const isBiz = state.mergeGame?.mode === 'biz';
     var targetSum;
@@ -7202,7 +7199,7 @@ ${promptContextLines.join('\n')}`;
       addPiece(Math.min(7, remaining2));
     }
 
-    return { courseId, courseName, isThesis, requiredPieces };
+    return { courseId, courseName, requiredPieces };
   }
 
   function cleanupStaleMergeTasks(mode, savedTasks) {
@@ -7211,7 +7208,7 @@ ${promptContextLines.join('\n')}`;
     // 保留已有任务的棋子要求，避免每次打开都重新随机。
     return getActiveHomeworkCourses().map(function (course) {
       return savedTasks.find(function (task) { return task.courseId === course.courseId; })
-        || generateMergeTask(course.courseId, course.courseName, course.isThesis);
+        || generateMergeTask(course.courseId, course.courseName);
     });
   }
 
@@ -7219,10 +7216,10 @@ ${promptContextLines.join('\n')}`;
     const mg = state.mergeGame;
     if (!mg) return;
     if (mg.mode === 'biz') {
-      mg.tasks = [generateMergeTask(null, '创业企划书', false)];
+      mg.tasks = [generateMergeTask(null, '创业企划书')];
     } else {
       const courses = getActiveHomeworkCourses();
-      mg.tasks = courses.map(function (c) { return generateMergeTask(c.courseId, c.courseName, c.isThesis); });
+      mg.tasks = courses.map(function (c) { return generateMergeTask(c.courseId, c.courseName); });
     }
   }
 
@@ -7243,7 +7240,6 @@ ${promptContextLines.join('\n')}`;
       ...source,
       courseId,
       courseName: isBusinessTask ? '创业企划书' : String(course?.courseName || ''),
-      isThesis: !isBusinessTask && courseId === 'graduation-thesis',
       requiredPieces
     };
   }
@@ -7271,8 +7267,7 @@ ${promptContextLines.join('\n')}`;
       state.mergeGame.tasks = [{
         courseId: null,
         courseName: '创业企划书',
-        isThesis: false,
-        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260920203408', name: '用户抱怨' }]
+        requiredPieces: [{ chainId: 1, level: 2, svg: 'g1-2.svg?build=20260920203724', name: '用户抱怨' }]
       }];
     } else if (hasSavedBoard) {
       state.mergeGame = createMergeGameState(mode);
@@ -7446,14 +7441,9 @@ ${promptContextLines.join('\n')}`;
     } else {
       const course = runtime.courses[task.courseId];
       if (course) {
-        const progressGain = task.isThesis ? MERGE_HOMEWORK_PROGRESS_THESIS : MERGE_HOMEWORK_PROGRESS_NORMAL;
-        if (task.isThesis) {
-          updateGraduationProgress(runtime, task.courseId, progressGain, `${task.courseName}完成度`);
-        } else {
-          updateCourseHomeworkProgress(course, progressGain);
-          // 作业满100后不立即结束，保持 active 让 finalizeWeek
-          // 在剩余周数归零时自然结算，避免 ensureAssignmentsForDate 提前开始新作业
-        }
+        updateCourseHomeworkProgress(course, MERGE_HOMEWORK_PROGRESS_NORMAL);
+        // 作业满100后不立即结束，保持 active 让 finalizeWeek
+        // 在剩余周数归零时自然结算，避免 ensureAssignmentsForDate 提前开始新作业
       }
     }
 
@@ -7469,7 +7459,7 @@ ${promptContextLines.join('\n')}`;
       mg.submitAnimation = null;
 
       if (mg.mode === 'biz') {
-        mg.tasks = [generateMergeTask(null, '创业企划书', false)];
+        mg.tasks = [generateMergeTask(null, '创业企划书')];
         saveCurrentRuntime();
         render();
         return;
@@ -7481,7 +7471,7 @@ ${promptContextLines.join('\n')}`;
       } else {
         const stillActive = remaining.some(function (c) { return c.courseId === task.courseId; });
         if (stillActive) {
-          mg.tasks[taskIndex] = generateMergeTask(task.courseId, task.courseName, task.isThesis);
+          mg.tasks[taskIndex] = generateMergeTask(task.courseId, task.courseName);
         } else {
           mg.tasks.splice(taskIndex, 1);
         }
@@ -7674,7 +7664,7 @@ ${promptContextLines.join('\n')}`;
           progressHtml = `<div class="merge-task-progress">完成度 ${state.runtime?.player?.bizProgress || 0}/${BUSINESS_ENDING_SCORE}</div>`;
         } else {
           const course = state.runtime?.courses?.[task.courseId];
-          const progress = course ? (task.isThesis ? (course.studyProgress || 0) : (course.currentHomeworkProgress || 0)) : 0;
+          const progress = course ? (course.currentHomeworkProgress || 0) : 0;
           progressHtml = `<div class="merge-task-progress">完成度 ${Math.round(progress)}%</div>`;
         }
         var taskHighlight = (tutorial && tutorial.step === 4) ? ' merge-task-highlight' : '';
