@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20260920022249';
-import { buildExportWorldbook } from './worldbook.js?build=20260920022249';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260920022249';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20260920023137';
+import { buildExportWorldbook } from './worldbook.js?build=20260920023137';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20260920023137';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -407,7 +407,6 @@ export function buildBuiltInPromptMessages(payload) {
   // final result, without retaining any worldbook/Persona/card/chat slots.
   add('system', fixedPrompt('top'));
   add('system', payload?.options?.scriptSettingsInstruction);
-  add('user', fixedPrompt('Enhance Definitions'));
   add('user', buildHistoryUserInstruction(payload));
   for (const instruction of buildRecentContextAssistantInstructions(payload)) {
     add('assistant', instruction);
