@@ -7,7 +7,7 @@
   "scenario": "",
   "first_mes": "请打开酒馆助手并启用本卡的界面脚本。游戏会在独立浮窗中运行。如果浮窗有任何问题请刷新网页。首次开启可能会需要十几秒钟才能显示浮窗，请稍后。",
   "mes_example": "",
-  "creatorcomment": "需要酒馆助手。卡内只保留加载入口。远程加载入口：https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.3/bootstrap.js",
+  "creatorcomment": "需要酒馆助手。卡内只保留加载入口。远程加载入口：https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.4/bootstrap.js",
   "avatar": "none",
   "talkativeness": "0.5",
   "fav": false,
@@ -17,7 +17,7 @@
     "酒馆助手",
     "贵族学院"
   ],
-  "create_date": "2026-09-21T04:37:58.380Z",
+  "create_date": "2026-09-21T04:53:28.979Z",
   "data": {
     "name": "贵族学院的特招生",
     "description": "大学毕业前的最后一年，你以特招生身份转入贵族学院。游戏规则、剧情和存档由浮窗管理。",
@@ -25,7 +25,7 @@
     "scenario": "",
     "first_mes": "请打开酒馆助手并启用本卡的界面脚本。游戏会在独立浮窗中运行。如果浮窗有任何问题请刷新网页。首次开启可能会需要十几秒钟才能显示浮窗，请稍后。",
     "mes_example": "",
-    "creator_notes": "需要酒馆助手。卡内只保留加载入口。远程加载入口：https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.3/bootstrap.js",
+    "creator_notes": "需要酒馆助手。卡内只保留加载入口。远程加载入口：https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.4/bootstrap.js",
     "system_prompt": "",
     "post_history_instructions": "",
     "tags": [
@@ -35,7 +35,7 @@
       "贵族学院"
     ],
     "creator": "sasa",
-    "character_version": "1.0.3",
+    "character_version": "1.0.4",
     "alternate_greetings": [],
     "group_only_greetings": [],
     "character_book": {
@@ -84,8 +84,8 @@
               "enabled": true,
               "name": "游戏浮窗加载器",
               "id": "noble-school-loader-v1",
-              "content": "import \"https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.3/bootstrap.js\";",
-              "info": "版本号：1.0.3\n构建模式：release\n",
+              "content": "import \"https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.4/bootstrap.js\";",
+              "info": "版本号：1.0.4\n构建模式：release\n",
               "button": {
                 "enabled": false,
                 "buttons": []

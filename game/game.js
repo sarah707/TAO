@@ -306,6 +306,85 @@
 
   const MERGE_BIZ_CHAIN_MAP = new Map(MERGE_BIZ_CHAINS.map((c) => [c.id, c]));
 
+  function collectMergeImageAssets(chains) {
+    return [...new Set(chains.flatMap((chain) => [
+      chain.motherSvg,
+      ...chain.pieces.map((piece) => piece.svg)
+    ]))];
+  }
+
+  const MERGE_IMAGE_ASSETS = Object.freeze({
+    // The first tutorial uses the business board, so warm this group first.
+    biz: Object.freeze(collectMergeImageAssets(MERGE_BIZ_CHAINS)),
+    homework: Object.freeze(collectMergeImageAssets(MERGE_CHAINS))
+  });
+  const preloadedMergeImageAssets = new Set();
+  const pendingMergeImageAssets = new Map();
+  let mergeImagePreloadQueued = false;
+
+  function preloadMergeImageAsset(source) {
+    if (preloadedMergeImageAssets.has(source)) return Promise.resolve();
+    if (pendingMergeImageAssets.has(source)) return pendingMergeImageAssets.get(source);
+    const ImageConstructor = window.Image || globalThis.Image;
+    if (typeof ImageConstructor !== 'function') return Promise.resolve();
+
+    let image;
+    try {
+      image = new ImageConstructor();
+      image.decoding = 'async';
+      image.fetchPriority = 'low';
+    } catch {
+      return Promise.resolve();
+    }
+
+    let resolveLoad;
+    let settled = false;
+    const pending = new Promise((resolve) => { resolveLoad = resolve; });
+    const finish = (loaded) => {
+      if (settled) return;
+      settled = true;
+      image.onload = null;
+      image.onerror = null;
+      pendingMergeImageAssets.delete(source);
+      if (loaded) preloadedMergeImageAssets.add(source);
+      resolveLoad();
+    };
+    image.onload = () => finish(true);
+    image.onerror = () => finish(false);
+    pendingMergeImageAssets.set(source, pending);
+    try {
+      // Keep the chain URL verbatim so release and cache-busted GitHub builds
+      // warm the exact same resource later used by the visible <img> nodes.
+      image.src = source;
+    } catch {
+      finish(false);
+    }
+    return pending;
+  }
+
+  function preloadMergeImageGroup(mode) {
+    return Promise.all((MERGE_IMAGE_ASSETS[mode] || []).map(preloadMergeImageAsset)).then(() => undefined);
+  }
+
+  function preloadMergeGameImages(mode = '') {
+    if (mode === 'biz' || mode === 'homework') return preloadMergeImageGroup(mode);
+    return preloadMergeImageGroup('biz').then(() => preloadMergeImageGroup('homework'));
+  }
+
+  function scheduleMergeImagePreload() {
+    if (mergeImagePreloadQueued) return;
+    mergeImagePreloadQueued = true;
+    const start = () => {
+      mergeImagePreloadQueued = false;
+      void preloadMergeGameImages();
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(start, { timeout: 500 });
+    } else {
+      window.setTimeout(start, 0);
+    }
+  }
+
   function getMergeChainMap(mode = state.mergeGame?.mode) {
     return mode === 'biz' ? MERGE_BIZ_CHAIN_MAP : MERGE_CHAIN_MAP;
   }
@@ -7455,6 +7534,7 @@ ${promptContextLines.join('\n')}`;
 
   function enterMergeGame(mode) {
     if (!state.runtime || state.runtime.phase === 'ended') return;
+    void preloadMergeGameImages(mode);
 
     // Preserve the other board before switching between homework and business modes.
     syncMergeGameToRuntime();
@@ -7983,7 +8063,7 @@ ${promptContextLines.join('\n')}`;
             是的，就像标题暗示的那样，你是个穷人。<br />
             你在毕业前的最后一年转入兰斯特皇家学院，必须在这一年里确保自己能在吃得饱饭的前提下顺利毕业。<br />
             拿奖学金也好，打工也好，总之要想办法把生活费挣出来。<br />
-            上学期任何一门普通课程低于 A 都会立即退学；进入下学期后，毕业时普通课程必须达到 B 以上，毕业论文和实习也必须完成，否则你将面对的是——<br /><strong class="intro-expulsion">无法毕业</strong>
+            上学期任何一门普通课程低于 A 都会立即退学；进入下学期后，毕业时普通课程必须达到 B 以上，毕业论文和实习也必须完成，否则你将面对的是——<br /><strong class="intro-expulsion">退学</strong>
           </div>
           <div class="inline-actions intro-actions">
             <button class="primary" data-action="start-opening-ceremony">前往报到</button>
@@ -9035,6 +9115,7 @@ ${promptContextLines.join('\n')}`;
     } finally {
       state.ui.loading = false;
       render();
+      if (!state.runtime && state.bootstrap) scheduleMergeImagePreload();
       schedulePendingGameCompletionFlow();
     }
   }
@@ -9455,6 +9536,7 @@ ${promptContextLines.join('\n')}`;
             clearCurrentRuntime();
             setStatus('当前运行数据已清空。', 'warning');
             render();
+            scheduleMergeImagePreload();
           });
           return;
         case 'invite-character':

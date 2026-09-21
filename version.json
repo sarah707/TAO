@@ -1,9 +1,9 @@
 {
-  "version": "1.0.3",
+  "version": "1.0.4",
   "mode": "release",
-  "buildId": "20260921043758",
-  "releaseRef": "v1.0.3",
-  "loaderUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.3/loader.js",
-  "bootstrapUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.3/bootstrap.js",
-  "builtAt": "2026-09-21T04:37:58.223Z"
+  "buildId": "20260921045328",
+  "releaseRef": "v1.0.4",
+  "loaderUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.4/loader.js",
+  "bootstrapUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.4/bootstrap.js",
+  "builtAt": "2026-09-21T04:53:28.822Z"
 }
