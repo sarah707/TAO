@@ -269,13 +269,17 @@
 </World_Building>`.replaceAll('<user>', playerName).trim();
   }
 
-  function buildPlayerSettings({ playerName, playerPersona, userBirthday, userAge, cloth }) {
+  const DEFAULT_PLAYER_DESCRIPTION = `- 身份：<user>，孤儿院出身，很穷，在毕业前最后一年以优异成绩转入兰斯特皇家学院的毕业年级学生。
+- 性格：头脑冷静，有幽默感，非常重视成绩和自己未来的职业发展。成绩很好，很有文化，非常聪明，做什么都能很快学会并做的很好。说话很接地气，喜欢吐槽。但是被喜欢的人告白时也会像小女生一样害羞，在恋爱时也会变得甜软。贫穷但不穷酸，不会为钱的事情斤斤计较。对于天龙人们对自己的蔑视不会受到伤害，只会在心里觉得他们是傻逼。`;
+
+  function buildPlayerSettings({ playerName, playerPersona, userBirthday, userAge, cloth, playerDescription }) {
     const personaLine = String(playerPersona || '').trim()
       ? `- 酒馆玩家主角卡设定：${String(playerPersona).trim()}`
       : '';
+    const description = typeof playerDescription === 'string' && playerDescription.trim()
+      ? playerDescription.trim() : DEFAULT_PLAYER_DESCRIPTION;
     return `<Player_Settings>
-- 身份：<user>，孤儿院出身，很穷，在毕业前最后一年以优异成绩转入兰斯特皇家学院的毕业年级学生。
-- 性格：头脑冷静，有幽默感，非常重视成绩和自己未来的职业发展。成绩很好，很有文化，非常聪明，做什么都能很快学会并做的很好。说话很接地气，喜欢吐槽。但是被喜欢的人告白时也会像小女生一样害羞，在恋爱时也会变得甜软。贫穷但不穷酸，不会为钱的事情斤斤计较。对于天龙人们对自己的蔑视不会受到伤害，只会在心里觉得他们是傻逼。
+${description}
 ${personaLine}
 - 生日：${userBirthday}
 - 年龄：${userAge}
@@ -299,7 +303,8 @@ ${String(cloth || '').trim()}
     modeluList,
     userBirthday,
     userAge,
-    playerPersona
+    playerPersona,
+    playerDescription
   }) {
     const worldBuilding = buildWorldBuilding({ playerName });
     const playerSettings = buildPlayerSettings({
@@ -307,7 +312,8 @@ ${String(cloth || '').trim()}
       playerPersona,
       userBirthday,
       userAge,
-      cloth
+      cloth,
+      playerDescription
     });
     const coreSystemInstruction = `
 <role>
@@ -607,6 +613,7 @@ ${modeluList}`.replaceAll('<user>', playerName).replaceAll('${names}', names || 
     buildBackgroundAvatarPrompt,
     buildOutfitImagePrompt,
     buildWorldBuilding,
+    defaultPlayerDescription: DEFAULT_PLAYER_DESCRIPTION,
     buildPlayerSettings,
     buildEventPromptTexts
   };
