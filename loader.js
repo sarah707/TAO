@@ -1,10 +1,10 @@
-import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js?build=20260921032700';
+import { BRIDGE_KEY, createTavernBridge } from './bridge/tavern.js';
 import {
   clampFloatingPosition,
   getDefaultMinimizedPosition,
   getVisibleViewportBounds
-} from './overlay-position.js?build=20260921032700';
-import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js?build=20260921032700';
+} from './overlay-position.js';
+import { getActiveChatSnapshot, subscribeToChatChanges } from './chat-lifecycle.js';
 
 const OVERLAY_ID = 'noble-school-overlay';
 const STYLE_ID = 'noble-school-overlay-style';
@@ -12,7 +12,7 @@ const ROOT_ID = 'noble-school-root';
 const IMAGE_EXTENSION_URL = 'https://github.com/sarah707/SillyTavern-MiniGame-Image-API';
 const IMAGE_STATUS_CHECKED_PREFIX = 'noble-school.image-status-checked.v1';
 const IMAGE_STATUS_CHECK_TIMEOUT_MS = 2500;
-const BUILD_MODE = 'github';
+const BUILD_MODE = 'release';
 
 const hostWindow = (() => {
   try {
