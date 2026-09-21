@@ -13,7 +13,7 @@ async function resolveLoaderUrl() {
     if (!loaderUrl) throw new Error('版本清单没有 loaderUrl。');
     return loaderUrl;
   } catch (error) {
-    console.warn('[贵族学校的特招生] 无法读取最新版本清单，改用角色卡内置的首发版本。', error);
+    console.warn('[贵族学院的特招生] 无法读取最新版本清单，改用角色卡内置的首发版本。', error);
     return FALLBACK_LOADER_URL;
   }
 }
@@ -26,7 +26,7 @@ async function boot() {
 if (!globalThis[BOOTSTRAP_STATE_KEY]) {
   globalThis[BOOTSTRAP_STATE_KEY] = boot().catch((error) => {
     delete globalThis[BOOTSTRAP_STATE_KEY];
-    console.error('[贵族学校的特招生] 远程游戏加载失败。', error);
+    console.error('[贵族学院的特招生] 远程游戏加载失败。', error);
     throw error;
   });
 }

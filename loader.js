@@ -249,7 +249,7 @@ async function mount() {
         </section>
       </div>
       <aside class="noble-school-minimized" hidden>
-        <strong>贵族学校的特招生</strong>
+        <strong>贵族学院的特招生</strong>
         <button type="button" data-overlay-action="restore">恢复</button>
       </aside>
     </div>`;
@@ -288,7 +288,7 @@ async function mount() {
     body.replaceChildren();
     frame = hostDocument.createElement('iframe');
     frame.className = 'noble-school-frame';
-    frame.setAttribute('title', '贵族学校的特招生游戏');
+    frame.setAttribute('title', '贵族学院的特招生游戏');
     body.append(frame);
     try {
       await loadGameDocument(frame);

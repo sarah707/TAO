@@ -395,7 +395,7 @@ export function buildBuiltInPromptMessages(payload) {
   // Only game-owned names are substituted; never evaluate host/preset macros.
   const expand = (value) => String(value || '')
     .replace(/<user>|\{\{user\}\}/g, (match) => playerName || match)
-    .replace(/\{\{char\}\}/g, '贵族学校的特招生');
+    .replace(/\{\{char\}\}/g, '贵族学院的特招生');
   const fixedPrompt = (name) => expand(BUILTIN_PRESET_SETTINGS.prompts.find((item) => item.name === name)?.content);
   const messages = [];
   const add = (role, content) => {
@@ -440,7 +440,7 @@ async function buildBuiltInRequest(hostWindow, apiWindow, payload) {
   // Never send them (or extension tool definitions) in this fixed request.
   for (const key of ['stop', 'logprobs', 'top_logprobs', 'logit_bias', 'tools', 'tool_choice']) delete request[key];
   request.user_name = String(payload?.options?.playerName || '').trim() || '<user>';
-  request.char_name = '贵族学校的特招生';
+  request.char_name = '贵族学院的特招生';
   request.group_names = [];
   return { service, request };
 }
@@ -636,7 +636,7 @@ function wrapPromptForChat(prompt, textPresetMode, capturedFinalPrompt) {
       ? '以下是内置固定提示词经当前模型接口适配后实际提交的消息；未使用本地预设、世界书或额外玩家描述。'
       : '以下内容截取自酒馆提示词查看器使用的最终消息事件，已经过预设宏、变量、世界书、模板和游戏注入处理。')
     : '当前酒馆助手没有暴露最终消息事件；以下仅展示游戏本次提交的提示词。';
-  return `【贵族学校的特招生｜本次发送给 AI 的完整提示词】\n模式：${modeLabel}\n${note}\n\n${fence}text\n${source}\n${fence}`;
+  return `【贵族学院的特招生｜本次发送给 AI 的完整提示词】\n模式：${modeLabel}\n${note}\n\n${fence}text\n${source}\n${fence}`;
 }
 
 function emptyPromptOverrides() {
@@ -1293,7 +1293,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptW
         stage = '写入酒馆模型楼层（AI 已返回）';
         // 正文可能被其他扩展改写；恢复时优先读取独立备份，不反读展示正文。
         await appendTextMessageToChat(helper, hostWindow, 'assistant',
-          fullText || '【贵族学校的特招生｜AI 返回内容为空】',
+          fullText || '【贵族学院的特招生｜AI 返回内容为空】',
           {
             ...(fullText ? { nobleSchoolGameResponse: true } : { nobleSchoolGameError: true, nobleSchoolResponseEmpty: true }),
             ...(recoveryId ? { nobleSchoolRecoveryId: recoveryId } : {}),
@@ -1327,7 +1327,7 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptW
           // 网络断开时写聊天也可能失败或久等，不能让它遮住最初的诊断。
           void writePrompt(finalPromptCapture.getMessages()).then(() => (
             appendTextMessageToChat(helper, hostWindow, 'assistant',
-              `【贵族学校的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic.message)}`,
+              `【贵族学院的特招生｜AI 请求失败】\n${redactDiagnosticText(diagnostic.message)}`,
               { nobleSchoolGameError: true })
           )).catch(() => {});
           throw diagnostic;

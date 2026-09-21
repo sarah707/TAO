@@ -81,7 +81,7 @@ function replacePlayerNameWithUserToken(content, runtime) {
 export function buildExportWorldbook(runtime, promptSettings = {}) {
   const playerName = safeWorldbookPart(runtime?.player?.name);
   const runId = safeWorldbookPart(runtime?.meta?.runId || formatCreatedAt(runtime?.meta?.createdAt)).slice(0, 12);
-  const worldbookName = `贵族学校的特招生·${playerName}·${formatCreatedAt(runtime?.meta?.createdAt)}·${runId}`;
+  const worldbookName = `贵族学院的特招生·${playerName}·${formatCreatedAt(runtime?.meta?.createdAt)}·${runId}`;
   const worldBuilding = String(promptSettings?.worldBuilding || '').trim();
   const playerSettings = String(promptSettings?.playerSettings || '').trim();
   if (!worldBuilding || !playerSettings) {
