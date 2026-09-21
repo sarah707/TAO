@@ -13,6 +13,7 @@
   const IS_TEST_BUILD = String(globalThis.__NOBLE_SCHOOL_BUILD_MODE__ || '').toLowerCase() === 'github';
   const { escapeHtml, requestJson, postJson, parseDurationMs } = window.Games0Client || {};
   const {
+    PLAYER_GRADE,
     CAMPAIGN_CONFIG,
     TERM_DEFINITIONS,
     parseDate,
@@ -52,7 +53,7 @@
   if (typeof requestJson !== 'function' || typeof postJson !== 'function' || typeof escapeHtml !== 'function' || typeof parseDurationMs !== 'function') {
     throw new Error('公共客户端工具加载失败。');
   }
-  if (!CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof formatCampaignMonth !== 'function' || typeof selectNewestStoredValue !== 'function' || typeof resolveStoredPlanFixed !== 'function' || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof shouldResetHomeworkMergeBoard !== 'function' || typeof isAfterTermExams !== 'function' || typeof getGraduationActionKinds !== 'function' || typeof shouldPayInternshipSalary !== 'function' || typeof getInternshipSalaryAmount !== 'function' || typeof findCharactersForCourse !== 'function' || typeof isStudentCouncilPresident !== 'function' || typeof normalizeGeneratedCharactersForEvent !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof findMatchingPetrifiedPieceIndex !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function' || typeof stripRuntimeRuleFields !== 'function' || typeof extractNearestTagContent !== 'function' || typeof extractInfoBlockContent !== 'function' || typeof parseLooseCharacterRecords !== 'function') {
+  if (!Number.isInteger(PLAYER_GRADE) || !CAMPAIGN_CONFIG || !Array.isArray(TERM_DEFINITIONS) || typeof formatCampaignMonth !== 'function' || typeof selectNewestStoredValue !== 'function' || typeof resolveStoredPlanFixed !== 'function' || typeof selectFirstClassIntroduction !== 'function' || typeof selectRandomAPlusCourseId !== 'function' || typeof canReceiveGraduationInternshipOffer !== 'function' || typeof shouldResetHomeworkMergeBoard !== 'function' || typeof isAfterTermExams !== 'function' || typeof getGraduationActionKinds !== 'function' || typeof shouldPayInternshipSalary !== 'function' || typeof getInternshipSalaryAmount !== 'function' || typeof findCharactersForCourse !== 'function' || typeof isStudentCouncilPresident !== 'function' || typeof normalizeGeneratedCharactersForEvent !== 'function' || typeof resolveInternshipSelection !== 'function' || typeof findMatchingPetrifiedPieceIndex !== 'function' || typeof evaluateTermStanding !== 'function' || typeof evaluateGraduation !== 'function' || typeof stripRuntimeRuleFields !== 'function' || typeof extractNearestTagContent !== 'function' || typeof extractInfoBlockContent !== 'function' || typeof parseLooseCharacterRecords !== 'function') {
     throw new Error('游戏核心规则加载失败。');
   }
   if (!GAME_PROMPTS?.eventSpecs || typeof GAME_PROMPTS.buildPromptModules !== 'function' || typeof GAME_PROMPTS.buildEventPromptTexts !== 'function') {
@@ -2097,7 +2098,6 @@
         playerPersona: '',
         userBirthday: `${runtime.player.birthdayMonth}月${runtime.player.birthdayDay}日`,
         userAge: String(runtime.player.age || 18),
-        userGrade: String(getCurrentAcademicYear(runtime.player.currentDate)),
         cloth: ''
       })
     };
@@ -4064,10 +4064,6 @@
     return runtime.characters.find((item) => item.id === characterId) || null;
   }
 
-  function getCurrentAcademicYear(dateText) {
-    return getTermMeta(dateText)?.academicYear || 1;
-  }
-
   function getCharactersFromIds(runtime, characterIds = []) {
     return characterIds
       .map((characterId) => getCharacterById(runtime, characterId))
@@ -4173,10 +4169,9 @@
     if (flagged.length) {
       return uniqueCharacterIds(flagged.map((character) => character.id));
     }
-    const currentYear = getCurrentAcademicYear(dateText);
     const teammates = [];
     for (let year = 1; year <= 4; year += 1) {
-      if (year === currentYear) {
+      if (year === PLAYER_GRADE) {
         continue;
       }
       const candidate = pickRandom(runtime.characters.filter((character) => hasAffiliation(character, '本校学生') && character.grade === year));
@@ -4190,7 +4185,6 @@
   function resolveEventCharacterIds(runtime, eventName, dateText, options = {}) {
     const spec = getEventSpec(eventName);
     const rule = String(spec.characters || '').trim();
-    const currentYear = getCurrentAcademicYear(dateText);
     const candidates = getCandidateCharacters(runtime, options);
     const explicitIds = uniqueCharacterIds(options.characterIds || []);
     var resolvedIds;
@@ -4262,7 +4256,7 @@
     if (rule.includes('所有同年级同学、该门课助教、该门课教授里任选一人')) {
       const courseId = options.courseId || options.assistantCourseId || runtime.player.assistantRole?.courseId;
       const courseCandidates = [
-        ...runtime.characters.filter((character) => hasAffiliation(character, '本校学生') && character.grade === currentYear),
+        ...runtime.characters.filter((character) => hasAffiliation(character, '本校学生') && character.grade === PLAYER_GRADE),
         ...(courseId ? getCharactersForCourse(runtime, courseId, '助教') : []),
         ...(courseId ? getCharactersForCourse(runtime, courseId, '教授') : [])
       ];
@@ -4285,7 +4279,7 @@
       return uniqueCharacterIds([candidate?.id]);
     }
     if (rule.includes('角色列表里所有和<user>同年级的本校学生')) {
-      return uniqueCharacterIds(runtime.characters.filter((character) => hasAffiliation(character, '本校学生') && character.grade === currentYear).map((character) => character.id));
+      return uniqueCharacterIds(runtime.characters.filter((character) => hasAffiliation(character, '本校学生') && character.grade === PLAYER_GRADE).map((character) => character.id));
     }
     if (rule === '实习上司') {
       return uniqueCharacterIds(getCharactersWithGlobalFlag(runtime, '实习上司').map((character) => character.id));
@@ -4626,8 +4620,7 @@ ${promptContextLines.join('\n')}`;
       modeluList: eventConfig.modeluList,
       userBirthday: runtime.player.birthdayMonth + '月' + runtime.player.birthdayDay + '日',
       userAge: String(runtime.player.age || 18),
-      playerPersona: String(state.bootstrap?.playerProfile?.description || '').trim(),
-      userGrade: String(getCurrentAcademicYear(runtime.player.currentDate))
+      playerPersona: String(state.bootstrap?.playerProfile?.description || '').trim()
     });
 
     var locationInstruction = promptTexts.scriptSettingsLocationBlock || '';

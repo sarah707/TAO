@@ -1,4 +1,8 @@
 (function (global) {
+  const PLAYER_GRADE = global.Games0Core?.PLAYER_GRADE;
+  if (!Number.isInteger(PLAYER_GRADE)) {
+    throw new Error('主角固定年级配置加载失败。');
+  }
   const EVENT_SPECS = new Map([
     ["第一次开学典礼事件", {"name":"第一次开学典礼事件","characters":"无","modeluList":"<newCharacter>","userPrompt":"请编写<user>在大学毕业前的最后一年，以成绩优异的转学生身份第一次来到兰斯特皇家学院参加开学典礼的剧情，1500字以上。她需要在这里完成最后一学年并取得毕业资格，既期待又清楚自己只有一年时间适应环境。不要写她接下来的详细课程安排或学习计划，以免和后边的操作穿帮。结尾要连接本日结束，要结得很干净。这章剧情里应该让<user>新认识兰斯特皇家学院的学生会长（男性四年级），并把该角色信息写入<newCharacter>。","cloth":"","after":"该角色好感度+随机5到10"}],
     ["没钱看病版认识校外人士事件", {"name":"没钱看病版认识校外人士事件","characters":"全部已有角色","modeluList":"<newCharacter>","userPrompt":"请编写<user>疲劳过度生病但没钱看病，幸遇好心陌生校外人士帮忙付了医药费的剧情，1500字以上，结尾前要出院并连接本日结束，要结的很干净。生成的新人要确保和已有角色没有类似，该角色信息写入<newCharacter>。","cloth":"","after":"该角色好感度+随机1到10"}],
@@ -265,7 +269,7 @@
 </World_Building>`.replaceAll('<user>', playerName).trim();
   }
 
-  function buildPlayerSettings({ playerName, playerPersona, userBirthday, userAge, userGrade, cloth }) {
+  function buildPlayerSettings({ playerName, playerPersona, userBirthday, userAge, cloth }) {
     const personaLine = String(playerPersona || '').trim()
       ? `- 酒馆玩家主角卡设定：${String(playerPersona).trim()}`
       : '';
@@ -276,7 +280,7 @@ ${personaLine}
 - 生日：${userBirthday}
 - 年龄：${userAge}
 - 学校：兰斯特皇家学院
-- 年级：${userGrade}
+- 年级：${PLAYER_GRADE}
 ${String(cloth || '').trim()}
 </Player_Settings>`.replaceAll('<user>', playerName).replace(/\n{3,}/g, '\n\n').trim();
   }
@@ -295,8 +299,7 @@ ${String(cloth || '').trim()}
     modeluList,
     userBirthday,
     userAge,
-    playerPersona,
-    userGrade
+    playerPersona
   }) {
     const worldBuilding = buildWorldBuilding({ playerName });
     const playerSettings = buildPlayerSettings({
@@ -304,7 +307,6 @@ ${String(cloth || '').trim()}
       playerPersona,
       userBirthday,
       userAge,
-      userGrade,
       cloth
     });
     const coreSystemInstruction = `

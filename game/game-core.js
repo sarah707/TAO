@@ -1,7 +1,8 @@
 (function (global) {
+  const PLAYER_GRADE = 4;
   const TERM_DEFINITIONS = Object.freeze([
-    { id: 'y4-upper', academicYear: 4, semester: '上学期', label: '毕业学年上学期', start: '2003-09-01', end: '2003-12-28' },
-    { id: 'y4-lower', academicYear: 4, semester: '下学期', label: '毕业学年下学期', start: '2004-02-16', end: '2004-05-30' }
+    { id: 'y4-upper', academicYear: PLAYER_GRADE, semester: '上学期', label: '毕业学年上学期', start: '2003-09-01', end: '2003-12-28' },
+    { id: 'y4-lower', academicYear: PLAYER_GRADE, semester: '下学期', label: '毕业学年下学期', start: '2004-02-16', end: '2004-05-30' }
   ].map((term) => Object.freeze(term)));
   const REGULAR_COURSES = Object.freeze([
     { id: 'y4-upper-1', termId: 'y4-upper', courseName: '金融工程学' },
@@ -17,6 +18,7 @@
   ].map((course) => Object.freeze(course)));
   const CAMPAIGN_CONFIG = Object.freeze({
     storageVersion: 2,
+    playerGrade: PLAYER_GRADE,
     startDate: '2003-09-01',
     firstPlayableDate: '2003-09-02',
     endDate: '2004-06-06',
@@ -736,6 +738,7 @@
   }
 
   global.Games0Core = {
+    PLAYER_GRADE,
     CAMPAIGN_CONFIG,
     TERM_DEFINITIONS,
     parseDate,
