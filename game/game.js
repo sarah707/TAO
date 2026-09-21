@@ -1598,7 +1598,24 @@
     runtime.player.inspiration = Math.max(0, Math.min(MERGE_INSPIRATION_MAX, Number(runtime.player.inspiration ?? MERGE_INSPIRATION_INITIAL)));
     runtime.player.bizProgress = Number(runtime.player.bizProgress || 0);
     runtime.locations = Array.isArray(runtime.locations) ? runtime.locations : [];
-    runtime.history = Array.isArray(runtime.history) ? runtime.history : [];
+    runtime.history = Array.isArray(runtime.history)
+      ? runtime.history.map((history, index) => {
+          if (typeof history === 'string') {
+            return { index: index + 1, text: history, chapterId: null };
+          }
+          const normalized = { ...history };
+          const legacyDate = String(normalized.date || normalized.dateText || '').trim();
+          const storedDayOffset = Number(normalized.dayOffset);
+          if (Number.isInteger(storedDayOffset)) {
+            normalized.dayOffset = storedDayOffset;
+          } else if (legacyDate) {
+            normalized.dayOffset = diffDays(START_DATE, legacyDate);
+          }
+          delete normalized.date;
+          delete normalized.dateText;
+          return normalized;
+        })
+      : [];
     runtime.chapters = Array.isArray(runtime.chapters) ? runtime.chapters : [];
     runtime.outfits = Array.isArray(runtime.outfits) ? runtime.outfits.map((outfit, index) => patchOutfitDefaults(outfit, index)) : [];
     runtime.characters = Array.isArray(runtime.characters) ? runtime.characters : [];
@@ -3419,7 +3436,7 @@
     const historyIndex = runtime.history.length + 1;
     runtime.history.push({
       index: historyIndex,
-      date: dateText,
+      dayOffset: diffDays(START_DATE, dateText),
       text,
       chapterId: options.chapterId || null
     });
@@ -5624,14 +5641,19 @@ ${promptContextLines.join('\n')}`;
     scrollViewportToTop();
   }
 
+  function getHistoryDateText(history) {
+    const dayOffset = Number(history?.dayOffset);
+    return Number.isInteger(dayOffset) ? addDays(START_DATE, dayOffset) : '';
+  }
+
   function getCurrentWeekHistories(runtime) {
     const weekStart = runtime.flags?.historyPanelWeekStart || getWeekStart(runtime.player.currentDate);
     const dates = new Set(getWeekDates(weekStart));
-    return runtime.history.filter((item) => dates.has(item.date)).slice().reverse();
+    return runtime.history.filter((item) => dates.has(getHistoryDateText(item))).slice().reverse();
   }
 
   function getAllHistoryMonths(runtime) {
-    return Array.from(new Set(runtime.history.map((item) => getMonthKey(item.date)))).sort();
+    return Array.from(new Set(runtime.history.map(getHistoryDateText).filter(Boolean).map(getMonthKey))).sort();
   }
 
   function openAllHistoryModal() {
@@ -8489,7 +8511,7 @@ ${promptContextLines.join('\n')}`;
     if (modal.type === 'all-history') {
       const month = modal.month;
       const months = getAllHistoryMonths(state.runtime);
-      const monthHistories = state.runtime.history.filter((item) => getMonthKey(item.date) === month);
+      const monthHistories = state.runtime.history.filter((item) => getMonthKey(getHistoryDateText(item)) === month);
       const currentIndex = months.indexOf(month);
       return `
         <div class="modal-backdrop">

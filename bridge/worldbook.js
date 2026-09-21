@@ -43,9 +43,8 @@ function entry(name, content, options = {}) {
 function buildHistoryContent(runtime) {
   const lines = (runtime?.history || []).map((item) => {
     if (typeof item === 'string') return item.trim();
-    const date = cleanLine(item?.date || item?.dateText, '');
     const text = cleanLine(item?.text || item?.content || item?.summary, '');
-    return [date, text].filter(Boolean).join(' ');
+    return text;
   }).filter(Boolean);
   return `<SchoolHistory>\n${lines.length ? lines.join('\n') : '暂无履历记录'}\n</SchoolHistory>`;
 }
