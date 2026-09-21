@@ -40,21 +40,6 @@ function entry(name, content, options = {}) {
   };
 }
 
-function buildPlayerProgressContent(runtime) {
-  const player = runtime?.player || {};
-  const lovers = (runtime?.characters || [])
-    .filter((character) => character?.isLover)
-    .map((character) => character.name);
-  return [
-    '<Player_Progress>',
-    `当前日期：${cleanLine(player.currentDate)}`,
-    `当前资金：${Math.round(Number(player.money || 0))}`,
-    `疲劳度：${Math.round(Number(player.fatigue || 0))}`,
-    `恋人：${lovers.length ? lovers.join('、') : '无'}`,
-    '</Player_Progress>'
-  ].join('\n');
-}
-
 function buildHistoryContent(runtime) {
   const lines = (runtime?.history || []).map((item) => {
     if (typeof item === 'string') return item.trim();
@@ -106,7 +91,6 @@ export function buildExportWorldbook(runtime, promptSettings = {}) {
   const entries = [
     entry('世界观设定', worldBuilding, { constant: true, order: 150 }),
     entry('主角设定', playerSettings, { constant: true, order: 140 }),
-    entry('主角当前状态', buildPlayerProgressContent(runtime), { constant: true, order: 130 }),
     entry('学院事件履历', buildHistoryContent(runtime), { constant: true, order: 120 }),
     ...(runtime?.characters || []).filter((character) => character?.name).map((character, index) => entry(
       `角色·${character.name}`,
