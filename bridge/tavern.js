@@ -934,8 +934,14 @@ async function saveChatMetadataDurably(hostWindow, apiWindow) {
   throw new Error('当前酒馆没有提供立即保存对话变量的接口；为避免刷新后回档，本次存档未标记为成功。请更新 SillyTavern。');
 }
 
-export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptWriteTimeoutMs = 15000 }) {
+export function createTavernBridge({
+  hostWindow,
+  apiWindow = globalThis,
+  buildMode = 'github',
+  promptWriteTimeoutMs = 15000
+}) {
   const helper = apiWindow.TavernHelper || apiWindow;
+  const shouldWritePromptFloor = String(buildMode || '').trim().toLowerCase() === 'github';
   let textRequestActive = false;
   const getCurrentChatId = () => String(
     hostWindow?.SillyTavern?.getCurrentChatId?.()
@@ -1153,6 +1159,10 @@ export function createTavernBridge({ hostWindow, apiWindow = globalThis, promptW
       const generationId = makeGenerationId();
       let promptWrite = null;
       const writePrompt = (messages) => {
+        if (!shouldWritePromptFloor) {
+          promptWrite ||= Promise.resolve();
+          return promptWrite;
+        }
         if (!promptWrite) {
           const captured = Array.isArray(messages) && messages.length > 0;
           const visiblePrompt = captured
