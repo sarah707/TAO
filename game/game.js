@@ -7366,8 +7366,13 @@ ${promptContextLines.join('\n')}`;
         runtime.player.currentDate = addDays(dateText, 1); // 14. 下一天已排定则自动继续
       }
 
-      if (runtime.phase !== 'ended' && executedDates[executedDates.length - 1] === weekDates[weekDates.length - 1]) {
-        await finalizeWeek(runtime, executedDates); // 15~16. 周末结算并刷新到新一周
+      const weekWasAlreadyCompleted = pendingDates.length === 0
+        && weekDates.every((dateText) => isDateCompleted(runtime, dateText));
+      const reachedWeekEnd = executedDates[executedDates.length - 1] === weekDates[weekDates.length - 1];
+      if (runtime.phase !== 'ended' && (reachedWeekEnd || weekWasAlreadyCompleted)) {
+        // 最后一天的剧情若被刷新中断，恢复逻辑会先把当天标记为完成；此时
+        // pendingDates 为空，也仍需补做一次周结算，才能进入下一周。
+        await finalizeWeek(runtime, reachedWeekEnd ? executedDates : weekDates); // 15~16. 周末结算并刷新到新一周
       }
       const savedRuntime = saveCurrentRuntime();
       const savedAuto = saveAutoSlot();
