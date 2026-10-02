@@ -1,9 +1,9 @@
 {
   "version": "1.0.7",
-  "mode": "release",
-  "buildId": "20260930142930",
+  "mode": "github",
+  "buildId": "20261002023853",
   "releaseRef": "v1.0.7",
-  "loaderUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.7/loader.js",
-  "bootstrapUrl": "https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.7/bootstrap.js",
-  "builtAt": "2026-09-30T14:29:30.836Z"
+  "loaderUrl": "https://sarah707.github.io/TAO/loader.js?build=20261002023853",
+  "bootstrapUrl": "https://sarah707.github.io/TAO/loader.js",
+  "builtAt": "2026-10-02T02:38:53.181Z"
 }
