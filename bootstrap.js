@@ -1,6 +1,23 @@
 const BOOTSTRAP_STATE_KEY = '__NOBLE_SCHOOL_REMOTE_BOOTSTRAP_V1__';
 const VERSION_MANIFEST_URL = 'https://sarah707.github.io/TAO/version.json';
-const FALLBACK_LOADER_URL = 'https://sarah707.github.io/TAO/loader.js?build=20261002023853';
+const FALLBACK_LOADER_URL = 'https://sarah707.github.io/TAO/loader.js?build=20261003074822';
+const EXPECTED_BUILD_MODE = 'github';
+
+function resolveManifestLoaderUrl(manifest) {
+  const loaderUrl = String(manifest?.loaderUrl || '').trim();
+  if (!loaderUrl) throw new Error('版本清单没有 loaderUrl。');
+  if (EXPECTED_BUILD_MODE === 'release') {
+    const manifestMode = String(manifest?.mode || '').trim().toLowerCase();
+    const releaseRef = String(manifest?.releaseRef || '').trim();
+    if (manifestMode !== 'release') {
+      throw new Error(`正式版拒绝加载 ${manifestMode || '未知'} 模式的版本清单。`);
+    }
+    if (!releaseRef || !loaderUrl.includes(`@${releaseRef}/loader.js`)) {
+      throw new Error('正式版清单的 releaseRef 与固定版本 loaderUrl 不一致。');
+    }
+  }
+  return loaderUrl;
+}
 
 async function resolveLoaderUrl() {
   try {
@@ -9,9 +26,7 @@ async function resolveLoaderUrl() {
     const response = await fetch(manifestUrl, { cache: 'no-store' });
     if (!response.ok) throw new Error(`版本清单请求失败：HTTP ${response.status}`);
     const manifest = await response.json();
-    const loaderUrl = String(manifest?.loaderUrl || '').trim();
-    if (!loaderUrl) throw new Error('版本清单没有 loaderUrl。');
-    return loaderUrl;
+    return resolveManifestLoaderUrl(manifest);
   } catch (error) {
     console.warn('[贵族学院的特招生] 无法读取最新版本清单，改用角色卡内置的首发版本。', error);
     return FALLBACK_LOADER_URL;
