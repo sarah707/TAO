@@ -1,7 +1,7 @@
 const BOOTSTRAP_STATE_KEY = '__NOBLE_SCHOOL_REMOTE_BOOTSTRAP_V1__';
 const VERSION_MANIFEST_URL = 'https://sarah707.github.io/TAO/version.json';
-const FALLBACK_LOADER_URL = 'https://sarah707.github.io/TAO/loader.js?build=20261005060439';
-const EXPECTED_BUILD_MODE = 'github';
+const FALLBACK_LOADER_URL = 'https://testingcf.jsdelivr.net/gh/sarah707/TAO@v1.0.8/loader.js';
+const EXPECTED_BUILD_MODE = 'release';
 
 function resolveManifestLoaderUrl(manifest) {
   const loaderUrl = String(manifest?.loaderUrl || '').trim();
