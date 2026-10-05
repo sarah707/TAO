@@ -259,10 +259,16 @@
   }
 
   function buildBackgroundAvatarPrompt(character) {
+    if (!String(character.imagePrompt || '').trim()) {
+      return `请用《原神》画风结合水彩上色风格，生成单人的居中半身头像，1:1正方形构图，白色背景，无文字、字母或水印。角色描述：\n性别：${character.gender || ''}\n年龄：${character.age || ''}\n外貌服饰氛围气味：${character.appearance || ''}`;
+    }
     return `genshin impact art style, watercolor illustration, beautiful character portrait, solo, centered bust portrait, square composition, clean white background, detailed face and hair, no text, no letters, no watermark. ${requireEnglishImagePrompt(character.imagePrompt, '角色')}`;
   }
 
   function buildOutfitImagePrompt(outfit) {
+    if (!String(outfit.imagePrompt || '').trim()) {
+      return `请用《原神》的服装画风结合水彩上色风格，展示一身晚礼服裙子，1:1正方形构图，完整展示裙摆，白色无脸模特居中，白色背景，无文字、字母或水印。礼服描述：${outfit.description || ''}`;
+    }
     return `genshin impact fashion art style, watercolor illustration, beautiful dreamy evening gown, full dress display on a faceless white mannequin, entire skirt visible, centered, square composition, clean white background, no text, no letters, no watermark. ${requireEnglishImagePrompt(outfit.imagePrompt, '礼服')}`;
   }
 
