@@ -109,31 +109,6 @@
       backdrop-filter: blur(14px);
     }
 
-    .title-info-button {
-      width: 24px;
-      height: 24px;
-      padding: 0;
-      flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid currentColor;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.72);
-      color: #6d4eb5;
-      font: 800 15px/1 Georgia, serif;
-      letter-spacing: 0;
-      cursor: pointer;
-      box-shadow: none;
-    }
-
-    .title-info-button:hover,
-    .title-info-button:focus-visible {
-      color: #4a377d;
-      background: #fff;
-      transform: translateY(-1px);
-    }
-
     .panel {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -748,11 +723,6 @@
       align-items: center;
       justify-content: center;
       padding: 20px 12px;
-    }
-
-    .info-modal-backdrop {
-      inset: 0;
-      z-index: 10000;
     }
 
     .modal {
@@ -1477,7 +1447,6 @@
 <body>
   <div class="title-safe">
     <span>贵族学院的特招生</span>
-    <button id="gameInfoButton" class="title-info-button" type="button" aria-label="查看游戏信息" title="游戏信息">i</button>
   </div>
   <div id="app"></div>
   <script src="tavern-runtime.js?v=20260916-01"></script>

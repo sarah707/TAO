@@ -495,7 +495,6 @@
       interactionLocked: false,
       aiLoading: null,
       storageLoading: null,
-      infoModalOpen: false,
       statChanges: [],
       modal: null,
       currentAiEvent: null,
@@ -8980,27 +8979,6 @@ ${promptContextLines.join('\n')}`;
     return '';
   }
 
-  function renderInfoModal() {
-    if (!state.ui.infoModalOpen) {
-      return '';
-    }
-    return `
-      <div class="modal-backdrop info-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="gameInfoTitle">
-        <div class="modal modal-center">
-          <div class="modal-header">
-            <h2 id="gameInfoTitle">游戏信息</h2>
-          </div>
-          <div class="modal-body" style="text-align:center">
-            <pre>版本 1.0\n作者 水螅</pre>
-            <div class="modal-actions inline-actions" style="justify-content:center">
-              <button class="primary" data-action="close-info-modal">确定</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }
-
   const MERGE_RENDER_KEYS = [
     'merge-header',
     'merge-tasks',
@@ -9065,7 +9043,7 @@ ${promptContextLines.join('\n')}`;
             <div class="status warning">正在加载网站内容…</div>
           </div>
         </div>
-      ` + renderInfoModal();
+      `;
       return;
     }
 
@@ -9075,12 +9053,11 @@ ${promptContextLines.join('\n')}`;
       // so clear the old gesture before replacing any board DOM.
       if (mergeDrag) cancelActiveMergeDrag();
       const hasMergeModal = Boolean(state.ui.modal?.mergeGameModal);
-      if (hasMergeModal || state.ui.infoModalOpen) {
+      if (hasMergeModal) {
         app.innerHTML = renderMergeGame()
           + (hasMergeModal ? renderModal() : '')
           + renderAiLoading()
-          + renderStorageLoading()
-          + renderInfoModal();
+          + renderStorageLoading();
         state._mergeHadModal = true;
       } else if (state._mergeHadModal) {
         state._mergeHadModal = false;
@@ -9104,7 +9081,7 @@ ${promptContextLines.join('\n')}`;
       chapterModal.scrollTop = previousChapterElement.scrollTop;
       saveChapterModalState(chapterModal);
     }
-    app.innerHTML = renderMain() + renderModal() + renderAiLoading() + renderStorageLoading() + renderInfoModal();
+    app.innerHTML = renderMain() + renderModal() + renderAiLoading() + renderStorageLoading();
     if (chapterModal) {
       const chapterElement = app.querySelector('.modal[data-chapter-id]');
       if (chapterElement) {
@@ -9385,11 +9362,6 @@ ${promptContextLines.join('\n')}`;
     }
   });
 
-  document.getElementById('gameInfoButton')?.addEventListener('click', () => {
-    state.ui.infoModalOpen = true;
-    render();
-  });
-
   app.addEventListener('click', async (event) => {
     const button = event.target.closest('[data-action]');
     if (!button) {
@@ -9476,10 +9448,6 @@ ${promptContextLines.join('\n')}`;
           return;
         case 'close-modal':
           closeModal();
-          return;
-        case 'close-info-modal':
-          state.ui.infoModalOpen = false;
-          render();
           return;
         case 'show-chapter-prompt': {
           const debug = loadChapterDebug(button.dataset.chapterId);
