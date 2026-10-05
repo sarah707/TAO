@@ -202,6 +202,7 @@
                 家业：写明家族企业名称，如果是政界世家就直接写政界世家。所有除了主角外的角色都出身于拥有家族企业的富豪家庭或政界世家。家族产业必须多样化，可以来自传统制造、农业食品、航运物流、酒店旅游、百货零售、出版传媒、文化艺术、医疗健康、法律服务、建筑地产、时装珠宝、体育产业等，不要默认科技、互联网、金融或投资行业。
                 所属：本校学生（兰斯特皇家学院的学生）/本校老师（兰斯特皇家学院的教授）/外校学生（非兰斯特皇家学院的学生）/杰出校友（从兰斯特皇家学院毕业的人）/社会人士（不符合前边身份的人都算社会人士）
                 外貌服饰氛围气味: 包括头发颜色，详细描述发型，眼睛颜色，皮肤颜色，面部特征，气质，身材、服装和配饰，能体现角色给人感觉的香味。
+                英文生图提示词：必须同时生成的英文字符串，约40到100个英文单词。只写该角色可见的外观，包含性别、年龄感、发色和发型、瞳色、肤色、面部特征、体型、服装和配饰，与中文外貌资料一致。使用简短英文视觉标签或短句；不得包含中文、姓名、生平、气味、对白、引号内文字、JSON字段名、模型名或API/分辨率指令。不要要求在图中画文字；画风、头像构图和背景由游戏统一添加。这是专门用于头像生成的字段，不能省略。
                 性格动力与社交类型: 用1个词概括其社交姿态（例如：直觉系混世魔王 / 抑郁型艺术家 / 规矩强迫症受害者 / 极度自恋的享乐主义者），并说明他处理冲突时是靠‘情绪爆发’、‘逃避’、‘直觉横冲直撞’还是‘随波逐流’（严禁全员理性分析）。
                 说话方式与台词示例: 详细描述语速、语气词、常用词汇习惯，并附带2句能体现其性格的典型台词。
                 核心特质: 由2~4个能落实到说话、选择和习惯中的特征组成。可以有反差但不强制矛盾。至少写出一个不损害人格魅力的局限、笨拙点或不擅长之处。
@@ -223,13 +224,14 @@
   "家业": "陆氏远洋重工",
   "所属": "本校学生",
   "外貌服饰氛围气味": "银色长发用素色发带松松束在脑后/浅灰色的眼眸/身高185cm/常穿剪裁得体的浅灰色学者长袍，戴着单片金丝眼镜/身上带着极淡的纸质书本与冷水香调",
+  "英文生图提示词": "1boy, handsome young adult man, long silver hair loosely tied behind his head with a plain ribbon, pale gray eyes, fair skin, refined facial features, tall slender build, tailored light gray scholar robes, a delicate gold monocle, composed expression, detailed hair and elegant clothing accessories",
   "性格动力与社交类型": "直觉系混世魔王。处理冲突完全靠直觉与情绪爆发，厌恶任何复杂逻辑分析与商场勾心斗角，奉行‘能用一场赛车解决就别废话’的行动法则。",
   "说话方式与台词示例": "语速极快，声音洪亮，说话直截了当且喜欢用俚语，感到烦躁时会频繁打断别人。台词示例1：‘停停停！别跟我念那一套财务报表，听得我脑仁疼，直接告诉我这破船能开多快就行！’；台词示例2：‘学术报告？你自己留着慢慢品吧，小爷我要去赛道了！’",
   "核心特质": "极其护短、行动力爆棚但毫无耐心。致命短板：严重的人情世故白痴，完全不懂贵族社交中的含蓄暗示，极度缺乏商业常识，连自家公司的主要航线都记不住。",
   "人物小传": "从小被丢在船厂与赛车场野蛮生长，对家族的重工业庞大资产毫无兴趣，甚至觉得造船不如改赛车有趣。目前唯一的生活重心就是拉赞助搞车队。",
   "在家族企业或政府部分的职位":"被家族安排挂名陆氏远洋重工战略投资部总监来镀金，其实只是为了合法支取社团活动经费。",
   "爱好": "重型摩托改装、野外极限越野赛。",
-  "住所": "学院西侧学生改装车库旁自购的二层LOFT公寓。"
+  "住所": "学院西侧学生改装车库旁自购的二层LOFT公寓。",
   "性爱偏好":"喜欢使用一点点束缚道具/喜欢在明亮的光线下清楚地看着伴侣/极为持久且喜欢温柔地逼迫伴侣说出感受",
   "阴茎描述":"冷白色，形状漂亮，勃起时青筋明显，龟头圆润"
 }
@@ -238,26 +240,30 @@
     if (String(modeluList || '').includes('<newCloth>')) {
       blocks.push(`
 <newCloth>
-主角在本章新买的或者新收到的礼服的外观描述，一百字以内。
+若本章有新礼服，输出严格JSON对象，包含两个字符串字段：
+"礼服描述"：主角在本章新买或收到的礼服的中文外观描述，一百字以内。
+"英文生图提示词"：在本次剧情回复中同时生成40到100个英文单词的纯英文视觉描述，明确裙子的颜色、款式、面料、装饰、裙摆和配饰，与中文描述一致。不得包含中文、姓名、剧情、对白、模型名或API/分辨率指令；画风、模特和构图由游戏统一添加。不要要求在图中画文字。
+示例：{"礼服描述":"浅紫色丝绸长礼服，银色刺绣与珍珠点缀，飘逸裙摆。","英文生图提示词":"a beautiful floor length pale purple silk evening gown, flowing skirt, elegant fitted bodice, delicate silver floral embroidery across the waist and hem, small pearl embellishments, graceful layered fabric folds, refined tailoring, luxurious soft sheen, dreamy and romantic design, detailed dress accessories"}
+如果有多件礼服，输出由上述对象组成的JSON数组；没有则写“无”。
 </newCloth>`.trim());
     }
     return blocks.join('\n\n');
   }
 
-  function buildBackgroundAvatarPrompt(character) {
-    return `
-请用《原神》画风结合水彩上色风格画一个很帅的男子的头像，注意描述里如果有负面意味的词，只能在不损害角色美貌的前提下完成，角色必须要很帅气美丽。必须生成 1:1 的正方形画面，整张图本身就是正方形，不能是横图或竖图。请使用 Gemini 当前支持的最小输出分辨率 0.5K 生成。背景白色且没有任何文字或花纹，人物居中，构图适合 256x256 头像裁切。
-角色描述：
-姓名：${character.name}
-性别：${character.gender}
-年龄：${character.age}
-身份：${character.identity}
-外貌服饰氛围气味：${character.appearance}
-`.trim();
+  function requireEnglishImagePrompt(value, subject) {
+    const prompt = String(value || '').trim();
+    if (!prompt || !/[a-z]/i.test(prompt) || /[\u3400-\u9fff]/u.test(prompt)) {
+      throw new Error(`${subject}缺少有效的英文生图提示词，无法生成图片。`);
+    }
+    return prompt;
   }
 
-  function buildOutfitImagePrompt(description) {
-    return `用《原神》的服装画风结合**水彩**上色风格生成一身梦幻又美丽的晚礼服裙子的服装展示，必须生成 1:1 的正方形画面，整张图本身就是正方形，不能是横图或竖图。请使用 Gemini 当前支持的最小输出分辨率 0.5K 生成。背景白色且没有文字或花纹，完整展示整身裙子，不要裁掉裙摆，展示服装的模特用白色，没有脸，人物居中并在正方形画面里留出足够空间。裙子的描述为：${description}`.trim();
+  function buildBackgroundAvatarPrompt(character) {
+    return `genshin impact art style, watercolor illustration, beautiful character portrait, solo, centered bust portrait, square composition, clean white background, detailed face and hair, no text, no letters, no watermark. ${requireEnglishImagePrompt(character.imagePrompt, '角色')}`;
+  }
+
+  function buildOutfitImagePrompt(outfit) {
+    return `genshin impact fashion art style, watercolor illustration, beautiful dreamy evening gown, full dress display on a faceless white mannequin, entire skirt visible, centered, square composition, clean white background, no text, no letters, no watermark. ${requireEnglishImagePrompt(outfit.imagePrompt, '礼服')}`;
   }
 
   function buildWorldBuilding({ playerName }) {

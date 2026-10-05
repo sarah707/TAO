@@ -1,6 +1,6 @@
-import { makeGenerationId, sanitizeAiText } from './text.js?build=20261003074822';
-import { buildExportWorldbook } from './worldbook.js?build=20261003074822';
-import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20261003074822';
+import { makeGenerationId, sanitizeAiText } from './text.js?build=20261005054929';
+import { buildExportWorldbook } from './worldbook.js?build=20261005054929';
+import { BUILTIN_PRESET_SETTINGS, cloneBuiltInRequestPreset } from './builtin-preset.js?build=20261005054929';
 
 export const BRIDGE_KEY = '__NOBLE_SCHOOL_TAVERN_BRIDGE_V1__';
 export const CHAT_STORAGE_VARIABLE = '$nobleSchoolGameStorage';
@@ -1137,6 +1137,7 @@ export function createTavernBridge({
         }
         const generated = await api.generate({
           prompt: payload?.prompt,
+          negativePrompt: 'text, letters, writing, watermark, signature, speech bubble, caption, typography, screenshot, document, newspaper',
           aspectRatio: '1:1',
           imageSize: '1K',
           saveToSillyTavern: false
